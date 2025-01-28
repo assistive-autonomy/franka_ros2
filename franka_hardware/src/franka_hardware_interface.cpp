@@ -227,27 +227,8 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
   if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;
   }
-  if (info_.joints.size() != kNumberOfJoints) {
-    RCLCPP_FATAL(getLogger(), "Got %ld joints. Expected %ld.", info_.joints.size(),
-                 kNumberOfJoints);
-    return CallbackReturn::ERROR;
-  }
 
   for (const auto& joint : info_.joints) {
-    if (joint.command_interfaces.size() != 3) {
-      RCLCPP_FATAL(getLogger(), "Joint '%s' has %zu command interfaces found. 3 expected.",
-                   joint.name.c_str(), joint.command_interfaces.size());
-      return CallbackReturn::ERROR;
-    }
-    if (joint.command_interfaces[0].name != hardware_interface::HW_IF_EFFORT &&
-        joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY &&
-        joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION) {
-      RCLCPP_FATAL(getLogger(),
-                   "Joint '%s' has unexpected command interface '%s'. Expected '%s' and '%s' ",
-                   joint.name.c_str(), joint.command_interfaces[0].name.c_str(),
-                   hardware_interface::HW_IF_EFFORT, hardware_interface::HW_IF_VELOCITY);
-      return CallbackReturn::ERROR;
-    }
     if (joint.state_interfaces.size() != 3) {
       RCLCPP_FATAL(getLogger(), "Joint '%s' has %zu state interfaces found. 3 expected.",
                    joint.name.c_str(), joint.state_interfaces.size());
@@ -432,12 +413,12 @@ hardware_interface::return_type FrankaHardwareInterface::prepare_command_mode_sw
                         return contains_interface_type(interface_given, interface.interface_type);
                       });
 
-    if (num_stop_interface == interface.size) {
+    if (num_stop_interface == interface.size || num_stop_interface == 2) {
       interface.claim_flag = false;
     } else if (num_stop_interface != 0U) {
       generate_error_message("stop", interface.interface_type, num_stop_interface, interface.size);
     }
-    if (num_start_interface == interface.size) {
+    if (num_start_interface == interface.size || num_start_interface == 2) {
       interface.claim_flag = true;
     } else if (num_start_interface != 0U) {
       generate_error_message("start", interface.interface_type, num_start_interface,

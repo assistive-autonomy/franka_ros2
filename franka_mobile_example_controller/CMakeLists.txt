@@ -34,7 +34,6 @@ add_library(
         SHARED
         src/guiding_example_controller.cpp
         src/joint_velocity_example_controller.cpp
-        src/twist_example_controller.cpp
 )
 
 target_include_directories(
@@ -122,4 +121,26 @@ ament_export_dependencies(
         hardware_interface
         moveit_core
 )
+
+# Individual Nodes
+add_executable(twist_example_controller src/twist_example_controller.cpp)
+ament_target_dependencies(
+    twist_example_controller
+    geometry_msgs
+    rclcpp
+)
+
+target_include_directories(
+        twist_example_controller
+        PUBLIC
+        include
+        ${EIGEN3_INCLUDE_DIRS}
+)
+
+install(
+        TARGETS
+        twist_example_controller
+        DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

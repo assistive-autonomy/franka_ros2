@@ -22,12 +22,11 @@ TwistExampleController::TwistExampleController() : Node("twist_example_controlle
   };
   timer_ = this->create_wall_timer(50ms, timer_callback);
 }
+}  // namespace franka_mobile_example_controllers
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<TwistExampleController>());
+  rclcpp::spin(std::make_shared<franka_mobile_example_controllers::TwistExampleController>());
   rclcpp::shutdown();
   return 0;
 }
-
-}  // namespace franka_mobile_example_controllers

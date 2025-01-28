@@ -38,7 +38,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 robot_ip_parameter_name,
                 default_value="192.168.1.10",
-                description="Hostname or IP address of the robot."
+                description="Hostname or IP address of the robot.",
             ),
             DeclareLaunchArgument(
                 mobile_robot_id_parameter_name,
@@ -66,7 +66,11 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(
                     [
                         PathJoinSubstitution(
-                            [FindPackageShare("franka_mobile_bringup"), "launch", "mobile_robot.launch.py"]
+                            [
+                                FindPackageShare("franka_mobile_bringup"),
+                                "launch",
+                                "mobile_robot.launch.py",
+                            ]
                         )
                     ]
                 ),
@@ -85,7 +89,7 @@ def generate_launch_description():
                 output="screen",
             ),
             Node(
-                package="tmr_example_controllers",
+                package="franka_mobile_example_controllers",
                 executable="twist_example_controller",
                 name="twist_example_controller",
                 remappings=[("/cmd_vel", "/diff_drive_controller/cmd_vel")],

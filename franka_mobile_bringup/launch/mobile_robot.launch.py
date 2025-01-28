@@ -17,7 +17,12 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchContext, LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, Shutdown
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+    Shutdown,
+)
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -28,11 +33,17 @@ import xacro
 
 
 def robot_description_dependent_nodes_spawner(
-    context: LaunchContext, robot_ip, mobile_robot_id, use_fake_hardware, fake_sensor_commands
+    context: LaunchContext,
+    robot_ip,
+    mobile_robot_id,
+    arm_id,
+    use_fake_hardware,
+    fake_sensor_commands,
 ):
 
     robot_ip_str = context.perform_substitution(robot_ip)
     mobile_robot_id_str = context.perform_substitution(mobile_robot_id)
+    arm_id_str = context.perform_substitution(arm_id)
     use_fake_hardware_str = context.perform_substitution(use_fake_hardware)
     fake_sensor_commands_str = context.perform_substitution(fake_sensor_commands)
 
@@ -71,6 +82,7 @@ def robot_description_dependent_nodes_spawner(
                 franka_controllers,
                 {"robot_description": robot_description},
                 {"mobile_robot_id": mobile_robot_id},
+                {"arm_id": arm_id},
             ],
             remappings=[("joint_states", mobile_robot_id_str + "/joint_states")],
             output={
@@ -90,12 +102,14 @@ def robot_description_dependent_nodes_spawner(
 
 def generate_launch_description():
     mobile_robot_id_parameter_name = "mobile_robot_id"
+    arm_id_parameter_name = "arm_id"
     robot_ip_parameter_name = "robot_ip"
     use_fake_hardware_parameter_name = "use_fake_hardware"
     fake_sensor_commands_parameter_name = "fake_sensor_commands"
     use_rviz_parameter_name = "use_rviz"
 
     mobile_robot_id = LaunchConfiguration(mobile_robot_id_parameter_name)
+    arm_id = LaunchConfiguration(arm_id_parameter_name)
     robot_ip = LaunchConfiguration(robot_ip_parameter_name)
     use_fake_hardware = LaunchConfiguration(use_fake_hardware_parameter_name)
     fake_sensor_commands = LaunchConfiguration(fake_sensor_commands_parameter_name)
@@ -105,7 +119,7 @@ def generate_launch_description():
 
     robot_description_dependent_nodes_spawner_opaque_function = OpaqueFunction(
         function=robot_description_dependent_nodes_spawner,
-        args=[robot_ip, mobile_robot_id, use_fake_hardware, fake_sensor_commands],
+        args=[robot_ip, mobile_robot_id, arm_id, use_fake_hardware, fake_sensor_commands],
     )
 
     launch_description = LaunchDescription(
@@ -113,12 +127,17 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 robot_ip_parameter_name,
                 default_value="192.168.1.10",
-                description="Hostname or IP address of the robot."
+                description="Hostname or IP address of the robot.",
             ),
             DeclareLaunchArgument(
                 mobile_robot_id_parameter_name,
                 default_value="tmr",
                 description="Name of the robot.",
+            ),
+            DeclareLaunchArgument(
+                arm_id_parameter_name,
+                default_value="tmr",
+                description="ID of the type of mobile robot used. Supported values: tmr",
             ),
             DeclareLaunchArgument(
                 use_rviz_parameter_name,
