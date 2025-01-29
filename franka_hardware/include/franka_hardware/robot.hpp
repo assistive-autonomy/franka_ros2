@@ -106,11 +106,18 @@ class Robot {
   virtual void writeOnce(const std::array<double, 7>& joint_hardware_command);
 
   /**
+   * This function will automatically propagate the received hardware active command
+   * interface
+   * @param[in] joint_hardware_command joint hardware command either efforts or velocities
+   */
+  virtual void writeOnce(const std::vector<double>& joint_hardware_command);
+
+  /**
    * Cartesian velocity command
    * @param[in] cartesian_velocity_command cartesian level velocity command in format
    *  [vx, vy, vz, wx, wy, wz]
    */
-  virtual void writeOnce(const std::array<double, 6>& cartesian_velocity_command);
+  virtual void writeOnceCartesianVelocity(const std::array<double, 6>& cartesian_velocity_command);
 
   /**
    * Cartesian velocity command with elbow command
@@ -122,11 +129,20 @@ class Robot {
                          const std::array<double, 2>& elbow_command);
 
   /**
+   * Cartesian velocity command with elbow command
+   * @param[in] cartesian_velocity_command cartesian level velocity command in format
+   *  [vx, vy, vz, wx, wy, wz]
+   * @param[in] elbow_command elbow command representing joint3_position in rad and joint4 sign
+   */
+  virtual void writeOnce(const std::vector<double>& cartesian_velocity_command,
+                         const std::vector<double>& elbow_command);
+
+  /**
    * Cartesian pose command
    * @param[in] cartesian_pose_command cartesian level pose command in column major format [4x4]
    * homogeneous transformation matrix
    */
-  virtual void writeOnce(const std::array<double, 16>& cartesian_pose_command);
+  virtual void writeOnceCartesianPose(const std::array<double, 16>& cartesian_pose_command);
 
   /**
    * Cartesian pose command with elbow command

@@ -23,7 +23,7 @@
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
-#include <hardware_interface/types/hardware_interface_type_values.hpp>
+
 #include <rclcpp/macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -97,32 +97,39 @@ std::vector<StateInterface> FrankaHardwareInterface::export_state_interfaces() {
 std::vector<CommandInterface> FrankaHardwareInterface::export_command_interfaces() {
   std::vector<CommandInterface> command_interfaces;
   command_interfaces.reserve(info_.joints.size());
-  for (auto i = 0U; i < info_.joints.size(); i++) {
-    command_interfaces.emplace_back(CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &hw_effort_commands_.at(i)));
-    command_interfaces.emplace_back(CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &hw_velocity_commands_.at(i)));
-    command_interfaces.emplace_back(CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_position_commands_.at(i)));
+  // Register all command interfaces defined in the URDF
+  RCLCPP_INFO(getLogger(), "Register joint-based command interfaces");
+  for (auto joint_index = 0U; joint_index < info_.joints.size(); joint_index++) {
+    const auto& joint = info_.joints[joint_index];
+    for (auto command_interface_index = 0U;
+         command_interface_index < joint.command_interfaces.size(); command_interface_index++) {
+      const auto& command_interface = joint.command_interfaces[command_interface_index];
+      command_interfaces.emplace_back(
+          CommandInterface(joint.name, command_interface.name,
+                           &command_interface_map_.at(command_interface.name)[joint_index]));
+
+      RCLCPP_INFO(getLogger(),
+                  "Registering command interface: %s for command interface %s with index %d",
+                  joint.name.c_str(),
+                  joint.command_interfaces[command_interface_index].name.c_str(), joint_index);
+    }
   }
 
-  // cartesian velocity command interface 6 in order: dx, dy, dz, wx, wy, wz
-  for (auto i = 0U; i < hw_cartesian_velocities_.size(); i++) {
-    command_interfaces.emplace_back(CommandInterface(hw_cartesian_velocities_names_.at(i),
-                                                     k_HW_IF_CARTESIAN_VELOCITY,
-                                                     &hw_cartesian_velocities_.at(i)));
-  }
+  RCLCPP_INFO(getLogger(), "Register general purpose command interfaces");
+  for (auto gpio_index = 0U; gpio_index < info_.gpios.size(); gpio_index++) {
+    const auto& gpio = info_.gpios[gpio_index];
+    for (auto command_interface_index = 0U;
+         command_interface_index < gpio.command_interfaces.size(); command_interface_index++) {
+      const auto& command_interface = gpio.command_interfaces[command_interface_index];
+      auto vector_index = std::stoul(gpio.parameters.at("index"));
+      command_interfaces.emplace_back(
+          CommandInterface(gpio.name, command_interface.name,
+                           &command_interface_map_.at(command_interface.name)[vector_index]));
 
-  // cartesian pose command interface 16 element pose matrix
-  for (auto i = 0U; i < 16; i++) {
-    command_interfaces.emplace_back(CommandInterface(
-        std::to_string(i), k_HW_IF_CARTESIAN_POSE_COMMAND, &hw_cartesian_pose_commands_.at(i)));
-  }
-
-  // elbow command interface
-  for (auto i = 0U; i < hw_elbow_command_names_.size(); i++) {
-    command_interfaces.emplace_back(CommandInterface(
-        hw_elbow_command_names_.at(i), k_HW_IF_ELBOW_COMMAND, &hw_elbow_command_.at(i)));
+      RCLCPP_INFO(getLogger(),
+                  "Registering command interface: %s for command interface %s with index %ld",
+                  gpio.name.c_str(), command_interface.name.c_str(), vector_index);
+    }
   }
 
   return command_interfaces;
@@ -156,12 +163,16 @@ void initializeCommand(bool& first_update,
 }
 
 void FrankaHardwareInterface::initializePositionCommands(const franka::RobotState& robot_state) {
+  auto mapped_elbow = std::vector<double>{robot_state.elbow.begin(), robot_state.elbow.end()};
   initializeCommand(first_elbow_update_, elbow_command_interface_running_, hw_elbow_command_,
-                    robot_state.elbow);
+                    mapped_elbow);
+  auto mapped_position = std::vector<double>{robot_state.q.begin(), robot_state.q.end()};
   initializeCommand(first_position_update_, position_joint_interface_running_,
-                    hw_position_commands_, robot_state.q);
+                    hw_position_commands_, mapped_position);
+  auto mapped_cartesian_pose =
+      std::vector<double>{robot_state.O_T_EE.begin(), robot_state.O_T_EE.end()};
   initializeCommand(first_cartesian_pose_update_, pose_cartesian_interface_running_,
-                    hw_cartesian_pose_commands_, robot_state.O_T_EE);
+                    hw_cartesian_pose_commands_, mapped_cartesian_pose);
 }
 
 hardware_interface::return_type FrankaHardwareInterface::read(const rclcpp::Time& /*time*/,
@@ -228,28 +239,6 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
     return CallbackReturn::ERROR;
   }
 
-  for (const auto& joint : info_.joints) {
-    if (joint.state_interfaces.size() != 3) {
-      RCLCPP_FATAL(getLogger(), "Joint '%s' has %zu state interfaces found. 3 expected.",
-                   joint.name.c_str(), joint.state_interfaces.size());
-      return CallbackReturn::ERROR;
-    }
-    if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION) {
-      RCLCPP_FATAL(getLogger(), "Joint '%s' has unexpected state interface '%s'. Expected '%s'",
-                   joint.name.c_str(), joint.state_interfaces[0].name.c_str(),
-                   hardware_interface::HW_IF_POSITION);
-    }
-    if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY) {
-      RCLCPP_FATAL(getLogger(), "Joint '%s' has unexpected state interface '%s'. Expected '%s'",
-                   joint.name.c_str(), joint.state_interfaces[1].name.c_str(),
-                   hardware_interface::HW_IF_VELOCITY);
-    }
-    if (joint.state_interfaces[2].name != hardware_interface::HW_IF_EFFORT) {
-      RCLCPP_FATAL(getLogger(), "Joint '%s' has unexpected state interface '%s'. Expected '%s'",
-                   joint.name.c_str(), joint.state_interfaces[2].name.c_str(),
-                   hardware_interface::HW_IF_EFFORT);
-    }
-  }
   if (!robot_) {
     std::string robot_ip;
     try {
@@ -297,7 +286,7 @@ hardware_interface::return_type FrankaHardwareInterface::perform_command_mode_sw
     const std::vector<std::string>& /*start_interfaces*/,
     const std::vector<std::string>& /*stop_interfaces*/) {
   if (!effort_interface_running_ && effort_interface_claimed_) {
-    hw_effort_commands_.fill(0);
+    std::fill(hw_effort_commands_.begin(), hw_effort_commands_.end(), 0);
     robot_->stopRobot();
     robot_->initializeTorqueInterface();
     effort_interface_running_ = true;
@@ -307,7 +296,7 @@ hardware_interface::return_type FrankaHardwareInterface::perform_command_mode_sw
   }
 
   if (!velocity_joint_interface_running_ && velocity_joint_interface_claimed_) {
-    hw_velocity_commands_.fill(0);
+    std::fill(hw_velocity_commands_.begin(), hw_velocity_commands_.end(), 0);
     robot_->stopRobot();
     robot_->initializeJointVelocityInterface();
     velocity_joint_interface_running_ = true;
@@ -327,7 +316,7 @@ hardware_interface::return_type FrankaHardwareInterface::perform_command_mode_sw
   }
 
   if (!velocity_cartesian_interface_running_ && velocity_cartesian_interface_claimed_) {
-    hw_cartesian_velocities_.fill(0);
+    std::fill(hw_cartesian_velocities_.begin(), hw_cartesian_velocities_.end(), 0);
     robot_->stopRobot();
     robot_->initializeCartesianVelocityInterface();
     if (!elbow_command_interface_running_ && elbow_command_interface_claimed_) {
@@ -413,12 +402,12 @@ hardware_interface::return_type FrankaHardwareInterface::prepare_command_mode_sw
                         return contains_interface_type(interface_given, interface.interface_type);
                       });
 
-    if (num_stop_interface == interface.size || num_stop_interface == 2) {
+    if (num_stop_interface == interface.size) {
       interface.claim_flag = false;
     } else if (num_stop_interface != 0U) {
       generate_error_message("stop", interface.interface_type, num_stop_interface, interface.size);
     }
-    if (num_start_interface == interface.size || num_start_interface == 2) {
+    if (num_start_interface == interface.size) {
       interface.claim_flag = true;
     } else if (num_start_interface != 0U) {
       generate_error_message("start", interface.interface_type, num_start_interface,
