@@ -2,8 +2,8 @@ controller_manager:
   ros__parameters:
     update_rate: 1000  # Hz
 
-    gravity_compensation_example_controller:
-      type: franka_mobile_example_controllers/GravityCompensationExampleController
+    guiding_example_controller:
+      type: franka_mobile_example_controllers/GuidingExampleController
 
     joint_velocity_example_controller:
       type: franka_mobile_example_controllers/JointVelocityExampleController
@@ -28,7 +28,7 @@ diff_drive_controller:
 
     wheel_separation_multiplier: 1.0
     left_wheel_radius_multiplier: 1.0
-    right_wheel_radius_multiplier: 1.0
+    right_wheel_radius_multiplier: -1.0
 
     odom_frame_id: odom
     base_frame_id: base_link
@@ -40,14 +40,15 @@ diff_drive_controller:
     enable_odom_tf: true
 
     cmd_vel_timeout: 0.5 # seconds
+    publish_cmd: true
     publish_limited_velocity: true
     velocity_rolling_window_size: 10
 
     linear.x.has_velocity_limits: true
     linear.x.has_acceleration_limits: true
     linear.x.has_jerk_limits: true
-    linear.x.max_velocity: 1.0
-    linear.x.min_velocity: -1.0
+    linear.x.max_velocity: 0.3
+    linear.x.min_velocity: -0.3
     linear.x.max_acceleration: 0.5
     linear.x.min_acceleration: -0.5
     linear.x.max_jerk: 20.0

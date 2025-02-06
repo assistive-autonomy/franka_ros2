@@ -144,7 +144,7 @@ class FrankaHardwareInterface : public hardware_interface::SystemInterface {
   const std::string k_HW_IF_ELBOW_STATE = "elbow_state";
   const std::string k_HW_IF_CARTESIAN_POSE_STATE = "cartesian_pose_state";
 
-  const std::vector<InterfaceInfo> command_interfaces_info_;
+  std::vector<InterfaceInfo> command_interfaces_info_;
 
   franka::RobotState hw_franka_robot_state_;
   franka::RobotState* hw_franka_robot_state_addr_ = &hw_franka_robot_state_;

@@ -44,9 +44,9 @@ FrankaHardwareInterface::FrankaHardwareInterface(std::shared_ptr<Robot> robot,
 
 FrankaHardwareInterface::FrankaHardwareInterface()
     : command_interfaces_info_({
-          {hardware_interface::HW_IF_EFFORT, kNumberOfJoints, effort_interface_claimed_},
-          {hardware_interface::HW_IF_VELOCITY, kNumberOfJoints, velocity_joint_interface_claimed_},
-          {hardware_interface::HW_IF_POSITION, kNumberOfJoints, position_joint_interface_claimed_},
+          {hardware_interface::HW_IF_EFFORT, 0, effort_interface_claimed_},
+          {hardware_interface::HW_IF_VELOCITY, 0, velocity_joint_interface_claimed_},
+          {hardware_interface::HW_IF_POSITION, 0, position_joint_interface_claimed_},
           {k_HW_IF_ELBOW_COMMAND, hw_elbow_command_names_.size(), elbow_command_interface_claimed_},
           {k_HW_IF_CARTESIAN_VELOCITY, hw_cartesian_velocities_.size(),
            velocity_cartesian_interface_claimed_},
@@ -107,6 +107,13 @@ std::vector<CommandInterface> FrankaHardwareInterface::export_command_interfaces
       command_interfaces.emplace_back(
           CommandInterface(joint.name, command_interface.name,
                            &command_interface_map_.at(command_interface.name)[joint_index]));
+
+      auto it =
+          std::find_if(command_interfaces_info_.begin(), command_interfaces_info_.end(),
+                       [&](const auto& stored_interface_name) {
+                         return stored_interface_name.interface_type == command_interface.name;
+                       });
+      it->size++;
 
       RCLCPP_INFO(getLogger(),
                   "Registering command interface: %s for command interface %s with index %d",
@@ -402,12 +409,12 @@ hardware_interface::return_type FrankaHardwareInterface::prepare_command_mode_sw
                         return contains_interface_type(interface_given, interface.interface_type);
                       });
 
-    if (num_stop_interface == interface.size) {
+    if ((interface.size != 0) && (num_stop_interface == interface.size)) {
       interface.claim_flag = false;
     } else if (num_stop_interface != 0U) {
       generate_error_message("stop", interface.interface_type, num_stop_interface, interface.size);
     }
-    if (num_start_interface == interface.size) {
+    if ((interface.size != 0) && (num_start_interface == interface.size)) {
       interface.claim_flag = true;
     } else if (num_start_interface != 0U) {
       generate_error_message("start", interface.interface_type, num_start_interface,
