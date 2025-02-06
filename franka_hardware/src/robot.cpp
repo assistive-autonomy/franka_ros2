@@ -339,6 +339,14 @@ void Robot::initializeTorqueInterface() {
 
 void Robot::initializeJointVelocityInterface() {
   try {
+    robot_->setCollisionBehavior(
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0},
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0},
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0},
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0},
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0}, {400.0, 400.0, 400.0, 400.0, 400.0, 400.0},
+        {400.0, 400.0, 400.0, 400.0, 400.0, 400.0}, {400.0, 400.0, 400.0, 400.0, 400.0, 400.0});
+
     active_control_ = robot_->startJointVelocityControl(
         research_interface::robot::Move::ControllerMode::kJointImpedance);
   } catch (const franka::ControlException& e) {

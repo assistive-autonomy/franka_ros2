@@ -49,8 +49,8 @@ diff_drive_controller:
     linear.x.has_jerk_limits: true
     linear.x.max_velocity: 0.3
     linear.x.min_velocity: -0.3
-    linear.x.max_acceleration: 0.5
-    linear.x.min_acceleration: -0.5
+    linear.x.max_acceleration: 1.0
+    linear.x.min_acceleration: -1.0
     linear.x.max_jerk: 20.0
     linear.x.min_jerk: -20.0
 
