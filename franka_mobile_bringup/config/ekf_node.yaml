@@ -1,0 +1,54 @@
+### Extended Kalman filter config file for robot localization ###
+ekf_filter_node:
+  ros__parameters:
+    frequency: 100.0
+
+    two_d_mode: false
+
+    publish_acceleration: true
+
+    publish_tf: true
+
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    odom0: /diff_drive_controller/odom
+    odom0_config:
+      [
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+      ]
+
+    imu0: /olive/imu/tmr/filtered_ahrs
+    imu0_config:
+      [
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]

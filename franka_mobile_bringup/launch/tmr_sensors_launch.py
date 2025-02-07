@@ -100,7 +100,7 @@ def generate_launch_description():
         package='robot_localization', executable='ekf_node', name='ekf_filter_node',
         output='screen',
         parameters=[os.path.join(
-            get_package_share_directory('tmr_bringup'),
+            get_package_share_directory('franka_mobile_bringup'),
             'config/ekf_node.yaml'),
             {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         condition=IfCondition(launch_localization_node)

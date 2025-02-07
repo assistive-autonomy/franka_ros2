@@ -10,7 +10,7 @@ controller_manager:
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
-    
+
     franka_robot_state_broadcaster:
       type: franka_robot_state_broadcaster/FrankaRobotStateBroadcaster
 
@@ -59,7 +59,7 @@ diff_drive_controller:
     angular.z.has_jerk_limits: true
     angular.z.max_velocity: 0.5
     angular.z.min_velocity: -0.5
-    angular.z.max_acceleration: 0.5
-    angular.z.min_acceleration: -0.5
+    angular.z.max_acceleration: 1.0
+    angular.z.min_acceleration: -1.0
     angular.z.max_jerk: 20.0
     angular.z.min_jerk: -20.0

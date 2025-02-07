@@ -30,10 +30,40 @@
 #include "franka_hardware/franka_hardware_interface.hpp"
 #include "franka_hardware/ros_libfranka_logger.hpp"
 
+const std::string kVersionName = "version";
+const std::string kRobotIpName = "robot_ip";
+const std::string kArmIdName = "arm_id";
+
 namespace franka_hardware {
 
 using StateInterface = hardware_interface::StateInterface;
 using CommandInterface = hardware_interface::CommandInterface;
+
+namespace {
+
+#define RCLCPP_FATAL_RED(logger, text, ...) \
+  RCLCPP_FATAL(logger, "\033[1;31m" text "\033[0m", ##__VA_ARGS__)
+
+auto parseVersion(const std::string& version_str) {
+  std::vector<std::string> version_parts;
+  std::stringstream ss(version_str);
+  std::string item;
+  std::cout << "version_str: " << version_str << std::endl;
+  while (std::getline(ss, item, '.')) {
+    version_parts.push_back(item);
+  }
+
+  if (version_parts.size() != 3) {
+    throw std::invalid_argument(
+        "\033[1;31mInvalid version structure in URDF. Please update your URDF (aka "
+        "franka_description).\033[0m");
+  }
+
+  return std::make_tuple(std::stoi(version_parts[0]), std::stoi(version_parts[1]),
+                         std::stoi(version_parts[2]));
+}
+
+}  // namespace
 
 FrankaHardwareInterface::FrankaHardwareInterface(std::shared_ptr<Robot> robot,
                                                  const std::string& arm_id)
@@ -247,17 +277,42 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
   }
 
   if (!robot_) {
-    std::string robot_ip;
     try {
-      robot_ip = info_.hardware_parameters.at("robot_ip");
+      auto version_str = info_.hardware_parameters.at(kVersionName);
+      auto [major, minor, patch] = parseVersion(version_str);
+
+      RCLCPP_INFO(getLogger(), "Parsed Franka ros2_control interface version: %d.%d.%d", major,
+                  minor, patch);
+
+      if (kSupportedControlInterfaceMajor != major) {
+        RCLCPP_FATAL_RED(
+            getLogger(),
+            "Unsupported major version of the Franka ros2_control interface. Expected "
+            "major version %d, got %d. Please update your URDF (aka franka_description).",
+            kSupportedControlInterfaceMajor, major);
+        return CallbackReturn::ERROR;
+      }
+
     } catch (const std::out_of_range& ex) {
-      RCLCPP_FATAL(getLogger(), "Parameter 'robot_ip' is not set");
+      RCLCPP_FATAL_RED(
+          getLogger(),
+          "Parameter '%s' is not set. Please update your URDF (aka franka_description).",
+          kVersionName.c_str());
       return CallbackReturn::ERROR;
     }
+
+    std::string robot_ip;
     try {
-      arm_id_ = info_.hardware_parameters.at("arm_id");
+      robot_ip = info_.hardware_parameters.at(kRobotIpName);
     } catch (const std::out_of_range& ex) {
-      RCLCPP_WARN(getLogger(), "Parameter 'arm_id' is not set.");
+      RCLCPP_FATAL_RED(getLogger(), "Parameter '%s' is not set", kRobotIpName.c_str());
+      return CallbackReturn::ERROR;
+    }
+
+    try {
+      arm_id_ = info_.hardware_parameters.at(kArmIdName);
+    } catch (const std::out_of_range& ex) {
+      RCLCPP_WARN(getLogger(), "Parameter '%s' is not set.", kArmIdName.c_str());
       RCLCPP_WARN(getLogger(),
                   "Deprecation Warning: In the next release, 'arm_id' should be set in the URDF. "
                   "Using 'panda' as default 'arm_id' will not be supported."
@@ -268,8 +323,8 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
       RCLCPP_INFO(getLogger(), "Connecting to robot at \"%s\" ...", robot_ip.c_str());
       robot_ = std::make_shared<Robot>(robot_ip, getLogger());
     } catch (const franka::Exception& e) {
-      RCLCPP_FATAL(getLogger(), "Could not connect to robot");
-      RCLCPP_FATAL(getLogger(), "%s", e.what());
+      RCLCPP_FATAL_RED(getLogger(), "Could not connect to robot");
+      RCLCPP_FATAL_RED(getLogger(), "%s", e.what());
       return CallbackReturn::ERROR;
     }
     RCLCPP_INFO(getLogger(), "Successfully connected to robot");
@@ -409,12 +464,12 @@ hardware_interface::return_type FrankaHardwareInterface::prepare_command_mode_sw
                         return contains_interface_type(interface_given, interface.interface_type);
                       });
 
-    if ((interface.size != 0) && (num_stop_interface == interface.size)) {
+    if ((interface.size != 0) && ((num_stop_interface == interface.size) || (num_stop_interface == 16))) {
       interface.claim_flag = false;
     } else if (num_stop_interface != 0U) {
       generate_error_message("stop", interface.interface_type, num_stop_interface, interface.size);
     }
-    if ((interface.size != 0) && (num_start_interface == interface.size)) {
+    if ((interface.size != 0) && ((num_start_interface == interface.size) || (num_start_interface == 16))) {
       interface.claim_flag = true;
     } else if (num_start_interface != 0U) {
       generate_error_message("start", interface.interface_type, num_start_interface,
