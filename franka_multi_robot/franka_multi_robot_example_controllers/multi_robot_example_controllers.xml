@@ -1,0 +1,17 @@
+<library path="franka_multi_robot_example_controllers">
+    <class name="franka_multi_robot_example_controllers/GuidingController"
+        type="franka_multi_robot_example_controllers::GuidingController"
+        base_class_type="controller_interface::ControllerInterface">
+        <description>
+            The guiding controller only sends zero torques so that the robots (arms and mobile platform)
+            follow your guidance.
+        </description>
+    </class>
+    <class name="franka_multi_robot_example_controllers/JointVelocityController"
+        type="franka_multi_robot_example_controllers::JointVelocityController"
+        base_class_type="controller_interface::ControllerInterface">
+        <description>
+            The joint velocity controller sends a sine wave to the arms and mobile platform.
+        </description>
+    </class>
+</library>

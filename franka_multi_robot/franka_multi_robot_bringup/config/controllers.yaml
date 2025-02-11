@@ -1,0 +1,13 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 1000 # Hz
+    thread_priority: 99
+
+    franka_multi_robot_gravity_example_controller:
+      type: franka_multi_robot_example_controllers/GuidingController
+
+    franka_multi_robot_joint_velocity_example_controller:
+      type: franka_multi_robot_example_controllers/JointVelocityController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
