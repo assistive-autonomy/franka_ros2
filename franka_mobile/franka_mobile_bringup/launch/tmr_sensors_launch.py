@@ -32,8 +32,8 @@ camera_params = [
      'description': 'camera4 namespace'},
     # The default values of the usb_port_id parameters are the ports where the cameras are connected
     # to the host pc when it was delivered. If the cameras are connected to different ports, the
-    # default values can be changed. If the false port is given, a warning will be raised 
-    # during execution and the ports where the cameras are connected will be shown. 
+    # default values can be changed. If the false port is given, a warning will be raised
+    # during execution and the ports where the cameras are connected will be shown.
     {'name': 'usb_port_id1', 'default': "'2-3.3.4'",
      'description': 'Usb port id of camera1 (by default camera_front_right)'},
     {'name': 'usb_port_id2', 'default': "'2-3.3.3'",
@@ -89,8 +89,8 @@ def generate_launch_description():
 
     rviz_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('tmr_description'), 'launch'),
-            '/visualize.launch.py']),
+            get_package_share_directory('franka_description'), 'launch'),
+            '/visualize_tmr.launch.py']),
         launch_arguments={'rviz_filename': rviz_filename}.items()
     )
 

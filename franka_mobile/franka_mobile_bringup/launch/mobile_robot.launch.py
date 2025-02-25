@@ -48,7 +48,7 @@ def robot_description_dependent_nodes_spawner(
     fake_sensor_commands_str = context.perform_substitution(fake_sensor_commands)
 
     franka_xacro_filepath = os.path.join(
-        get_package_share_directory("tmr_description"),
+        get_package_share_directory("franka_description"),
         "robots",
         "tmr.urdf.xacro",
     )
@@ -115,7 +115,7 @@ def generate_launch_description():
     fake_sensor_commands = LaunchConfiguration(fake_sensor_commands_parameter_name)
     use_rviz = LaunchConfiguration(use_rviz_parameter_name)
 
-    rviz_file = os.path.join(get_package_share_directory("tmr_description"), "rviz", "tmr.rviz")
+    rviz_file = os.path.join(get_package_share_directory("franka_description"), "rviz", "tmr.rviz")
 
     robot_description_dependent_nodes_spawner_opaque_function = OpaqueFunction(
         function=robot_description_dependent_nodes_spawner,
