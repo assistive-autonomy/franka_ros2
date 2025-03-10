@@ -50,9 +50,9 @@ lidar_params = [
      'description': 'lidar1 unique name that will be used as frame_id'},
     {'name': 'lidar_namespace2', 'default': 'lidar_rear',
      'description': 'lidar2 unique name that will be used as frame_id'},
-    {'name': 'lidar_ip1', 'default': '192.168.1.11', 'description': 'unique ip of lidar 1'},
-    {'name': 'lidar_ip2', 'default': '192.168.1.12', 'description': 'unique ip of the lidar 2'},
-    {'name': 'host_ip', 'default': '192.168.1.9', 'description': 'unique ip of host pc'}
+    {'name': 'lidar_ip1', 'default': '172.16.1.11', 'description': 'unique ip of lidar 1'},
+    {'name': 'lidar_ip2', 'default': '172.16.1.12', 'description': 'unique ip of the lidar 2'},
+    {'name': 'host_ip', 'default': '172.16.1.9', 'description': 'unique ip of host pc'}
 ]
 
 

@@ -37,7 +37,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument(
                 robot_ip_parameter_name,
-                default_value="192.168.1.10",
+                default_value="172.16.1.20",
                 description="Hostname or IP address of the robot.",
             ),
             DeclareLaunchArgument(

@@ -2,9 +2,9 @@
 
 ## Quickstart
 
-The internal user PC can be access via the provided ethernet port with the IP `192.168.1.9`. Within, you can implement, compile and run ROS 2 related code to monitor and control the full robot.
+The internal user PC can be access via the provided ethernet port with the IP `172.16.1.9`. Within, you can implement, compile and run ROS 2 related code to monitor and control the full robot.
 
-The standard IP for the mobile platform (TMR) is `192.168.1.20`.
+The standard IP for the mobile platform (TMR) is `172.16.1.20`.
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -98,10 +98,10 @@ pressed for at least 2 seconds to help recover from joint-related errors (**expe
 ### Network Switch
 The TMR includes a network switch that facilitates internal communication between the following
 components:
-- User PC (IP: 192.168.1.9)
-- Front LIDAR (IP: 192.168.1.11)
-- Rear LIDAR (IP: 192.168.1.12)
-- Control PC (IP: 192.168.1.20)
+- User PC (IP: 172.16.1.9)
+- Front LIDAR (IP: 172.16.1.11)
+- Rear LIDAR (IP: 172.16.1.12)
+- Control PC (IP: 172.16.1.20)
 
 A dedicated Ethernet port on the External Ports Panel allows you to connect to each of these
 components using their respective IP addresses.
@@ -164,7 +164,7 @@ is ROS 2 Native so it will publish by default ROS 2 topics with its data. To acc
 the IMU interface, connect a display, keyboard, and mouse to the TMR. Once connected, the Ubuntu
 user interface of the User PC should be visible. Open the Firefox browser (can be installed with
 `sudo snap install firefox`) and navigate to the IMU's web user interface at its IP
-`192.168.7.1`. Here, you can view the current data produced by the IMU. We do not recommend
+`172.16.7.1`. Here, you can view the current data produced by the IMU. We do not recommend
 changing its settings (IP or ROS 2 naming) because our network configuration and ROS 2 examples
 rely on them. More information can be found in their
 [documentation](https://docs.olive-robotics.com/hardware/imu/OLVX%E2%84%A2-IMU01-9D.html#setup-and-test).
@@ -203,12 +203,12 @@ Ethernet port (SSH) or directly with a screen, keyboard, and mouse. Each of thes
 on the [External Ports Panel](#external-ports-panel). To establish an SSH connection, follow these
 steps:
 
-1. Set a static IP address on your computer, such as `192.168.1.30`. The first three values are
+1. Set a static IP address on your computer, such as `172.16.1.30`. The first three values are
    static, while the last value can be chosen freely. Ensure it does not conflict with any of the
    components mentioned in the [Network Switch](#network-switch) section. Use `255.255.255.0` for
    the netmask.
 2. Connect your computer to the Ethernet port on the `External Ports Panel` using an Ethernet cable.
-3. Open a terminal and connect to the `User PC` with `ssh tmr-user@192.168.1.9`. The password is
+3. Open a terminal and connect to the `User PC` with `ssh tmr-user@172.16.1.9`. The password is
    `tmr-user`.
 
 ### ROS 2 Demos
@@ -227,7 +227,7 @@ start the demo, follow these steps:
    that allows you to detach your session without terminating it and reconnect to it later. This is
    useful if you need to physically disconnect your computer from the TMR, as the SSH session will
    time out after a few minutes.
-4. In the `screen` terminal session, run the command `ros2 launch franka_mobile_bringup diff_drive_teleop.launch.py robot_ip:=192.168.1.20` to
+4. In the `screen` terminal session, run the command `ros2 launch franka_mobile_bringup diff_drive_teleop.launch.py robot_ip:=172.16.1.20` to
    start the demo.
 5. Power on the Xbox controller. The indicator light will turn steadily white after a second,
    indicating a successful pairing with the User PC.
@@ -253,12 +253,12 @@ connecting directly to the User PC via its ports on the [External Ports
 Panel](#external-ports-panel) (see [Accessing the TMR](#accessing-the-tmr)). The first controller is
 a guiding controller, which will set the robot to a guidable state, allowing you to push the TMR
 from its rear. It can be started with `ros2 launch franka_mobile_bringup guiding_example_controller.launch.py
-robot_ip:=192.168.1.10` and stopped with `CTRL + C`.
+robot_ip:=172.16.1.20` and stopped with `CTRL + C`.
 
 To teleoperate the robot using a keyboard with a differential drive controller, follow these steps:
 
 1. In a first terminal, run
-   `ros2 launch franka_mobile_bringup differential_drive_controller.launch.py robot_ip:=192.168.1.10`
+   `ros2 launch franka_mobile_bringup differential_drive_controller.launch.py robot_ip:=172.16.1.20`
 2. In a second terminal, run
    `ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true --remap /cmd_vel:=/diff_drive_controller/cmd_vel`
 
@@ -284,7 +284,7 @@ the IMU, LIDARs, and cameras by running `ros2 topic list`.
 
 ## System Maintenance
 System updates work like with any FR3 system. However, the 3 different components (2 FR3s + TMR) need to be updated individually via Desk.
-The IPs to reach the 3 Desks are `192.168.1.20` for the TMR while it is `192.168.1.21` for the left FR3 and `192.168.1.22` for the right FR3.
+The IPs to reach the 3 Desks are `172.16.1.20` for the TMR while it is `172.16.1.21` for the left FR3 and `172.16.1.22` for the right FR3.
 
 ### Updating the repositories
 The [franka_ros2_tmr](https://github.com/frankaemika/franka_ros2_tmr) and
