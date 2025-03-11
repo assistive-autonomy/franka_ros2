@@ -50,6 +50,7 @@ def robot_description_dependent_nodes_spawner(
     franka_xacro_filepath = os.path.join(
         get_package_share_directory("franka_description"),
         "robots",
+        "tmr",
         "tmr.urdf.xacro",
     )
     robot_description = xacro.process_file(
