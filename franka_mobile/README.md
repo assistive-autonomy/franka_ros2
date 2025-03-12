@@ -2,9 +2,14 @@
 
 ## Quickstart
 
-The internal user PC can be access via the provided ethernet port with the IP `172.16.1.9`. Within, you can implement, compile and run ROS 2 related code to monitor and control the full robot.
+The internal user PC can be accessed via the provided ethernet port with the IP `172.16.1.9`: `ssh tmr-user@172.16.1.9`.
+Within, you can implement, compile and run ROS 2 related code to monitor and control the full robot.
 
-The standard IP for the mobile platform (TMR) is `172.16.1.20`.
+The standard IPs are:
+- User pc - `172.16.1.9`
+- Mobile platform (TMR) - `172.16.1.20`
+- Left arm (FR3) - `172.16.1.21`
+- Right arm (FR3) - `172.16.1.22`
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -99,9 +104,13 @@ pressed for at least 2 seconds to help recover from joint-related errors (**expe
 The TMR includes a network switch that facilitates internal communication between the following
 components:
 - User PC (IP: 172.16.1.9)
+- Mobile Platform (TMR) (IP: 172.16.1.20)
 - Front LIDAR (IP: 172.16.1.11)
 - Rear LIDAR (IP: 172.16.1.12)
-- Control PC (IP: 172.16.1.20)
+
+In case you have a `Mobile Franka Duo`, you have additional controllers:
+- Left Arm (FR3) (IP: 172.16.1.21)
+- Right Arm (FR3) (IP: 172.16.1.22)
 
 A dedicated Ethernet port on the External Ports Panel allows you to connect to each of these
 components using their respective IP addresses.
@@ -109,11 +118,10 @@ components using their respective IP addresses.
 ### Emergency Stops
 The TMR is equipped with two onboard emergency stop buttons, located at the front and rear.
 Additionally, there is a Tyro wireless remote stop control with a range of up to 600 meters in open
-field. If the TMR moves beyond this range or the battery of the remote is empty, the connection is
-lost, triggering an emergency stop. When any of these buttons are engaged, a service running on on
-the Control PC detects the input signal, immediately locking the drives and stopping the TMR. After
-booting up the robot, the remote stop control needs to be actively disengaged (if already
-disengaged, it needs to be engaged and then disengaged) for the robot to be able to move.
+field. If the TMR moves beyond this range or <span style="color: orange;">**the battery of the remote is low or empty**</span>,
+the connection is lost, triggering an emergency stop. When any of these buttons are engaged, all components (TMR + FR3s) are stopped.
+
+<span style="color: orange;">**Important: After booting up the robot, the remote stop control needs to be actively disengaged and engaged again.**</span>
 
 <div style="text-align: center;">
   <img src="images/tyro-remote-stop.jpg" alt="Tyro Remote Stop" width="250"/>
@@ -121,8 +129,7 @@ disengaged, it needs to be engaged and then disengaged) for the robot to be able
 
 ### Batteries and Battery Display
 The TMR is powered by three large `Varta Easy Blade 48` batteries, each with a nominal voltage of
-48V and a combined capacity of approximately 4.9 kWh. These batteries communicate with the Control
-PC via a CAN interface, allowing the battery status to be monitored. The battery with the lowest
+48V and a combined capacity of approximately 4.9 kWh. The battery with the lowest
 serial number is designated as the master, coordinating the other two batteries. Next to the
 external Ports Panel, there is a battery display that shows the current charge level.
 
@@ -141,9 +148,12 @@ which supports powerful onboard edge computation by combining GPU and CPU perfor
 CUDA cores for AI and vision algorithms. It also has real-time kernel support. Communication with
 the Control PC has an approximate latency of 0.15ms. The User PC runs Ubuntu 22.04 and ROS 2 Humble.
 The password for the user `tmr-user` is `tmr-user`. This user has sudo rights. You can create
-additional ROS 2 projects in the `/home/tmr-user/tmr_ros2_ws/src/` directory. To build these projects, navigate to
-`/home/tmr-user/tmr_ros2_ws/` and execute `colcon build`. This will enable the launch of your newly
+additional ROS 2 projects in the `/home/tmr-user/ros2_ws/src/` directory. To build these projects, navigate to
+`/home/tmr-user/ros2_ws/` and execute `colcon build`. This will enable the launch of your newly
 added projects.
+
+<span style="color: orange;">For an in-depth instruction for setting up the ROS 2 workspace,
+please head over to: https://github.com/frankaemika/franka_ros2</span>
 
 ### LIDARs
 
@@ -186,10 +196,10 @@ This section provides instructions for the startup and operation of the TMR.
 
 ### Booting the TMR
 First, rotate the red switch located at the front of the TMR to power it on. You will see and hear
-the TMR booting up. To set the robot into `IDLE` state,
-ensure that the wireless remote stop control and the two onboard emergency buttons are disengaged. If
-each emergency button is already disengaged at startup, you will need to engage and then disengage
-the emergency button on the wireless remote stop control to switch to `IDLE` state.
+the TMR booting up. Please ensure that the wireless remote stop control and the two onboard emergency
+buttons are disengaged. If each emergency button is already disengaged at startup, you will need to
+engage and then disengage the emergency button on the wireless remote stop control.
+This procedure will ensure that the TMR is ready for operation - in the following called `IDLE` state.
 
 In the following sections, different ways of moving the robot and testing the sensors are described.
 It is recommended to always keep the wireless remote stop control within reach while the robot is
@@ -212,12 +222,20 @@ steps:
    `tmr-user`.
 
 ### ROS 2 Demos
-The ROS 2 based demos are located in `/home/tmr-user/tmr_ros2_ws/src/` on the User PC.
+The ROS 2 based demos are located in `/home/tmr-user/ros2_ws/src/` on the User PC. The necessary repositories
+containing are already downloaded. Yet, for getting updates, you can pull the latest version of the
+repositories from:
+- [franka_description_tmr](https://github.com/frankaemika/franka_description_tmr): This repository
+  contains the URDF and meshes for the arms and TMR. The TMR based branch is `main_tmr`.
+- [franka_ros2_tmr](https://github.com/frankaemika/franka_ros2_tmr): This repository contains the
+  ROS 2 packages for the arms and TMR. The TMR based branch is `humble_tmr`.
+
+All updates will be pushed to the aforementioned branches.
 
 #### Gamepad Demo
 The Gamepad Demo demonstrates control of the TMR using ROS 2 Humble and an Xbox controller
-integrated with the User PC via the xone firmware to command the JCI interface. First, ensure that
-the robot is in the `IDLE` state (see [Booting the TMR](#booting-the-tmr) for instructions). To
+integrated with the User PC via the xone firmware. First, ensure that
+the robot is not blocked by safety (see [Booting the TMR](#booting-the-tmr) for instructions). To
 start the demo, follow these steps:
 
 1. Access the User PC as described in the [Accessing the TMR](#accessing-the-tmr) section.
@@ -282,6 +300,9 @@ surroundings by the LIDARs. On the right side of the screen, a separate window i
 camera, showing the current image captured by it. Additionally, you can view the published topics of
 the IMU, LIDARs, and cameras by running `ros2 topic list`.
 
+Important note: If you want to visualize the robot in `RViz`, you need to have a screen connected to
+the TMR through the HDMI cable.
+
 ## System Maintenance
 System updates work like with any FR3 system. However, the 3 different components (2 FR3s + TMR) need to be updated individually via Desk.
 The IPs to reach the 3 Desks are `172.16.1.20` for the TMR while it is `172.16.1.21` for the left FR3 and `172.16.1.22` for the right FR3.
@@ -290,7 +311,7 @@ The IPs to reach the 3 Desks are `172.16.1.20` for the TMR while it is `172.16.1
 The [franka_ros2_tmr](https://github.com/frankaemika/franka_ros2_tmr) and
 [franka_description_tmr](https://github.com/frankaemika/franka_description_tmr) are **private** repositories maintained by
 Franka Robotics. To pull the latest version of these repositories, navigate to
-`/home/tmr-user/tmr_ros2_ws/src/`. Inside the `tmr_ros2` folder, run `git pull` and
+`/home/tmr-user/ros2_ws/src/`. Inside the `ROS 2` folder, run `git pull` and
 log in with the user credentials that have access to these repositories. If your organization does
 still not have access credentials, please contact support@franka.de.
 
