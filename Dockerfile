@@ -66,6 +66,10 @@ RUN sudo apt-get update \
         ros-humble-moveit-simple-controller-manager \
         ros-humble-rviz2 \
         ros-humble-xacro \
+        ros-humble-realsense2-description \
+        ros-humble-realsense2-camera \
+        ros-humble-sick-safetyscanners2 \
+        ros-humble-robot-localization \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/*
 
@@ -75,6 +79,7 @@ WORKDIR /ros2_ws
 COPY . /ros2_ws/src
 RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
     && vcs import src < src/franka.repos --recursive --skip-existing \
+    && git clone https://github.com/olive-robotics/olvx_descriptions_module.git src/olvx_descriptions_module \
     && sudo apt-get update \
     && rosdep update \
     && rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y \
