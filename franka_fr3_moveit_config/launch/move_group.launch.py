@@ -36,7 +36,6 @@ def load_yaml(package_name, file_path):
     except EnvironmentError:  # parent of IOError, OSError *and* Windows Error where available
         return None
 
-
 def generate_launch_description():
     robot_ip_parameter_name = 'robot_ip'
     load_gripper_parameter_name = 'load_gripper'
