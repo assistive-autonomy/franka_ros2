@@ -23,7 +23,6 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-
 import yaml
 
 
@@ -35,6 +34,7 @@ def load_yaml(package_name, file_path):
             return yaml.safe_load(file)
     except EnvironmentError:  # parent of IOError, OSError *and* Windows Error where available
         return None
+
 
 def generate_launch_description():
     robot_ip_parameter_name = 'robot_ip'

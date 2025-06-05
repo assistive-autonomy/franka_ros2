@@ -54,13 +54,13 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-    
+
 # Add the path to the `utils` folder
 package_share = get_package_share_directory('franka_bringup')
 utils_path = os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
 sys.path.append(os.path.abspath(utils_path))
 
-from launch_utils import load_yaml
+from launch_utils import load_yaml  # noqa: E402
 
 # Iterates over the uncommented lines in file specified by the robot_config_file parameter.
 # "Includes" franka.launch.py for each active (uncommented) Robot.

@@ -222,7 +222,6 @@ def generate_launch_description():
             )
         )
 
-
     joint_state_publisher = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
@@ -244,7 +243,7 @@ def generate_launch_description():
     robot_arg = DeclareLaunchArgument(
         robot_ip_parameter_name,
         description='Hostname or IP address of the robot.')
-    
+
     namespace_arg = DeclareLaunchArgument(
         namespace_parameter_name,
         default_value='',
