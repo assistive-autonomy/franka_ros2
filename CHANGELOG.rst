@@ -6,6 +6,7 @@ Unreleased
 Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humble
 
 * refactor: srdf files come from franka description
+* Fix: FrankaHardwareInterface: Fix eager claiming bug when multiple hardware components are present
 
 v2.0.1 (2025-06-26)
 -------------------
