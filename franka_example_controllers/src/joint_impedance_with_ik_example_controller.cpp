@@ -55,6 +55,8 @@ JointImpedanceWithIKExampleController::state_interface_configuration() const {
     config.names.push_back(franka_robot_model_name);
   }
 
+  config.names.push_back(arm_id_ + "/robot_time");
+
   return config;
 }
 

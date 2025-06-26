@@ -1,6 +1,12 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+v2.0.1 (2025-06-26)
+-------------------
+Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humble
+
+* Fix: joint_impedance_with_ik_example_controller uses correct time from robot
+
 v2.0.0 (2025-06-10)
 -------------------
 Requires libfranka >= 0.15.0 and franka_description >= 0.5.0 requires ROS 2 Humble
