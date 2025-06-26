@@ -84,13 +84,6 @@
       move_to_start_example_controller:
         type: franka_example_controllers/MoveToStartExampleController
 
-      dynamic_wave_example_controller:
-        type: franka_example_controllers/DynamicWaveExampleController
-        state_interfaces:
-          robot_state
-        command_interfaces:
-          robot_command
-
 /**:
   cartesian_elbow_example_controller:
     ros__parameters:
@@ -231,10 +224,3 @@
         - 10.0
         - 10.0
         - 5.0
-/**:
-  dynamic_wave_example_controller:
-    ros__parameters:
-      gazebo: false
-      robot_description: ""
-      duration: 30.0
-
