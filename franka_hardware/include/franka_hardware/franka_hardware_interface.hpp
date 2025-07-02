@@ -16,7 +16,9 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <hardware_interface/visibility_control.h>
@@ -178,5 +180,7 @@ class FrankaHardwareInterface : public hardware_interface::SystemInterface {
   const std::string k_robot_state_interface_name{"robot_state"};
   const std::string k_robot_model_interface_name{"robot_model"};
   const size_t max_number_start_interfaces = 45;
+
+  std::unordered_set<std::string> exported_command_interfaces_;
 };
 }  // namespace franka_hardware
