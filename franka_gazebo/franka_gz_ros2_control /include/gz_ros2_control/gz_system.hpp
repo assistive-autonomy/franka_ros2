@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGN_ROS2_CONTROL__IGN_SYSTEM_HPP_
-#define IGN_ROS2_CONTROL__IGN_SYSTEM_HPP_
+#ifndef GZ_ROS2_CONTROL__GZ_SYSTEM_HPP_
+#define GZ_ROS2_CONTROL__GZ_SYSTEM_HPP_
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "ign_ros2_control/ign_system_interface.hpp"
+#include "gz_ros2_control/gz_system_interface.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-namespace ign_ros2_control
+namespace gz_ros2_control
 {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
 // Forward declaration
-class IgnitionSystemPrivate;
+class GZSystemPrivate;
 
-// These class must inherit `ign_ros2_control::IgnitionSystemInterface` which
+// These class must inherit `gz_ros2_control::GZSystemInterface` which
 // implements a simulated `ros2_control` `hardware_interface::SystemInterface`.
 
-class IgnitionSystem : public IgnitionSystemInterface
+class GZSystem : public GZSystemInterface
 {
 public:
   // Documentation Inherited
@@ -73,9 +73,9 @@ public:
   bool initSim(
     const ModelKDL & kdl_model,
     rclcpp::Node::SharedPtr & model_nh,
-    std::map<std::string, ignition::gazebo::Entity> & joints,
+    std::map<std::string, gz::sim::Entity> & joints,
     const hardware_interface::HardwareInfo & hardware_info,
-    ignition::gazebo::EntityComponentManager & _ecm,
+    gz::sim::EntityComponentManager & _ecm,
     int & update_rate) override;
 
 private:
@@ -85,10 +85,10 @@ private:
   void registerSensors(const hardware_interface::HardwareInfo & hardware_info);
 
   /// \brief Private data class
-  std::unique_ptr<IgnitionSystemPrivate> dataPtr;
+  std::unique_ptr<GZSystemPrivate> dataPtr;
   ModelKDL kdl_model_;
 };
 
-}  // namespace ign_ros2_control
+}  // namespace gz_ros2_control
 
-#endif  // IGN_ROS2_CONTROL__IGN_SYSTEM_HPP_
+#endif  // GZ_ROS2_CONTROL__GZ_SYSTEM_HPP_

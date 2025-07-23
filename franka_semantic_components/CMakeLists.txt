@@ -21,7 +21,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     sensor_msgs
     hardware_interface
     rclcpp_lifecycle
-    urdf)
+    urdf
+    controller_interface
+    )
 
 # find dependencies
 find_package(ament_cmake REQUIRED)

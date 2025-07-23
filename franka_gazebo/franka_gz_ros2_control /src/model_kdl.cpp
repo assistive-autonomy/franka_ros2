@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ign_ros2_control/model_kdl.h"
+#include "gz_ros2_control/model_kdl.h"
 
 #include <algorithm>
 #include <array>

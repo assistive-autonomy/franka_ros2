@@ -21,6 +21,8 @@
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/utilities.hpp"
+#include <ros2_control_test_assets/descriptions.hpp>
+
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
 const double k_EPS = 1e-5;
@@ -42,7 +44,9 @@ void MoveToStartExampleControllerTest::TearDown() {
 }
 
 void MoveToStartExampleControllerTest::SetUpController() {
-  const auto result = controller_->init("test_move_to_start_example");
+  const auto result = controller_->init("test_move_to_start_example",ros2_control_test_assets::minimal_robot_urdf,30,"", rclcpp::NodeOptions()
+        .allow_undeclared_parameters(true)
+        .automatically_declare_parameters_from_overrides(true));
   ASSERT_EQ(result, controller_interface::return_type::OK);
   std::vector<LoanedCommandInterface> command_ifs;
   std::vector<LoanedStateInterface> state_ifs;

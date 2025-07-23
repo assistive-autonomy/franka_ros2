@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ign_ros2_control/ign_system.hpp"
+#include "gz_ros2_control/gz_system.hpp"
 
-#include <ignition/msgs/imu.pb.h>
+#include <gz/msgs/imu.pb.h>
 
 #include <limits>
 #include <map>
@@ -23,26 +23,26 @@
 #include <utility>
 #include <vector>
 
-#include <ignition/gazebo/components/AngularVelocity.hh>
-#include <ignition/gazebo/components/Imu.hh>
-#include <ignition/gazebo/components/JointForceCmd.hh>
-#include <ignition/gazebo/components/JointPosition.hh>
-#include <ignition/gazebo/components/JointPositionReset.hh>
-#include <ignition/gazebo/components/JointVelocity.hh>
-#include <ignition/gazebo/components/JointVelocityCmd.hh>
-#include <ignition/gazebo/components/JointVelocityReset.hh>
-#include <ignition/gazebo/components/LinearAcceleration.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/ParentEntity.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/components/Sensor.hh>
+#include <gz/sim/components/AngularVelocity.hh>
+#include <gz/sim/components/Imu.hh>
+#include <gz/sim/components/JointForceCmd.hh>
+#include <gz/sim/components/JointPosition.hh>
+#include <gz/sim/components/JointPositionReset.hh>
+#include <gz/sim/components/JointVelocity.hh>
+#include <gz/sim/components/JointVelocityCmd.hh>
+#include <gz/sim/components/JointVelocityReset.hh>
+#include <gz/sim/components/LinearAcceleration.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/ParentEntity.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/Sensor.hh>
 
-#include <ignition/gazebo/components/JointAxis.hh>
-#include <ignition/gazebo/components/JointTransmittedWrench.hh>
-#include <ignition/gazebo/components/JointType.hh>
-#include <ignition/physics/Geometry.hh>
+#include <gz/sim/components/JointAxis.hh>
+#include <gz/sim/components/JointTransmittedWrench.hh>
+#include <gz/sim/components/JointType.hh>
+#include <gz/physics/Geometry.hh>
 
-#include <ignition/transport/Node.hh>
+#include <gz/transport/Node.hh>
 
 #include <hardware_interface/hardware_info.hpp>
 
@@ -79,10 +79,10 @@ struct jointData
   bool is_actuated;
 
   /// \brief handles to the joints from within Gazebo
-  ignition::gazebo::Entity sim_joint;
+  gz::sim::Entity sim_joint;
 
   /// \brief Control method defined in the URDF for each joint.
-  ign_ros2_control::IgnitionSystemInterface::ControlMethod joint_control_method;
+  gz_ros2_control::GZSystemInterface::ControlMethod joint_control_method;
 };
 
 struct MimicJoint
@@ -103,17 +103,17 @@ public:
   std::string topicName{};
 
   /// \brief handles to the imu from within Gazebo
-  ignition::gazebo::Entity sim_imu_sensors_ = ignition::gazebo::kNullEntity;
+  gz::sim::Entity sim_imu_sensors_ = gz::sim::kNullEntity;
 
   /// \brief An array per IMU with 4 orientation, 3 angular velocity and 3
   /// linear acceleration
   std::array<double, 10> imu_sensor_data_;
 
   /// \brief callback to get the IMU topic values
-  void OnIMU(const ignition::msgs::IMU & _msg);
+  void OnIMU(const gz::msgs::IMU & _msg);
 };
 
-void ImuData::OnIMU(const ignition::msgs::IMU & _msg)
+void ImuData::OnIMU(const gz::msgs::IMU & _msg)
 {
   this->imu_sensor_data_[0] = _msg.orientation().x();
   this->imu_sensor_data_[1] = _msg.orientation().y();
@@ -127,12 +127,12 @@ void ImuData::OnIMU(const ignition::msgs::IMU & _msg)
   this->imu_sensor_data_[9] = _msg.linear_acceleration().z();
 }
 
-class ign_ros2_control::IgnitionSystemPrivate
+class gz_ros2_control::GZSystemPrivate
 {
 public:
-  IgnitionSystemPrivate() = default;
+  GZSystemPrivate() = default;
 
-  ~IgnitionSystemPrivate() = default;
+  ~GZSystemPrivate() = default;
   /// \brief Degrees od freedom.
   size_t n_dof_;
 
@@ -153,13 +153,13 @@ public:
 
   /// \brief Entity component manager, ECM shouldn't be accessed outside those
   /// methods, otherwise the app will crash
-  ignition::gazebo::EntityComponentManager * ecm;
+  gz::sim::EntityComponentManager * ecm;
 
   /// \brief controller update rate
   int * update_rate;
 
   /// \brief Ignition communication node.
-  ignition::transport::Node node;
+  gz::transport::Node node;
 
   /// \brief mapping of mimicked joints to index of joint they mimic
   std::vector<MimicJoint> mimic_joints_;
@@ -168,18 +168,18 @@ public:
   double position_proportional_gain_;
 };
 
-namespace ign_ros2_control
+namespace gz_ros2_control
 {
-bool IgnitionSystem::initSim(
+bool GZSystem::initSim(
   const ModelKDL & kdl_model,
   rclcpp::Node::SharedPtr & model_nh,
-  std::map<std::string, ignition::gazebo::Entity> & enableJoints,
+  std::map<std::string, gz::sim::Entity> & enableJoints,
   const hardware_interface::HardwareInfo & hardware_info,
-  ignition::gazebo::EntityComponentManager & _ecm,
+  gz::sim::EntityComponentManager & _ecm,
   int & update_rate)
 {
   kdl_model_ = kdl_model;
-  this->dataPtr = std::make_unique<IgnitionSystemPrivate>();
+  this->dataPtr = std::make_unique<GZSystemPrivate>();
   this->dataPtr->last_update_sim_time_ros_ = rclcpp::Time();
   this->nh_ = model_nh;
   this->dataPtr->ecm = &_ecm;
@@ -224,7 +224,7 @@ bool IgnitionSystem::initSim(
       continue;
     }
 
-    ignition::gazebo::Entity simjoint = enableJoints[joint_name];
+    gz::sim::Entity simjoint = enableJoints[joint_name];
     this->dataPtr->joints_[j].sim_joint = simjoint;
 
     this->dataPtr->joints_[j].joint_type =
@@ -235,17 +235,17 @@ bool IgnitionSystem::initSim(
     // Create joint position component if one doesn't exist
     if (!_ecm.EntityHasComponentType(
         simjoint,
-        ignition::gazebo::components::JointPosition().TypeId()))
+        gz::sim::components::JointPosition().TypeId()))
     {
-      _ecm.CreateComponent(simjoint, ignition::gazebo::components::JointPosition());
+      _ecm.CreateComponent(simjoint, gz::sim::components::JointPosition());
     }
 
     // Create joint velocity component if one doesn't exist
     if (!_ecm.EntityHasComponentType(
         simjoint,
-        ignition::gazebo::components::JointVelocity().TypeId()))
+        gz::sim::components::JointVelocity().TypeId()))
     {
-      _ecm.CreateComponent(simjoint, ignition::gazebo::components::JointVelocity());
+      _ecm.CreateComponent(simjoint, gz::sim::components::JointVelocity());
     }
 
     // Create joint transmitted wrench component if one doesn't exist
@@ -411,13 +411,13 @@ bool IgnitionSystem::initSim(
         this->dataPtr->joints_[j].joint_position = initial_position;
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[j].sim_joint,
-          ignition::gazebo::components::JointPositionReset({initial_position}));
+          gz::sim::components::JointPositionReset({initial_position}));
       }
       if (!std::isnan(initial_velocity)) {
         this->dataPtr->joints_[j].joint_velocity = initial_velocity;
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[j].sim_joint,
-          ignition::gazebo::components::JointVelocityReset({initial_velocity}));
+          gz::sim::components::JointVelocityReset({initial_velocity}));
       }
     }
 
@@ -430,7 +430,7 @@ bool IgnitionSystem::initSim(
   return true;
 }
 
-void IgnitionSystem::registerSensors(const hardware_interface::HardwareInfo & hardware_info)
+void GZSystem::registerSensors(const hardware_interface::HardwareInfo & hardware_info)
 {
   // Collect gazebo sensor handles
   size_t n_sensors = hardware_info.sensors.size();
@@ -444,14 +444,14 @@ void IgnitionSystem::registerSensors(const hardware_interface::HardwareInfo & ha
   // associate the interfaces So we have resize only once the structures where
   // the data will be stored, and we can safely use pointers to the structures
 
-  this->dataPtr->ecm->Each<ignition::gazebo::components::Imu, ignition::gazebo::components::Name>(
-    [&](const ignition::gazebo::Entity & _entity, const ignition::gazebo::components::Imu *,
-    const ignition::gazebo::components::Name * _name) -> bool {
+  this->dataPtr->ecm->Each<gz::sim::components::Imu, gz::sim::components::Name>(
+    [&](const gz::sim::Entity & _entity, const gz::sim::components::Imu *,
+    const gz::sim::components::Name * _name) -> bool {
       auto imuData = std::make_shared<ImuData>();
       RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Loading sensor: " << _name->Data());
 
       auto sensorTopicComp =
-      this->dataPtr->ecm->Component<ignition::gazebo::components::SensorTopic>(_entity);
+      this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(_entity);
       if (sensorTopicComp) {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Topic name: " << sensorTopicComp->Data());
       }
@@ -488,7 +488,7 @@ void IgnitionSystem::registerSensors(const hardware_interface::HardwareInfo & ha
     });
 }
 
-CallbackReturn IgnitionSystem::on_init(const hardware_interface::HardwareInfo & system_info)
+CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo & system_info)
 {
   RCLCPP_WARN(this->nh_->get_logger(), "On init...");
   if (hardware_interface::SystemInterface::on_init(system_info) != CallbackReturn::SUCCESS) {
@@ -497,47 +497,47 @@ CallbackReturn IgnitionSystem::on_init(const hardware_interface::HardwareInfo & 
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn IgnitionSystem::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
+CallbackReturn GZSystem::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
 {
   RCLCPP_INFO(this->nh_->get_logger(), "System Successfully configured!");
 
   return CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> IgnitionSystem::export_state_interfaces()
+std::vector<hardware_interface::StateInterface> GZSystem::export_state_interfaces()
 {
   return std::move(this->dataPtr->state_interfaces_);
 }
 
-std::vector<hardware_interface::CommandInterface> IgnitionSystem::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface> GZSystem::export_command_interfaces()
 {
   return std::move(this->dataPtr->command_interfaces_);
 }
 
-CallbackReturn IgnitionSystem::on_activate(const rclcpp_lifecycle::State & previous_state)
+CallbackReturn GZSystem::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   return CallbackReturn::SUCCESS;
   return hardware_interface::SystemInterface::on_activate(previous_state);
 }
 
-CallbackReturn IgnitionSystem::on_deactivate(const rclcpp_lifecycle::State & previous_state)
+CallbackReturn GZSystem::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   return CallbackReturn::SUCCESS;
   return hardware_interface::SystemInterface::on_deactivate(previous_state);
 }
 
-hardware_interface::return_type IgnitionSystem::read(
+hardware_interface::return_type GZSystem::read(
   const rclcpp::Time & /*time*/,
   const rclcpp::Duration & /*period*/)
 {
   for (unsigned int i = 0; i < this->dataPtr->joints_.size(); ++i) {
-    if (this->dataPtr->joints_[i].sim_joint == ignition::gazebo::v6::kNullEntity) {
+    if (this->dataPtr->joints_[i].sim_joint == gz::sim::kNullEntity) {
       continue;
     }
 
     // Get the joint velocity
     const auto * jointVelocity =
-      this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocity>(
+      this->dataPtr->ecm->Component<gz::sim::components::JointVelocity>(
       this->dataPtr->joints_[i].sim_joint);
 
     // Get the joint force via joint transmitted wrench
@@ -547,13 +547,13 @@ hardware_interface::return_type IgnitionSystem::read(
 
     // Get the joint position
     const auto * jointPositions =
-      this->dataPtr->ecm->Component<ignition::gazebo::components::JointPosition>(
+      this->dataPtr->ecm->Component<gz::sim::components::JointPosition>(
       this->dataPtr->joints_[i].sim_joint);
 
     this->dataPtr->joints_[i].joint_position = jointPositions->Data()[0];
     this->dataPtr->joints_[i].joint_velocity = jointVelocity->Data()[0];
 
-    ignition::physics::Vector3d force_or_torque;
+    gz::physics::Vector3d force_or_torque;
     if (this->dataPtr->joints_[i].joint_type == sdf::JointType::PRISMATIC) {
       force_or_torque = {jointWrench->Data().force().x(), jointWrench->Data().force().y(),
         jointWrench->Data().force().z()};
@@ -563,7 +563,7 @@ hardware_interface::return_type IgnitionSystem::read(
     }
     // Calculate the scalar effort along the joint axis
     this->dataPtr->joints_[i].joint_effort = force_or_torque.dot(
-      ignition::physics::Vector3d{this->dataPtr->joints_[i].joint_axis.Xyz()[0],
+      gz::physics::Vector3d{this->dataPtr->joints_[i].joint_axis.Xyz()[0],
         this->dataPtr->joints_[i].joint_axis.Xyz()[1],
         this->dataPtr->joints_[i].joint_axis.Xyz()[2]});
   }
@@ -571,7 +571,7 @@ hardware_interface::return_type IgnitionSystem::read(
   for (unsigned int i = 0; i < this->dataPtr->imus_.size(); ++i) {
     if (this->dataPtr->imus_[i]->topicName.empty()) {
       auto sensorTopicComp =
-        this->dataPtr->ecm->Component<ignition::gazebo::components::SensorTopic>(
+        this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(
         this->dataPtr->imus_[i]->sim_imu_sensors_);
       if (sensorTopicComp) {
         this->dataPtr->imus_[i]->topicName = sensorTopicComp->Data();
@@ -589,7 +589,7 @@ hardware_interface::return_type IgnitionSystem::read(
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type IgnitionSystem::perform_command_mode_switch(
+hardware_interface::return_type GZSystem::perform_command_mode_switch(
   const std::vector<std::string> & start_interfaces,
   const std::vector<std::string> & stop_interfaces)
 {
@@ -635,7 +635,7 @@ hardware_interface::return_type IgnitionSystem::perform_command_mode_switch(
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type IgnitionSystem::write(
+hardware_interface::return_type GZSystem::write(
   const rclcpp::Time & /*time*/,
   const rclcpp::Duration & /*period*/)
 {
@@ -660,22 +660,22 @@ hardware_interface::return_type IgnitionSystem::write(
   }
 
   for (unsigned int i = 0; i < this->dataPtr->joints_.size(); ++i) {
-    if (this->dataPtr->joints_[i].sim_joint == ignition::gazebo::v6::kNullEntity) {
+    if (this->dataPtr->joints_[i].sim_joint == gz::sim::kNullEntity) {
       continue;
     }
 
     if (this->dataPtr->joints_[i].joint_control_method & VELOCITY) {
-      if (!this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+      if (!this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
           this->dataPtr->joints_[i].sim_joint))
       {
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[i].sim_joint,
-          ignition::gazebo::components::JointVelocityCmd({0}));
+          gz::sim::components::JointVelocityCmd({0}));
       } else {
         const auto jointVelCmd =
-          this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+          this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
           this->dataPtr->joints_[i].sim_joint);
-        *jointVelCmd = ignition::gazebo::components::JointVelocityCmd(
+        *jointVelCmd = gz::sim::components::JointVelocityCmd(
           {this->dataPtr->joints_[i].joint_velocity_cmd});
       }
     } else if (this->dataPtr->joints_[i].joint_control_method & POSITION) {
@@ -688,41 +688,41 @@ hardware_interface::return_type IgnitionSystem::write(
       // Calculate target velcity
       double target_vel = -this->dataPtr->position_proportional_gain_ * error;
 
-      auto vel = this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+      auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
         this->dataPtr->joints_[i].sim_joint);
 
       if (vel == nullptr) {
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[i].sim_joint,
-          ignition::gazebo::components::JointVelocityCmd({target_vel}));
+          gz::sim::components::JointVelocityCmd({target_vel}));
       } else if (!vel->Data().empty()) {
         vel->Data()[0] = target_vel;
       }
     } else if (this->dataPtr->joints_[i].joint_control_method & EFFORT) {
-      if (!this->dataPtr->ecm->Component<ignition::gazebo::components::JointForceCmd>(
+      if (!this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
           this->dataPtr->joints_[i].sim_joint))
       {
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[i].sim_joint,
-          ignition::gazebo::components::JointForceCmd({0}));
+          gz::sim::components::JointForceCmd({0}));
       } else {
         const auto jointEffortCmd =
-          this->dataPtr->ecm->Component<ignition::gazebo::components::JointForceCmd>(
+          this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
           this->dataPtr->joints_[i].sim_joint);
-        *jointEffortCmd = ignition::gazebo::components::JointForceCmd(
+        *jointEffortCmd = gz::sim::components::JointForceCmd(
           {this->dataPtr->joints_[i].joint_effort_cmd});
         jointEffortCmd->Data()[0] += joint_efforts[i];
       }
     } else if (this->dataPtr->joints_[i].is_actuated) {
       // Fallback case is a velocity command of zero (only for actuated joints)
       double target_vel = 0.0;
-      auto vel = this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+      auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
         this->dataPtr->joints_[i].sim_joint);
 
       if (vel == nullptr) {
         this->dataPtr->ecm->CreateComponent(
           this->dataPtr->joints_[i].sim_joint,
-          ignition::gazebo::components::JointVelocityCmd({target_vel}));
+          gz::sim::components::JointVelocityCmd({target_vel}));
       } else if (!vel->Data().empty()) {
         vel->Data()[0] = target_vel;
       }
@@ -736,13 +736,13 @@ hardware_interface::return_type IgnitionSystem::write(
         // Get the joint position
         double position_mimicked_joint =
           this->dataPtr->ecm
-          ->Component<ignition::gazebo::components::JointPosition>(
+          ->Component<gz::sim::components::JointPosition>(
           this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
           ->Data()[0];
 
         double position_mimic_joint =
           this->dataPtr->ecm
-          ->Component<ignition::gazebo::components::JointPosition>(
+          ->Component<gz::sim::components::JointPosition>(
           this->dataPtr->joints_[mimic_joint.joint_index].sim_joint)
           ->Data()[0];
 
@@ -751,13 +751,13 @@ hardware_interface::return_type IgnitionSystem::write(
 
         double velocity_sp = (-1.0) * position_error * (*this->dataPtr->update_rate);
 
-        auto vel = this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+        auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
           this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
 
         if (vel == nullptr) {
           this->dataPtr->ecm->CreateComponent(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            ignition::gazebo::components::JointVelocityCmd({velocity_sp}));
+            gz::sim::components::JointVelocityCmd({velocity_sp}));
         } else if (!vel->Data().empty()) {
           vel->Data()[0] = velocity_sp;
         }
@@ -766,36 +766,36 @@ hardware_interface::return_type IgnitionSystem::write(
         // get the velocity of mimicked joint
         double velocity_mimicked_joint =
           this->dataPtr->ecm
-          ->Component<ignition::gazebo::components::JointVelocity>(
+          ->Component<gz::sim::components::JointVelocity>(
           this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
           ->Data()[0];
 
-        if (!this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+        if (!this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint))
         {
           this->dataPtr->ecm->CreateComponent(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            ignition::gazebo::components::JointVelocityCmd({0}));
+            gz::sim::components::JointVelocityCmd({0}));
         } else {
           const auto jointVelCmd =
-            this->dataPtr->ecm->Component<ignition::gazebo::components::JointVelocityCmd>(
+            this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
-          *jointVelCmd = ignition::gazebo::components::JointVelocityCmd(
+          *jointVelCmd = gz::sim::components::JointVelocityCmd(
             {mimic_joint.multiplier * velocity_mimicked_joint});
         }
       }
       if (mimic_interface == "effort") {
-        if (!this->dataPtr->ecm->Component<ignition::gazebo::components::JointForceCmd>(
+        if (!this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint))
         {
           this->dataPtr->ecm->CreateComponent(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            ignition::gazebo::components::JointForceCmd({0}));
+            gz::sim::components::JointForceCmd({0}));
         } else {
           const auto jointEffortCmd =
-            this->dataPtr->ecm->Component<ignition::gazebo::components::JointForceCmd>(
+            this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
             this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
-          *jointEffortCmd = ignition::gazebo::components::JointForceCmd(
+          *jointEffortCmd = gz::sim::components::JointForceCmd(
             {mimic_joint.multiplier *
               this->dataPtr->joints_[mimic_joint.mimicked_joint_index].joint_effort});
         }
@@ -805,7 +805,7 @@ hardware_interface::return_type IgnitionSystem::write(
 
   return hardware_interface::return_type::OK;
 }
-}  // namespace ign_ros2_control
+}  // namespace gz_ros2_control
 
 #include "pluginlib/class_list_macros.hpp"  // NOLINT
-PLUGINLIB_EXPORT_CLASS(ign_ros2_control::IgnitionSystem, ign_ros2_control::IgnitionSystemInterface)
+PLUGINLIB_EXPORT_CLASS(gz_ros2_control::GZSystem, gz_ros2_control::GZSystemInterface)

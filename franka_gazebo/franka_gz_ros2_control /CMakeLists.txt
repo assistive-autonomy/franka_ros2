@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 # Suppress CMP0002 warning
 option(CHECK_TIDY "Enable clang-tidy checks" OFF)
 
-project(franka_ign_ros2_control)
+project(franka_gz_ros2_control)
 
 # Default to C11
 if(NOT CMAKE_C_STANDARD)
@@ -34,40 +34,21 @@ find_package(Franka 0.13.3 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 
-if("$ENV{IGNITION_VERSION}" STREQUAL "citadel")
-  find_package(ignition-gazebo3 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo3_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Citadel")
-
-elseif("$ENV{IGNITION_VERSION}" STREQUAL "edifice")
-  find_package(ignition-gazebo5 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo5_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Edifice")
-
-elseif("$ENV{IGNITION_VERSION}" STREQUAL "fortress")
-  find_package(ignition-gazebo6 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Fortress")
-
-else()
-  find_package(ignition-gazebo6 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Fortress")
-endif()
-
-find_package(ignition-plugin1 REQUIRED)
-set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
+find_package(gz_sim_vendor REQUIRED)
+find_package(gz-sim REQUIRED)
+find_package(gz_plugin_vendor REQUIRED)
+find_package(gz-plugin REQUIRED)
 
 include_directories(include)
 
 add_library(${PROJECT_NAME}-system SHARED
-  src/ign_ros2_control_plugin.cpp
+  src/gz_ros2_control_plugin.cpp
   src/model_kdl.cpp
 )
-
-target_link_libraries(${PROJECT_NAME}-system
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-plugin${IGN_PLUGIN_VER}::register
+target_link_libraries(${PROJECT_NAME}-system 
+  gz-plugin::gz-plugin
+  gz-plugin::core
+  gz-sim::gz-sim
 )
 ament_target_dependencies(${PROJECT_NAME}-system
   ament_index_cpp
@@ -87,11 +68,16 @@ ament_target_dependencies(${PROJECT_NAME}-system
 
 #########
 
-add_library(ign_hardware_plugins SHARED
-  src/ign_system.cpp
+add_library(gz_hardware_plugins SHARED
+  src/gz_system.cpp
   src/model_kdl.cpp
 )
-ament_target_dependencies(ign_hardware_plugins
+target_link_libraries(gz_hardware_plugins
+  gz-plugin::gz-plugin
+  gz-plugin::core
+  gz-sim::gz-sim
+)
+ament_target_dependencies(gz_hardware_plugins
   rclcpp_lifecycle
   hardware_interface
   rclcpp
@@ -102,13 +88,11 @@ ament_target_dependencies(ign_hardware_plugins
   tf2_geometry_msgs
   tf2_eigen
 )
-target_link_libraries(ign_hardware_plugins
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-)
+
 
 ## Install
 install(TARGETS
-  ign_hardware_plugins
+  gz_hardware_plugins
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -126,14 +110,14 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME}-system ign_hardware_plugins)
+ament_export_libraries(${PROJECT_NAME}-system gz_hardware_plugins)
 
 # Install directories
 install(TARGETS ${PROJECT_NAME}-system
   DESTINATION lib
 )
 
-pluginlib_export_plugin_description_file(franka_ign_ros2_control ign_hardware_plugins.xml)
+pluginlib_export_plugin_description_file(franka_gz_ros2_control gz_hardware_plugins.xml)
 
 # Setup the project
 ament_package()
