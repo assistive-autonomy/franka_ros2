@@ -104,9 +104,8 @@ def generate_robot_nodes(context):
     ).toprettyxml(indent='  ')
 
     namespace = LaunchConfiguration('namespace').perform(context)
-    controllers_yaml = PathJoinSubstitution([
-        FindPackageShare('franka_bringup'), 'config', "controllers.yaml"
-    ]).perform(context)
+
+    controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
 
     joint_state_publisher_sources = ['franka/joint_states', 'franka_gripper/joint_states']
     joint_state_rate = int(LaunchConfiguration('joint_state_rate').perform(context))
@@ -206,6 +205,14 @@ def generate_launch_description():
         DeclareLaunchArgument('joint_state_rate',
                               default_value='30',
                               description='Rate for joint state publishing (Hz)'),
+        DeclareLaunchArgument('controllers_yaml',
+                              default_value=PathJoinSubstitution(
+                                [
+                                    FindPackageShare('franka_bringup'),
+                                    'config',
+                                    "controllers.yaml"
+                                ]),
+                              description='Override the default controllers.yaml file.'),
     ]
 
     return LaunchDescription(launch_args + [OpaqueFunction(function=generate_robot_nodes)])
