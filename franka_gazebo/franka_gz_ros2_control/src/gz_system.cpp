@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+#include <hardware_interface/hardware_info.hpp>
+
 #include <gz/sim/components/AngularVelocity.hh>
 #include <gz/sim/components/Imu.hh>
 #include <gz/sim/components/JointForceCmd.hh>
@@ -41,10 +43,8 @@
 #include <gz/sim/components/JointTransmittedWrench.hh>
 #include <gz/sim/components/JointType.hh>
 #include <gz/physics/Geometry.hh>
-
 #include <gz/transport/Node.hh>
 
-#include <hardware_interface/hardware_info.hpp>
 
 struct jointData
 {

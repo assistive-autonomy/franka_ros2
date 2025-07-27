@@ -45,7 +45,7 @@ add_library(${PROJECT_NAME}-system SHARED
   src/gz_ros2_control_plugin.cpp
   src/model_kdl.cpp
 )
-target_link_libraries(${PROJECT_NAME}-system 
+target_link_libraries(${PROJECT_NAME}-system
   gz-plugin::gz-plugin
   gz-plugin::core
   gz-sim::gz-sim

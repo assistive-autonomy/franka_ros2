@@ -29,8 +29,7 @@ class GZROS2ControlPluginPrivate;
 class GZROS2ControlPlugin : public gz::sim::System,
   public gz::sim::ISystemConfigure,
   public gz::sim::ISystemPreUpdate,
-  public gz::sim::ISystemPostUpdate
-{
+  public gz::sim::ISystemPostUpdate {
 public:
   /// \brief Constructor
   GZROS2ControlPlugin();
@@ -48,7 +47,7 @@ public:
   // Documentation inherited
   void PreUpdate(
     const gz::sim::UpdateInfo & _info,
-   gz::sim::EntityComponentManager & _ecm) override;
+    gz::sim::EntityComponentManager & _ecm) override;
 
   void PostUpdate(
     const gz::sim::UpdateInfo & _info,
