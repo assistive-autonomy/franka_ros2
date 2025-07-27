@@ -48,6 +48,13 @@ MoveToStartExampleController::state_interface_configuration() const {
 controller_interface::return_type MoveToStartExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  static auto clear_tau = [this]() {
+    bool ret = true;
+    for (auto& command_interface : command_interfaces_) {
+      ret = command_interface.set_value(0.0);
+    }
+    return ret;
+  };
   updateJointStates();
   auto trajectory_time = this->get_node()->now() - start_time_;
   auto motion_generator_output = motion_generator_->getDesiredJointPositions(trajectory_time);
@@ -59,12 +66,13 @@ controller_interface::return_type MoveToStartExampleController::update(
     Vector7d tau_d_calculated =
         k_gains_.cwiseProduct(q_desired - q_) + d_gains_.cwiseProduct(-dq_filtered_);
     for (int i = 0; i < 7; ++i) {
-      command_interfaces_[i].set_value(tau_d_calculated(i));
+      if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
+        clear_tau();
+        return controller_interface::return_type::ERROR;
+      }
     }
   } else {
-    for (auto& command_interface : command_interfaces_) {
-      command_interface.set_value(0.0);
-    }
+    clear_tau();
     this->get_node()->set_parameter({"process_finished", true});
   }
   return controller_interface::return_type::OK;
@@ -131,8 +139,11 @@ void MoveToStartExampleController::updateJointStates() {
     assert(position_interface.get_interface_name() == "position");
     assert(velocity_interface.get_interface_name() == "velocity");
 
-    q_(i) = position_interface.get_value();
-    dq_(i) = velocity_interface.get_value();
+    // q_(i) = position_interface.get_value();
+    // dq_(i) = velocity_interface.get_value();
+
+    q_(i) = position_interface.get_optional().value_or(q_(i));
+    dq_(i) = velocity_interface.get_optional().value_or(dq_(i));
   }
 }
 }  // namespace franka_example_controllers

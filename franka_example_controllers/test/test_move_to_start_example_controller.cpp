@@ -131,11 +131,11 @@ TEST_F(MoveToStartExampleControllerTest, correct_setup_on_update_expect_ok) {
 
   ASSERT_EQ(controller_->update(time, duration), controller_interface::return_type::OK);
 
-  EXPECT_NEAR(joint_1_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_2_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_3_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_4_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_5_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_6_pos_cmd_.get_value(), 0.0, k_EPS);
-  EXPECT_NEAR(joint_7_pos_cmd_.get_value(), 0.0, k_EPS);
+  EXPECT_NEAR(joint_1_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_2_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_3_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_4_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_5_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_6_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_7_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
 }

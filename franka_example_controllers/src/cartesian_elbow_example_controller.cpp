@@ -18,6 +18,7 @@
 #include <cassert>
 #include <cmath>
 #include <exception>
+#include <rclcpp/logging.hpp>
 #include <string>
 
 namespace franka_example_controllers {
@@ -50,12 +51,22 @@ controller_interface::return_type CartesianElbowExampleController::update(
     // Get the initial pose
     initial_pose_configuration_ = franka_cartesian_pose_->getCurrentPoseMatrix();
 
-    initial_robot_time_ = state_interfaces_.back().get_value();
+    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
+      initial_robot_time_ = time_op.value();
+    } else {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
+      return controller_interface::return_type::ERROR;
+    }
     elapsed_time_ = 0.0;
 
     initialization_flag_ = false;
   } else {
-    robot_time_ = state_interfaces_.back().get_value();
+    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
+      robot_time_ = time_op.value();
+    } else {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
+      return controller_interface::return_type::ERROR;
+    }
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
 

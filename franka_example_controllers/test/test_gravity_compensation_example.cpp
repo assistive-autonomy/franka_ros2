@@ -129,11 +129,11 @@ TEST_F(TestGravityCompensationExample, given_joints_and_interface_when_update_ex
             controller_interface::return_type::OK);
 
   // check joint commands are updated to zero torque value
-  ASSERT_EQ(joint_1_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_2_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_3_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_4_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_5_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_6_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_7_pos_cmd_.get_value(), 0.0);
+  ASSERT_EQ(joint_1_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_2_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_3_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_4_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_5_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_6_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_7_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
 }

@@ -22,8 +22,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     hardware_interface
     rclcpp_lifecycle
     urdf
-    controller_interface
-    )
+    controller_interface)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
