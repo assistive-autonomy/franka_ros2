@@ -69,15 +69,15 @@
 ############################################################################
 
 
-import xacro
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.actions import OpaqueFunction, Shutdown
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import UnlessCondition, IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+import xacro
 
 # Generates the "default" nodes (controller_manager, robot_state_publisher, etc.)
 # for the Franka robot. This function is called by the main launch file.
@@ -105,7 +105,7 @@ def generate_robot_nodes(context):
 
     namespace = LaunchConfiguration('namespace').perform(context)
     controllers_yaml = PathJoinSubstitution([
-        FindPackageShare('franka_bringup'), 'config', "controllers.yaml"
+        FindPackageShare('franka_bringup'), 'config', 'controllers.yaml'
     ]).perform(context)
 
     joint_state_publisher_sources = ['franka/joint_states', 'franka_gripper/joint_states']
