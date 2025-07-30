@@ -104,9 +104,6 @@ def generate_robot_nodes(context):
     ).toprettyxml(indent='  ')
 
     namespace = LaunchConfiguration('namespace').perform(context)
-    controllers_yaml = PathJoinSubstitution([
-        FindPackageShare('franka_bringup'), 'config', "controllers.yaml"
-    ]).perform(context)
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
 
