@@ -208,6 +208,12 @@ controller_interface::return_type JointImpedanceWithIKExampleController::update(
 }
 
 CallbackReturn JointImpedanceWithIKExampleController::on_init() {
+    auto_declare("arm_id", "fr3");
+    auto_declare("load_gripper", false);
+    std::vector<double> default_k_gains{600.0,600.0,600.0,600.0,250.0,150.0,50.0};
+    std::vector<double> default_d_gains{30.0,30.0,30.0,30.0,10.0,10.0,5.0};
+    auto_declare("k_gains", default_k_gains);
+    auto_declare("d_gains", default_d_gains);
   franka_cartesian_pose_ =
       std::make_unique<franka_semantic_components::FrankaCartesianPoseInterface>(
           franka_semantic_components::FrankaCartesianPoseInterface(k_elbow_activated_));
