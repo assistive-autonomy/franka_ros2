@@ -100,16 +100,33 @@ def generate_launch_description():
         'franka_fr3_moveit_config', 'config/kinematics.yaml'
     )
 
+    kinematics_config = {
+        'robot_description_kinematics': kinematics_yaml
+    }
+
+    joint_limits_yaml = load_yaml(
+        'franka_fr3_moveit_config', 'config/fr3_joint_limits.yaml'
+    )
+
+    joint_limits_config = {
+        'robot_description_planning': joint_limits_yaml
+    }
+
     # Planning Functionality
     ompl_planning_pipeline_config = {
         'move_group': {
-            'planning_plugin': 'ompl_interface/OMPLPlanner',
-            'request_adapters': 'default_planner_request_adapters/AddTimeOptimalParameterization '
-                                'default_planner_request_adapters/ResolveConstraintFrames '
-                                'default_planner_request_adapters/FixWorkspaceBounds '
-                                'default_planner_request_adapters/FixStartStateBounds '
-                                'default_planner_request_adapters/FixStartStateCollision '
-                                'default_planner_request_adapters/FixStartStatePathConstraints',
+            'planning_plugins': ['ompl_interface/OMPLPlanner'],
+            'request_adapters': [
+                'default_planning_request_adapters/ResolveConstraintFrames',
+                'default_planning_request_adapters/ValidateWorkspaceBounds',
+                'default_planning_request_adapters/CheckStartStateBounds',
+                'default_planning_request_adapters/CheckStartStateCollision',
+                                ],
+            'response_adapters': [
+                'default_planning_response_adapters/AddTimeOptimalParameterization',
+                'default_planning_response_adapters/ValidateSolution',
+                'default_planning_response_adapters/DisplayMotionPath'
+                                  ],
             'start_state_max_bounds_error': 0.1,
         }
     }
@@ -151,7 +168,8 @@ def generate_launch_description():
         parameters=[
             robot_description,
             robot_description_semantic,
-            kinematics_yaml,
+            kinematics_config,
+            joint_limits_config,
             ompl_planning_pipeline_config,
             trajectory_execution,
             moveit_controllers,
@@ -174,7 +192,7 @@ def generate_launch_description():
             robot_description,
             robot_description_semantic,
             ompl_planning_pipeline_config,
-            kinematics_yaml,
+            kinematics_config,
         ],
     )
 
@@ -198,7 +216,7 @@ def generate_launch_description():
         executable='ros2_control_node',
         namespace=namespace,
         parameters=[robot_description, ros2_controllers_path],
-        remappings=[('joint_states', 'franka/joint_states')],
+        # arguments=['--controller-ros-args', '--remap', ('joint_states', 'franka/joint_states')],
         output={
             'stdout': 'screen',
             'stderr': 'screen',
