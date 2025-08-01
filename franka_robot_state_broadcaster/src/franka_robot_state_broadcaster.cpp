@@ -86,8 +86,7 @@ controller_interface::CallbackReturn FrankaRobotStateBroadcaster::on_configure(
   std::string robot_description;
   auto this_node = get_node();
   robot_description = get_robot_description();
-  if(robot_description.empty())
-  {
+  if (robot_description.empty()) {
     RCLCPP_ERROR(this_node->get_logger(), "Failed to get robot_description parameter");
     return CallbackReturn::ERROR;
   }
