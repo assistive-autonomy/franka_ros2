@@ -68,16 +68,16 @@ ament_target_dependencies(${PROJECT_NAME}-system
 
 #########
 
-add_library(gz_hardware_plugins SHARED
+add_library(franka_gz_hardware_plugins SHARED
   src/gz_system.cpp
   src/model_kdl.cpp
 )
-target_link_libraries(gz_hardware_plugins
+target_link_libraries(franka_gz_hardware_plugins
   gz-plugin::gz-plugin
   gz-plugin::core
   gz-sim::gz-sim
 )
-ament_target_dependencies(gz_hardware_plugins
+ament_target_dependencies(franka_gz_hardware_plugins
   rclcpp_lifecycle
   hardware_interface
   rclcpp
@@ -87,12 +87,13 @@ ament_target_dependencies(gz_hardware_plugins
   kdl_parser
   tf2_geometry_msgs
   tf2_eigen
+  pluginlib
 )
 
 
 ## Install
 install(TARGETS
-  gz_hardware_plugins
+  franka_gz_hardware_plugins
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -110,14 +111,15 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME}-system gz_hardware_plugins)
+ament_export_libraries(${PROJECT_NAME}-system franka_gz_hardware_plugins)
 
 # Install directories
 install(TARGETS ${PROJECT_NAME}-system
   DESTINATION lib
 )
 
-pluginlib_export_plugin_description_file(franka_gz_ros2_control gz_hardware_plugins.xml)
+pluginlib_export_plugin_description_file(hardware_interface franka_gz_hardware_plugins.xml)
+pluginlib_export_plugin_description_file(${PROJECT_NAME} franka_gz_hardware_plugins.xml)
 
 # Setup the project
 ament_package()

@@ -87,6 +87,7 @@ private:
   /// \brief Private data class
   std::unique_ptr<GZSystemPrivate> dataPtr;
   ModelKDL kdl_model_;
+  std::atomic_bool is_sim_init{false};
 };
 
 }  // namespace gz_ros2_control

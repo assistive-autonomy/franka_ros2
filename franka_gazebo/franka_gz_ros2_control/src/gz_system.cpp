@@ -158,7 +158,7 @@ public:
   /// \brief controller update rate
   int * update_rate;
 
-  /// \brief Ignition communication node.
+  /// \brief Gazebo communication node.
   gz::transport::Node node;
 
   /// \brief mapping of mimicked joints to index of joint they mimic
@@ -426,7 +426,8 @@ bool GZSystem::initSim(
   }
 
   registerSensors(hardware_info);
-
+  is_sim_init.store(true);
+  RCLCPP_INFO(this->nh_->get_logger(), "initSim success: %d", static_cast<int>(is_sim_init.load()));
   return true;
 }
 
@@ -490,7 +491,11 @@ void GZSystem::registerSensors(const hardware_interface::HardwareInfo & hardware
 
 CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo & system_info)
 {
-  RCLCPP_WARN(this->nh_->get_logger(), "On init...");
+  if(!is_sim_init) {
+    RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "%s: initSim() has not been called, "
+      "dont care if another initSim() of GZSystem was called.", get_name().c_str());
+  }
+
   if (hardware_interface::SystemInterface::on_init(system_info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;
   }
@@ -499,23 +504,37 @@ CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo & system
 
 CallbackReturn GZSystem::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(this->nh_->get_logger(), "System Successfully configured!");
-
+  if(!is_sim_init) {
+    RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "Sim Param not init, "
+    "need at least one GZSystem::initSim() be called...");
+  }
   return CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> GZSystem::export_state_interfaces()
 {
-  return std::move(this->dataPtr->state_interfaces_);
+  if(!is_sim_init) {
+    return {};
+  } else {
+    return std::move(this->dataPtr->state_interfaces_);
+  }
 }
 
 std::vector<hardware_interface::CommandInterface> GZSystem::export_command_interfaces()
 {
-  return std::move(this->dataPtr->command_interfaces_);
+  if(!is_sim_init) {
+    return {};
+  } else {
+    return std::move(this->dataPtr->command_interfaces_);
+  }
 }
 
 CallbackReturn GZSystem::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
+  if(!is_sim_init) {
+    RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "%s Sim Param not init, do nothing...",
+      get_name().c_str());
+  }
   return CallbackReturn::SUCCESS;
   return hardware_interface::SystemInterface::on_activate(previous_state);
 }
@@ -530,6 +549,9 @@ hardware_interface::return_type GZSystem::read(
   const rclcpp::Time & /*time*/,
   const rclcpp::Duration & /*period*/)
 {
+  if(!is_sim_init) {
+    return hardware_interface::return_type::OK;
+  }
   for (unsigned int i = 0; i < this->dataPtr->joints_.size(); ++i) {
     if (this->dataPtr->joints_[i].sim_joint == gz::sim::kNullEntity) {
       continue;
@@ -593,6 +615,9 @@ hardware_interface::return_type GZSystem::perform_command_mode_switch(
   const std::vector<std::string> & start_interfaces,
   const std::vector<std::string> & stop_interfaces)
 {
+  if(!is_sim_init) {
+    return hardware_interface::return_type::OK;
+  }
   for (unsigned int j = 0; j < this->dataPtr->joints_.size(); j++) {
     for (const std::string & interface_name : stop_interfaces) {
       // Clear joint control method bits corresponding to stop interfaces
@@ -639,6 +664,9 @@ hardware_interface::return_type GZSystem::write(
   const rclcpp::Time & /*time*/,
   const rclcpp::Duration & /*period*/)
 {
+  if(!is_sim_init) {
+    return hardware_interface::return_type::OK;
+  }
   // Assuming there are 7 joints and gravity_earth is defined
   std::array<double, 7> q;
   std::array<double, 3> gravity_earth{0.0, 0.0, -9.8};  // Earth gravity in m/s^2
@@ -809,3 +837,4 @@ hardware_interface::return_type GZSystem::write(
 
 #include "pluginlib/class_list_macros.hpp"  // NOLINT
 PLUGINLIB_EXPORT_CLASS(gz_ros2_control::GZSystem, gz_ros2_control::GZSystemInterface)
+PLUGINLIB_EXPORT_CLASS(gz_ros2_control::GZSystem, hardware_interface::SystemInterface)

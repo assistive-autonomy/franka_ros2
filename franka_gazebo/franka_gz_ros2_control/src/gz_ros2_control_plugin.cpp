@@ -60,7 +60,7 @@ public:
   /// joints are returned
   /// \param[in] _entity Entity of the model that the plugin is being
   /// configured for
-  /// \param[in] _ecm Ignition Entity Component Manager
+  /// \param[in] _ecm Gazebo Entity Component Manager
   /// \return List of entities containing all enabled joints
   std::map<std::string, gz::sim::Entity> GetEnabledJoints(
     const gz::sim::Entity & _entity,
@@ -96,7 +96,7 @@ public:
   std::string robot_description_node_ = "robot_state_publisher";
 
   /// \brief Last time the update method was called
-  rclcpp::Time last_update_sim_time_ros_ = rclcpp::Time((int64_t)0, RCL_ROS_TIME);
+  rclcpp::Time last_update_sim_time_ros_ = rclcpp::Time((int64_t)0, RCL_STEADY_TIME);
 
   /// \brief ECM pointer
   gz::sim::EntityComponentManager * ecm{nullptr};
@@ -280,9 +280,9 @@ void GZROS2ControlPlugin::Configure(
   const auto model = gz::sim::Model(_entity);
   if (!model.Valid(_ecm)) {
     RCLCPP_ERROR(logger,
-                 "[Ignition ROS 2 Control] Failed to initialize because [%s] "
+                 "[Gazebo ROS 2 Control] Failed to initialize because [%s] "
                  "(Entity=%lu)] is not a model."
-                 "Please make sure that Ignition ROS 2 Control is attached to "
+                 "Please make sure that Gazebo ROS 2 Control is attached to "
                  "a valid model.",
                  model.Name(_ecm).c_str(), _entity);
     return;
@@ -293,7 +293,7 @@ void GZROS2ControlPlugin::Configure(
 
   if (paramFileName.empty()) {
     RCLCPP_ERROR(logger,
-                 "Ignition ros2 control found an empty parameters "
+                 "Gazebo ros2 control found an empty parameters "
                  "file. Failed to initialize.");
     return;
   }
@@ -379,7 +379,7 @@ void GZROS2ControlPlugin::Configure(
   this->dataPtr->thread_executor_spin_ = std::thread(spin);
 
   RCLCPP_DEBUG_STREAM(this->dataPtr->node_->get_logger(),
-                      "[Ignition ROS 2 Control] Setting up controller for ["
+                      "[Gazebo ROS 2 Control] Setting up controller for ["
                           << model.Name(_ecm) << "] (Entity=" << _entity << ")].");
 
   // Get list of enabled joints
@@ -387,7 +387,7 @@ void GZROS2ControlPlugin::Configure(
 
   if (enabledJoints.size() == 0) {
     RCLCPP_DEBUG_STREAM(this->dataPtr->node_->get_logger(),
-                        "[Ignition ROS 2 Control] There are no available Joints.");
+                        "[Gazebo ROS 2 Control] There are no available Joints.");
     return;
   }
 
@@ -415,21 +415,21 @@ void GZROS2ControlPlugin::Configure(
     return;
   }
 
-  rclcpp::Clock::SharedPtr clock;
-
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
   std::unique_ptr<hardware_interface::ResourceManager> resource_manager_ =
-    std::make_unique<hardware_interface::ResourceManager>(clock, logger);
-
+    std::make_unique<hardware_interface::ResourceManager>(clock,
+      this->dataPtr->node_->get_logger());
   try {
     resource_manager_->load_and_initialize_components(urdf_string);
   } catch (...) {
     RCLCPP_ERROR(this->dataPtr->node_->get_logger(),
-                 "Error initializing URDF to resource manager!");
+                "Error initializing URDF to resource manager!");
   }
+
   try {
-    this->dataPtr->robot_hw_sim_loader_.reset(
-        new pluginlib::ClassLoader<gz_ros2_control::GZSystemInterface>(
-            "franka_gz_ros2_control", "gz_ros2_control::GZSystemInterface"));
+    this->dataPtr->robot_hw_sim_loader_ =
+      std::make_shared<pluginlib::ClassLoader<gz_ros2_control::GZSystemInterface>>(
+        "franka_gz_ros2_control", "gz_ros2_control::GZSystemInterface");
   } catch (pluginlib::LibraryLoadException & ex) {
     RCLCPP_ERROR(this->dataPtr->node_->get_logger(),
                  "Failed to create robot simulation interface loader: %s ", ex.what());
@@ -437,20 +437,22 @@ void GZROS2ControlPlugin::Configure(
   }
 
   for (unsigned int i = 0; i < control_hardware_info.size(); ++i) {
-    std::string robot_hw_sim_type_str_ = control_hardware_info[i].type;
-    std::unique_ptr<gz_ros2_control::GZSystemInterface> ignitionSystem;
-    RCLCPP_DEBUG(this->dataPtr->node_->get_logger(), "Load hardware interface %s ...",
-                 robot_hw_sim_type_str_.c_str());
+    std::string robot_hw_sim_plugin_name_str_ = control_hardware_info[i].hardware_plugin_name;
+    std::unique_ptr<gz_ros2_control::GZSystemInterface> gazeboSystem;
+    RCLCPP_DEBUG(this->dataPtr->node_->get_logger(), "Load hardware interface: %s...",
+                control_hardware_info[i].hardware_plugin_name.c_str()
+    );
 
     try {
-      ignitionSystem = std::unique_ptr<gz_ros2_control::GZSystemInterface>(
-          this->dataPtr->robot_hw_sim_loader_->createUnmanagedInstance(robot_hw_sim_type_str_));
+      gazeboSystem = std::unique_ptr<gz_ros2_control::GZSystemInterface>(
+          this->dataPtr->robot_hw_sim_loader_->createUnmanagedInstance(
+            robot_hw_sim_plugin_name_str_));
     } catch (pluginlib::PluginlibException & ex) {
       RCLCPP_ERROR(this->dataPtr->node_->get_logger(),
                    "The plugin failed to load for some reason. Error: %s\n", ex.what());
       continue;
     }
-    if (!ignitionSystem->initSim(kdl_model_, this->dataPtr->node_, enabledJoints,
+    if (!gazeboSystem->initSim(kdl_model_, this->dataPtr->node_, enabledJoints,
                                  control_hardware_info[i], _ecm, this->dataPtr->update_rate))
     {
       RCLCPP_FATAL(this->dataPtr->node_->get_logger(),
@@ -458,9 +460,9 @@ void GZROS2ControlPlugin::Configure(
       return;
     }
     RCLCPP_DEBUG(this->dataPtr->node_->get_logger(), "Initialized robot simulation interface %s!",
-                 robot_hw_sim_type_str_.c_str());
+                 robot_hw_sim_plugin_name_str_.c_str());
 
-    resource_manager_->import_component(std::move(ignitionSystem), control_hardware_info[i]);
+    resource_manager_->import_component(std::move(gazeboSystem), control_hardware_info[i]);
 
     rclcpp_lifecycle::State state(lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
       hardware_interface::lifecycle_state_names::ACTIVE);
@@ -469,9 +471,13 @@ void GZROS2ControlPlugin::Configure(
 
   // Create the controller manager
   RCLCPP_INFO(this->dataPtr->node_->get_logger(), "Loading controller_manager");
-  this->dataPtr->controller_manager_.reset(new controller_manager::ControllerManager(
+  rclcpp::NodeOptions cm_options = controller_manager::get_cm_node_options();
+  // cm_options.append_parameter_override("use_sim_time", true);
+  cm_options.arguments({"--ros-args", "-r", "robot_description:=/robot_description"});
+
+  this->dataPtr->controller_manager_ = std::make_shared<controller_manager::ControllerManager>(
       std::move(resource_manager_), this->dataPtr->executor_, controllerManagerNodeName,
-      this->dataPtr->node_->get_namespace()));
+      this->dataPtr->node_->get_namespace(), cm_options);
   this->dataPtr->executor_->add_node(this->dataPtr->controller_manager_);
 
   if (!this->dataPtr->controller_manager_->has_parameter("update_rate")) {
@@ -523,7 +529,7 @@ void GZROS2ControlPlugin::PreUpdate(
   }
 
   rclcpp::Time sim_time_ros(
-    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
+    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_STEADY_TIME);
   rclcpp::Duration sim_period = sim_time_ros - this->dataPtr->last_update_sim_time_ros_;
   // Always set commands on joints, otherwise at low control frequencies the
   // joints tremble as they are updated at a fraction of gazebo sim time
@@ -540,7 +546,7 @@ void GZROS2ControlPlugin::PostUpdate(
   }
   // Get the simulation time and period
   rclcpp::Time sim_time_ros(
-    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
+    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_STEADY_TIME);
   rclcpp::Duration sim_period = sim_time_ros - this->dataPtr->last_update_sim_time_ros_;
 
   if (sim_period >= this->dataPtr->control_period_) {
