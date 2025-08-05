@@ -76,7 +76,7 @@ public:
     std::map<std::string, gz::sim::Entity> & joints,
     const hardware_interface::HardwareInfo & hardware_info,
     gz::sim::EntityComponentManager & _ecm,
-    int & update_rate) override;
+    const unsigned int & update_rate) override;
 
 private:
   // Register a sensor (for now just IMUs)

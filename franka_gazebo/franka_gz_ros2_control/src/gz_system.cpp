@@ -156,7 +156,7 @@ public:
   gz::sim::EntityComponentManager * ecm;
 
   /// \brief controller update rate
-  int * update_rate;
+  unsigned int update_rate;
 
   /// \brief Gazebo communication node.
   gz::transport::Node node;
@@ -176,7 +176,7 @@ bool GZSystem::initSim(
   std::map<std::string, gz::sim::Entity> & enableJoints,
   const hardware_interface::HardwareInfo & hardware_info,
   gz::sim::EntityComponentManager & _ecm,
-  int & update_rate)
+  const unsigned int & update_rate)
 {
   kdl_model_ = kdl_model;
   this->dataPtr = std::make_unique<GZSystemPrivate>();
@@ -185,7 +185,7 @@ bool GZSystem::initSim(
   this->dataPtr->ecm = &_ecm;
   this->dataPtr->n_dof_ = hardware_info.joints.size();
 
-  this->dataPtr->update_rate = &update_rate;
+  this->dataPtr->update_rate = update_rate;
 
   RCLCPP_DEBUG(this->nh_->get_logger(), "n_dof_ %lu", this->dataPtr->n_dof_);
 
@@ -711,7 +711,7 @@ hardware_interface::return_type GZSystem::write(
       double error;
       error = (this->dataPtr->joints_[i].joint_position -
         this->dataPtr->joints_[i].joint_position_cmd) *
-        *this->dataPtr->update_rate;
+        this->dataPtr->update_rate;
 
       // Calculate target velcity
       double target_vel = -this->dataPtr->position_proportional_gain_ * error;
@@ -777,7 +777,7 @@ hardware_interface::return_type GZSystem::write(
         double position_error =
           position_mimic_joint - position_mimicked_joint * mimic_joint.multiplier;
 
-        double velocity_sp = (-1.0) * position_error * (*this->dataPtr->update_rate);
+        double velocity_sp = (-1.0) * position_error * (this->dataPtr->update_rate);
 
         auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
           this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
@@ -837,4 +837,3 @@ hardware_interface::return_type GZSystem::write(
 
 #include "pluginlib/class_list_macros.hpp"  // NOLINT
 PLUGINLIB_EXPORT_CLASS(gz_ros2_control::GZSystem, gz_ros2_control::GZSystemInterface)
-PLUGINLIB_EXPORT_CLASS(gz_ros2_control::GZSystem, hardware_interface::SystemInterface)

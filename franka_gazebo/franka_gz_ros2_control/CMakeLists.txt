@@ -118,7 +118,6 @@ install(TARGETS ${PROJECT_NAME}-system
   DESTINATION lib
 )
 
-pluginlib_export_plugin_description_file(hardware_interface franka_gz_hardware_plugins.xml)
 pluginlib_export_plugin_description_file(${PROJECT_NAME} franka_gz_hardware_plugins.xml)
 
 # Setup the project
