@@ -24,8 +24,7 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-namespace gz_ros2_control
-{
+namespace gz_ros2_control {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
 // Forward declaration
@@ -34,13 +33,12 @@ class GZSystemPrivate;
 // These class must inherit `gz_ros2_control::GZSystemInterface` which
 // implements a simulated `ros2_control` `hardware_interface::SystemInterface`.
 
-class GZSystem : public GZSystemInterface
-{
-public:
+class GZSystem : public GZSystemInterface {
+ public:
   // Documentation Inherited
-  CallbackReturn on_init(const hardware_interface::HardwareInfo & system_info) override;
+  CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) override;
 
-  CallbackReturn on_configure(const rclcpp_lifecycle::State & previous_state) override;
+  CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
 
   // Documentation Inherited
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
@@ -49,40 +47,37 @@ public:
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
   // Documentation Inherited
-  CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
+  CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   // Documentation Inherited
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
+  CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
   // Documentation Inherited
   hardware_interface::return_type perform_command_mode_switch(
-    const std::vector<std::string> & start_interfaces,
-    const std::vector<std::string> & stop_interfaces) override;
+      const std::vector<std::string>& start_interfaces,
+      const std::vector<std::string>& stop_interfaces) override;
 
   // Documentation Inherited
-  hardware_interface::return_type read(
-    const rclcpp::Time & time,
-    const rclcpp::Duration & period) override;
+  hardware_interface::return_type read(const rclcpp::Time& time,
+                                       const rclcpp::Duration& period) override;
 
   // Documentation Inherited
-  hardware_interface::return_type write(
-    const rclcpp::Time & time,
-    const rclcpp::Duration & period) override;
+  hardware_interface::return_type write(const rclcpp::Time& time,
+                                        const rclcpp::Duration& period) override;
 
   // Documentation Inherited
-  bool initSim(
-    const ModelKDL & kdl_model,
-    rclcpp::Node::SharedPtr & model_nh,
-    std::map<std::string, gz::sim::Entity> & joints,
-    const hardware_interface::HardwareInfo & hardware_info,
-    gz::sim::EntityComponentManager & _ecm,
-    const unsigned int & update_rate) override;
+  bool initSim(const ModelKDL& kdl_model,
+               rclcpp::Node::SharedPtr& model_nh,
+               std::map<std::string, gz::sim::Entity>& joints,
+               const hardware_interface::HardwareInfo& hardware_info,
+               gz::sim::EntityComponentManager& _ecm,
+               const unsigned int& update_rate) override;
 
-private:
+ private:
   // Register a sensor (for now just IMUs)
   // \param[in] hardware_info hardware information where the data of
   // the sensors is extract.
-  void registerSensors(const hardware_interface::HardwareInfo & hardware_info);
+  void registerSensors(const hardware_interface::HardwareInfo& hardware_info);
 
   /// \brief Private data class
   std::unique_ptr<GZSystemPrivate> dataPtr;

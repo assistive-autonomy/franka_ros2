@@ -139,9 +139,6 @@ void MoveToStartExampleController::updateJointStates() {
     assert(position_interface.get_interface_name() == "position");
     assert(velocity_interface.get_interface_name() == "velocity");
 
-    // q_(i) = position_interface.get_value();
-    // dq_(i) = velocity_interface.get_value();
-
     q_(i) = position_interface.get_optional().value_or(q_(i));
     dq_(i) = velocity_interface.get_optional().value_or(dq_(i));
   }

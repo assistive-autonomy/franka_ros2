@@ -189,7 +189,6 @@ TEST_F(
     } else if (i % 3 == 2) {
       ASSERT_EQ(states[i].get_name(), arm_id + "_" + joint_name + "/" + k_effort_controller);
     }
-    // ASSERT_EQ(states[i].get_value(), 0.0);
     ASSERT_EQ(states[i].get_optional().value_or(-1.0), 0.0);
   }
 
@@ -219,11 +218,10 @@ TEST_F(
   ASSERT_EQ(states[22].get_name(),
             "fr3/robot_model");  // joint states (3*7) + robot state (1)
 
-  EXPECT_NEAR(states[22].get_optional().value_or(0.0),  // joint states (3*7) + robot state (1)
-              *reinterpret_cast<double*>(
-                  &model_address),  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
-              k_EPS);               // testing that the casted mock_model ptr
-                                    // is correctly pushed to state interface
+  EXPECT_NEAR(states[22].get_optional().value_or(0.0),     // joint states (3*7) + robot state (1)
+              *reinterpret_cast<double*>(&model_address),  // NOLINT
+              k_EPS);                                      // testing that the casted mock_model ptr
+                                                           // is correctly pushed to state interface
 }
 
 TEST_F(
@@ -246,7 +244,7 @@ TEST_F(
             "fr3/robot_state");  // joint states (3*7) , then comes robot state
 
   EXPECT_NEAR(states[21].get_optional().value_or(0.0),
-              *reinterpret_cast<double*>(&robot_state_address),// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+              *reinterpret_cast<double*>(&robot_state_address),  // NOLINT
               k_EPS);  // testing that the casted robot state ptr
                        // is correctly pushed to state interface
 }

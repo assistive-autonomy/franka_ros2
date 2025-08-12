@@ -39,15 +39,13 @@
 #include <gz/sim/components/Pose.hh>
 #include <gz/sim/components/Sensor.hh>
 
+#include <gz/physics/Geometry.hh>
 #include <gz/sim/components/JointAxis.hh>
 #include <gz/sim/components/JointTransmittedWrench.hh>
 #include <gz/sim/components/JointType.hh>
-#include <gz/physics/Geometry.hh>
 #include <gz/transport/Node.hh>
 
-
-struct jointData
-{
+struct jointData {
   /// \brief Joint's names.
   std::string name;
 
@@ -85,17 +83,16 @@ struct jointData
   gz_ros2_control::GZSystemInterface::ControlMethod joint_control_method;
 };
 
-struct MimicJoint
-{
+struct MimicJoint {
   std::size_t joint_index;
   std::size_t mimicked_joint_index;
   double multiplier = 1.0;
   std::vector<std::string> interfaces_to_mimic;
 };
 
-class ImuData
-{
-public:
+class ImuData {
+ public:
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   /// \brief imu's name.
   std::string name{};
 
@@ -108,13 +105,13 @@ public:
   /// \brief An array per IMU with 4 orientation, 3 angular velocity and 3
   /// linear acceleration
   std::array<double, 10> imu_sensor_data_;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 
   /// \brief callback to get the IMU topic values
-  void OnIMU(const gz::msgs::IMU & _msg);
+  void OnIMU(const gz::msgs::IMU& _msg);
 };
 
-void ImuData::OnIMU(const gz::msgs::IMU & _msg)
-{
+void ImuData::OnIMU(const gz::msgs::IMU& _msg) {
   this->imu_sensor_data_[0] = _msg.orientation().x();
   this->imu_sensor_data_[1] = _msg.orientation().y();
   this->imu_sensor_data_[2] = _msg.orientation().z();
@@ -127,12 +124,13 @@ void ImuData::OnIMU(const gz::msgs::IMU & _msg)
   this->imu_sensor_data_[9] = _msg.linear_acceleration().z();
 }
 
-class gz_ros2_control::GZSystemPrivate
-{
-public:
+class gz_ros2_control::GZSystemPrivate {
+ public:
   GZSystemPrivate() = default;
 
   ~GZSystemPrivate() = default;
+
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   /// \brief Degrees od freedom.
   size_t n_dof_;
 
@@ -153,7 +151,7 @@ public:
 
   /// \brief Entity component manager, ECM shouldn't be accessed outside those
   /// methods, otherwise the app will crash
-  gz::sim::EntityComponentManager * ecm;
+  gz::sim::EntityComponentManager* ecm;
 
   /// \brief controller update rate
   unsigned int update_rate;
@@ -166,18 +164,16 @@ public:
 
   /// \brief Gain which converts position error to a velocity command
   double position_proportional_gain_;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
-namespace gz_ros2_control
-{
-bool GZSystem::initSim(
-  const ModelKDL & kdl_model,
-  rclcpp::Node::SharedPtr & model_nh,
-  std::map<std::string, gz::sim::Entity> & enableJoints,
-  const hardware_interface::HardwareInfo & hardware_info,
-  gz::sim::EntityComponentManager & _ecm,
-  const unsigned int & update_rate)
-{
+namespace gz_ros2_control {
+bool GZSystem::initSim(const ModelKDL& kdl_model,
+                       rclcpp::Node::SharedPtr& model_nh,
+                       std::map<std::string, gz::sim::Entity>& enableJoints,
+                       const hardware_interface::HardwareInfo& hardware_info,
+                       gz::sim::EntityComponentManager& _ecm,
+                       const unsigned int& update_rate) {
   kdl_model_ = kdl_model;
   this->dataPtr = std::make_unique<GZSystemPrivate>();
   this->dataPtr->last_update_sim_time_ros_ = rclcpp::Time();
@@ -195,16 +191,14 @@ bool GZSystem::initSim(
 
   try {
     this->dataPtr->position_proportional_gain_ =
-      this->nh_->declare_parameter<double>("position_proportional_gain", default_gain);
-  } catch (rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
-    this->nh_->get_parameter(
-      "position_proportional_gain",
-      this->dataPtr->position_proportional_gain_);
+        this->nh_->declare_parameter<double>("position_proportional_gain", default_gain);
+  } catch (rclcpp::exceptions::ParameterAlreadyDeclaredException& ex) {
+    this->nh_->get_parameter("position_proportional_gain",
+                             this->dataPtr->position_proportional_gain_);
   }
 
-  RCLCPP_INFO_STREAM(
-    this->nh_->get_logger(), "The position_proportional_gain has been set to: "
-      << this->dataPtr->position_proportional_gain_);
+  RCLCPP_INFO_STREAM(this->nh_->get_logger(), "The position_proportional_gain has been set to: "
+                                                  << this->dataPtr->position_proportional_gain_);
 
   if (this->dataPtr->n_dof_ == 0) {
     RCLCPP_ERROR_STREAM(this->nh_->get_logger(), "There is no joint available");
@@ -212,15 +206,14 @@ bool GZSystem::initSim(
   }
 
   for (unsigned int j = 0; j < this->dataPtr->n_dof_; j++) {
-    auto & joint_info = hardware_info.joints[j];
+    auto& joint_info = hardware_info.joints[j];
     std::string joint_name = this->dataPtr->joints_[j].name = joint_info.name;
 
     auto it = enableJoints.find(joint_name);
     if (it == enableJoints.end()) {
-      RCLCPP_WARN_STREAM(
-        this->nh_->get_logger(), "Skipping joint in the URDF named '"
-          << joint_name
-          << "' which is not in the gazebo model.");
+      RCLCPP_WARN_STREAM(this->nh_->get_logger(), "Skipping joint in the URDF named '"
+                                                      << joint_name
+                                                      << "' which is not in the gazebo model.");
       continue;
     }
 
@@ -228,31 +221,23 @@ bool GZSystem::initSim(
     this->dataPtr->joints_[j].sim_joint = simjoint;
 
     this->dataPtr->joints_[j].joint_type =
-      _ecm.Component<gz::sim::components::JointType>(simjoint)->Data();
+        _ecm.Component<gz::sim::components::JointType>(simjoint)->Data();
     this->dataPtr->joints_[j].joint_axis =
-      _ecm.Component<gz::sim::components::JointAxis>(simjoint)->Data();
+        _ecm.Component<gz::sim::components::JointAxis>(simjoint)->Data();
 
     // Create joint position component if one doesn't exist
-    if (!_ecm.EntityHasComponentType(
-        simjoint,
-        gz::sim::components::JointPosition().TypeId()))
-    {
+    if (!_ecm.EntityHasComponentType(simjoint, gz::sim::components::JointPosition().TypeId())) {
       _ecm.CreateComponent(simjoint, gz::sim::components::JointPosition());
     }
 
     // Create joint velocity component if one doesn't exist
-    if (!_ecm.EntityHasComponentType(
-        simjoint,
-        gz::sim::components::JointVelocity().TypeId()))
-    {
+    if (!_ecm.EntityHasComponentType(simjoint, gz::sim::components::JointVelocity().TypeId())) {
       _ecm.CreateComponent(simjoint, gz::sim::components::JointVelocity());
     }
 
     // Create joint transmitted wrench component if one doesn't exist
-    if (!_ecm.EntityHasComponentType(
-        simjoint,
-        gz::sim::components::JointTransmittedWrench().TypeId()))
-    {
+    if (!_ecm.EntityHasComponentType(simjoint,
+                                     gz::sim::components::JointTransmittedWrench().TypeId())) {
       _ecm.CreateComponent(simjoint, gz::sim::components::JointTransmittedWrench());
     }
     // Accept this joint and continue configuration
@@ -264,11 +249,10 @@ bool GZSystem::initSim(
     if (joint_info.parameters.find("mimic") != joint_info.parameters.end()) {
       const auto mimicked_joint = joint_info.parameters.at("mimic");
       const auto mimicked_joint_it =
-        std::find_if(
-        hardware_info.joints.begin(), hardware_info.joints.end(),
-        [&mimicked_joint](const hardware_interface::ComponentInfo & info) {
-          return info.name == mimicked_joint;
-        });
+          std::find_if(hardware_info.joints.begin(), hardware_info.joints.end(),
+                       [&mimicked_joint](const hardware_interface::ComponentInfo& info) {
+                         return info.name == mimicked_joint;
+                       });
       if (mimicked_joint_it == hardware_info.joints.end()) {
         throw std::runtime_error(std::string("Mimicked joint '") + mimicked_joint + "' not found");
       }
@@ -276,7 +260,7 @@ bool GZSystem::initSim(
       MimicJoint mimic_joint;
       mimic_joint.joint_index = j;
       mimic_joint.mimicked_joint_index =
-        std::distance(hardware_info.joints.begin(), mimicked_joint_it);
+          std::distance(hardware_info.joints.begin(), mimicked_joint_it);
       auto param_it = joint_info.parameters.find("multiplier");
       if (param_it != joint_info.parameters.end()) {
         mimic_joint.multiplier = std::stod(joint_info.parameters.at("multiplier"));
@@ -285,34 +269,32 @@ bool GZSystem::initSim(
       }
 
       // check joint info of mimicked joint
-      auto & joint_info_mimicked = hardware_info.joints[mimic_joint.mimicked_joint_index];
+      auto& joint_info_mimicked = hardware_info.joints[mimic_joint.mimicked_joint_index];
       const auto state_mimicked_interface = std::find_if(
-        joint_info_mimicked.state_interfaces.begin(), joint_info_mimicked.state_interfaces.end(),
-        [&mimic_joint](const hardware_interface::InterfaceInfo & interface_info) {
-          bool pos = interface_info.name == "position";
-          if (pos) {
-            mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_POSITION);
-          }
-          bool vel = interface_info.name == "velocity";
-          if (vel) {
-            mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_VELOCITY);
-          }
-          bool eff = interface_info.name == "effort";
-          if (vel) {
-            mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_EFFORT);
-          }
-          return pos || vel || eff;
-        });
+          joint_info_mimicked.state_interfaces.begin(), joint_info_mimicked.state_interfaces.end(),
+          [&mimic_joint](const hardware_interface::InterfaceInfo& interface_info) {
+            bool pos = interface_info.name == "position";
+            if (pos) {
+              mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_POSITION);
+            }
+            bool vel = interface_info.name == "velocity";
+            if (vel) {
+              mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_VELOCITY);
+            }
+            bool eff = interface_info.name == "effort";
+            if (vel) {
+              mimic_joint.interfaces_to_mimic.push_back(hardware_interface::HW_IF_EFFORT);
+            }
+            return pos || vel || eff;
+          });
       if (state_mimicked_interface == joint_info_mimicked.state_interfaces.end()) {
-        throw std::runtime_error(
-                std::string("For mimic joint '") + joint_info.name +
-                "' no state interface was found in mimicked joint '" +
-                mimicked_joint + " ' to mimic");
+        throw std::runtime_error(std::string("For mimic joint '") + joint_info.name +
+                                 "' no state interface was found in mimicked joint '" +
+                                 mimicked_joint + " ' to mimic");
       }
-      RCLCPP_INFO_STREAM(
-        this->nh_->get_logger(),
-        "Joint '" << joint_name << "'is mimicking joint '" << mimicked_joint
-                  << "' with multiplier: " << mimic_joint.multiplier);
+      RCLCPP_INFO_STREAM(this->nh_->get_logger(),
+                         "Joint '" << joint_name << "'is mimicking joint '" << mimicked_joint
+                                   << "' with multiplier: " << mimic_joint.multiplier);
       this->dataPtr->mimic_joints_.push_back(mimic_joint);
       suffix = "_mimic";
     }
@@ -320,56 +302,52 @@ bool GZSystem::initSim(
     RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\tState:");
 
     auto get_initial_value = [this,
-        joint_name](const hardware_interface::InterfaceInfo & interface_info) {
-        double initial_value{0.0};
-        if (!interface_info.initial_value.empty()) {
-          try {
-            initial_value = std::stod(interface_info.initial_value);
-            RCLCPP_INFO(this->nh_->get_logger(), "\t\t\t found initial value: %f", initial_value);
-          } catch (std::invalid_argument &) {
-            RCLCPP_ERROR_STREAM(
-              this->nh_->get_logger(),
-              "Failed converting initial_value string to "
-              "real number for the joint "
-                << joint_name << " and state interface " << interface_info.name
-                << ". Actual value of parameter: " << interface_info.initial_value
-                << ". Initial value will be set to 0.0");
-            throw std::invalid_argument("Failed converting initial_value string");
-          }
+                              joint_name](const hardware_interface::InterfaceInfo& interface_info) {
+      double initial_value{0.0};
+      if (!interface_info.initial_value.empty()) {
+        try {
+          initial_value = std::stod(interface_info.initial_value);
+          RCLCPP_INFO(this->nh_->get_logger(), "\t\t\t found initial value: %f", initial_value);
+        } catch (std::invalid_argument&) {
+          RCLCPP_ERROR_STREAM(this->nh_->get_logger(),
+                              "Failed converting initial_value string to "
+                              "real number for the joint "
+                                  << joint_name << " and state interface " << interface_info.name
+                                  << ". Actual value of parameter: " << interface_info.initial_value
+                                  << ". Initial value will be set to 0.0");
+          throw std::invalid_argument("Failed converting initial_value string");
         }
-        return initial_value;
-      };
+      }
+      return initial_value;
+    };
 
     double initial_position = std::numeric_limits<double>::quiet_NaN();
     double initial_velocity = std::numeric_limits<double>::quiet_NaN();
     double initial_effort = std::numeric_limits<double>::quiet_NaN();
 
     // register the state handles
-    for (unsigned int i = 0; i < joint_info.state_interfaces.size(); ++i) {
+    for (unsigned int i = 0; i < joint_info.state_interfaces.size(); ++i) {  // NOLINT
       if (joint_info.state_interfaces[i].name == "position") {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t position");
-        this->dataPtr->state_interfaces_.emplace_back(
-          joint_name + suffix,
-          hardware_interface::HW_IF_POSITION,
-          &this->dataPtr->joints_[j].joint_position);
+        this->dataPtr->state_interfaces_.emplace_back(joint_name + suffix,
+                                                      hardware_interface::HW_IF_POSITION,
+                                                      &this->dataPtr->joints_[j].joint_position);
         initial_position = get_initial_value(joint_info.state_interfaces[i]);
         this->dataPtr->joints_[j].joint_position = initial_position;
       }
       if (joint_info.state_interfaces[i].name == "velocity") {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t velocity");
-        this->dataPtr->state_interfaces_.emplace_back(
-          joint_name + suffix,
-          hardware_interface::HW_IF_VELOCITY,
-          &this->dataPtr->joints_[j].joint_velocity);
+        this->dataPtr->state_interfaces_.emplace_back(joint_name + suffix,
+                                                      hardware_interface::HW_IF_VELOCITY,
+                                                      &this->dataPtr->joints_[j].joint_velocity);
         initial_velocity = get_initial_value(joint_info.state_interfaces[i]);
         this->dataPtr->joints_[j].joint_velocity = initial_velocity;
       }
       if (joint_info.state_interfaces[i].name == "effort") {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t effort");
-        this->dataPtr->state_interfaces_.emplace_back(
-          joint_name + suffix,
-          hardware_interface::HW_IF_EFFORT,
-          &this->dataPtr->joints_[j].joint_effort);
+        this->dataPtr->state_interfaces_.emplace_back(joint_name + suffix,
+                                                      hardware_interface::HW_IF_EFFORT,
+                                                      &this->dataPtr->joints_[j].joint_effort);
         initial_effort = get_initial_value(joint_info.state_interfaces[i]);
         this->dataPtr->joints_[j].joint_effort = initial_effort;
       }
@@ -378,20 +356,20 @@ bool GZSystem::initSim(
     RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\tCommand:");
 
     // register the command handles
-    for (unsigned int i = 0; i < joint_info.command_interfaces.size(); ++i) {
+    for (unsigned int i = 0; i < joint_info.command_interfaces.size(); ++i) {  // NOLINT
       if (joint_info.command_interfaces[i].name == "position") {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t position");
         this->dataPtr->command_interfaces_.emplace_back(
-          joint_name + suffix, hardware_interface::HW_IF_POSITION,
-          &this->dataPtr->joints_[j].joint_position_cmd);
+            joint_name + suffix, hardware_interface::HW_IF_POSITION,
+            &this->dataPtr->joints_[j].joint_position_cmd);
         if (!std::isnan(initial_position)) {
           this->dataPtr->joints_[j].joint_position_cmd = initial_position;
         }
       } else if (joint_info.command_interfaces[i].name == "velocity") {
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t velocity");
         this->dataPtr->command_interfaces_.emplace_back(
-          joint_name + suffix, hardware_interface::HW_IF_VELOCITY,
-          &this->dataPtr->joints_[j].joint_velocity_cmd);
+            joint_name + suffix, hardware_interface::HW_IF_VELOCITY,
+            &this->dataPtr->joints_[j].joint_velocity_cmd);
         if (!std::isnan(initial_velocity)) {
           this->dataPtr->joints_[j].joint_velocity_cmd = initial_velocity;
         }
@@ -399,8 +377,8 @@ bool GZSystem::initSim(
         this->dataPtr->joints_[j].joint_control_method |= EFFORT;
         RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t effort");
         this->dataPtr->command_interfaces_.emplace_back(
-          joint_name + suffix, hardware_interface::HW_IF_EFFORT,
-          &this->dataPtr->joints_[j].joint_effort_cmd);
+            joint_name + suffix, hardware_interface::HW_IF_EFFORT,
+            &this->dataPtr->joints_[j].joint_effort_cmd);
         if (!std::isnan(initial_effort)) {
           this->dataPtr->joints_[j].joint_effort_cmd = initial_effort;
         }
@@ -410,14 +388,14 @@ bool GZSystem::initSim(
       if (!std::isnan(initial_position)) {
         this->dataPtr->joints_[j].joint_position = initial_position;
         this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[j].sim_joint,
-          gz::sim::components::JointPositionReset({initial_position}));
+            this->dataPtr->joints_[j].sim_joint,
+            gz::sim::components::JointPositionReset({initial_position}));
       }
       if (!std::isnan(initial_velocity)) {
         this->dataPtr->joints_[j].joint_velocity = initial_velocity;
         this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[j].sim_joint,
-          gz::sim::components::JointVelocityReset({initial_velocity}));
+            this->dataPtr->joints_[j].sim_joint,
+            gz::sim::components::JointVelocityReset({initial_velocity}));
       }
     }
 
@@ -431,8 +409,7 @@ bool GZSystem::initSim(
   return true;
 }
 
-void GZSystem::registerSensors(const hardware_interface::HardwareInfo & hardware_info)
-{
+void GZSystem::registerSensors(const hardware_interface::HardwareInfo& hardware_info) {
   // Collect gazebo sensor handles
   size_t n_sensors = hardware_info.sensors.size();
   std::vector<hardware_interface::ComponentInfo> sensor_components_;
@@ -446,54 +423,54 @@ void GZSystem::registerSensors(const hardware_interface::HardwareInfo & hardware
   // the data will be stored, and we can safely use pointers to the structures
 
   this->dataPtr->ecm->Each<gz::sim::components::Imu, gz::sim::components::Name>(
-    [&](const gz::sim::Entity & _entity, const gz::sim::components::Imu *,
-    const gz::sim::components::Name * _name) -> bool {
-      auto imuData = std::make_shared<ImuData>();
-      RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Loading sensor: " << _name->Data());
+      [&](const gz::sim::Entity& _entity, const gz::sim::components::Imu*,
+          const gz::sim::components::Name* _name) -> bool {
+        auto imuData = std::make_shared<ImuData>();
+        RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Loading sensor: " << _name->Data());
 
-      auto sensorTopicComp =
-      this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(_entity);
-      if (sensorTopicComp) {
-        RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Topic name: " << sensorTopicComp->Data());
-      }
-
-      RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\tState:");
-      imuData->name = _name->Data();
-      imuData->sim_imu_sensors_ = _entity;
-
-      hardware_interface::ComponentInfo component;
-      for (auto & comp : sensor_components_) {
-        if (comp.name == _name->Data()) {
-          component = comp;
+        auto sensorTopicComp =
+            this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(_entity);
+        if (sensorTopicComp) {
+          RCLCPP_INFO_STREAM(this->nh_->get_logger(), "Topic name: " << sensorTopicComp->Data());
         }
-      }
 
-      static const std::map<std::string, size_t> interface_name_map = {
-        {"orientation.x", 0}, {"orientation.y", 1},
-        {"orientation.z", 2}, {"orientation.w", 3},
-        {"angular_velocity.x", 4}, {"angular_velocity.y", 5},
-        {"angular_velocity.z", 6}, {"linear_acceleration.x", 7},
-        {"linear_acceleration.y", 8}, {"linear_acceleration.z", 9},
-      };
+        RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\tState:");
+        imuData->name = _name->Data();
+        imuData->sim_imu_sensors_ = _entity;
 
-      for (const auto & state_interface : component.state_interfaces) {
-        RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t " << state_interface.name);
+        hardware_interface::ComponentInfo component;
+        for (auto& comp : sensor_components_) {
+          if (comp.name == _name->Data()) {
+            component = comp;
+          }
+        }
 
-        size_t data_index = interface_name_map.at(state_interface.name);
-        this->dataPtr->state_interfaces_.emplace_back(
-          imuData->name, state_interface.name,
-          &imuData->imu_sensor_data_[data_index]);
-      }
-      this->dataPtr->imus_.push_back(imuData);
-      return true;
-    });
+        static const std::map<std::string, size_t> interface_name_map = {
+            {"orientation.x", 0},         {"orientation.y", 1},
+            {"orientation.z", 2},         {"orientation.w", 3},
+            {"angular_velocity.x", 4},    {"angular_velocity.y", 5},
+            {"angular_velocity.z", 6},    {"linear_acceleration.x", 7},
+            {"linear_acceleration.y", 8}, {"linear_acceleration.z", 9},
+        };
+
+        for (const auto& state_interface : component.state_interfaces) {
+          RCLCPP_INFO_STREAM(this->nh_->get_logger(), "\t\t " << state_interface.name);
+
+          size_t data_index = interface_name_map.at(state_interface.name);
+          this->dataPtr->state_interfaces_.emplace_back(imuData->name, state_interface.name,
+                                                        &imuData->imu_sensor_data_[data_index]);
+        }
+        this->dataPtr->imus_.push_back(imuData);
+        return true;
+      });
 }
 
-CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo & system_info)
-{
-  if(!is_sim_init) {
-    RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "%s: initSim() has not been called, "
-      "dont care if another initSim() of GZSystem was called.", get_name().c_str());
+CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo& system_info) {
+  if (!is_sim_init) {
+    RCLCPP_WARN(rclcpp::get_logger("GZSystem"),
+                "%s: initSim() has not been called, "
+                "dont care if another initSim() of GZSystem was called.",
+                get_name().c_str());
   }
 
   if (hardware_interface::SystemInterface::on_init(system_info) != CallbackReturn::SUCCESS) {
@@ -502,54 +479,48 @@ CallbackReturn GZSystem::on_init(const hardware_interface::HardwareInfo & system
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn GZSystem::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
-{
-  if(!is_sim_init) {
-    RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "Sim Param not init, "
-    "need at least one GZSystem::initSim() be called...");
+CallbackReturn GZSystem::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
+  if (!is_sim_init) {
+    RCLCPP_WARN(rclcpp::get_logger("GZSystem"),
+                "Sim Param not init, "
+                "need at least one GZSystem::initSim() be called...");
   }
   return CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> GZSystem::export_state_interfaces()
-{
-  if(!is_sim_init) {
+std::vector<hardware_interface::StateInterface> GZSystem::export_state_interfaces() {
+  if (!is_sim_init) {
     return {};
   } else {
     return std::move(this->dataPtr->state_interfaces_);
   }
 }
 
-std::vector<hardware_interface::CommandInterface> GZSystem::export_command_interfaces()
-{
-  if(!is_sim_init) {
+std::vector<hardware_interface::CommandInterface> GZSystem::export_command_interfaces() {
+  if (!is_sim_init) {
     return {};
   } else {
     return std::move(this->dataPtr->command_interfaces_);
   }
 }
 
-CallbackReturn GZSystem::on_activate(const rclcpp_lifecycle::State & previous_state)
-{
-  if(!is_sim_init) {
+CallbackReturn GZSystem::on_activate(const rclcpp_lifecycle::State& previous_state) {
+  if (!is_sim_init) {
     RCLCPP_WARN(rclcpp::get_logger("GZSystem"), "%s Sim Param not init, do nothing...",
-      get_name().c_str());
+                get_name().c_str());
   }
   return CallbackReturn::SUCCESS;
   return hardware_interface::SystemInterface::on_activate(previous_state);
 }
 
-CallbackReturn GZSystem::on_deactivate(const rclcpp_lifecycle::State & previous_state)
-{
+CallbackReturn GZSystem::on_deactivate(const rclcpp_lifecycle::State& previous_state) {
   return CallbackReturn::SUCCESS;
   return hardware_interface::SystemInterface::on_deactivate(previous_state);
 }
 
-hardware_interface::return_type GZSystem::read(
-  const rclcpp::Time & /*time*/,
-  const rclcpp::Duration & /*period*/)
-{
-  if(!is_sim_init) {
+hardware_interface::return_type GZSystem::read(const rclcpp::Time& /*time*/,
+                                               const rclcpp::Duration& /*period*/) {
+  if (!is_sim_init) {
     return hardware_interface::return_type::OK;
   }
   for (unsigned int i = 0; i < this->dataPtr->joints_.size(); ++i) {
@@ -558,19 +529,17 @@ hardware_interface::return_type GZSystem::read(
     }
 
     // Get the joint velocity
-    const auto * jointVelocity =
-      this->dataPtr->ecm->Component<gz::sim::components::JointVelocity>(
-      this->dataPtr->joints_[i].sim_joint);
+    const auto* jointVelocity = this->dataPtr->ecm->Component<gz::sim::components::JointVelocity>(
+        this->dataPtr->joints_[i].sim_joint);
 
     // Get the joint force via joint transmitted wrench
-    const auto * jointWrench =
-      this->dataPtr->ecm->Component<gz::sim::components::JointTransmittedWrench>(
-      this->dataPtr->joints_[i].sim_joint);
+    const auto* jointWrench =
+        this->dataPtr->ecm->Component<gz::sim::components::JointTransmittedWrench>(
+            this->dataPtr->joints_[i].sim_joint);
 
     // Get the joint position
-    const auto * jointPositions =
-      this->dataPtr->ecm->Component<gz::sim::components::JointPosition>(
-      this->dataPtr->joints_[i].sim_joint);
+    const auto* jointPositions = this->dataPtr->ecm->Component<gz::sim::components::JointPosition>(
+        this->dataPtr->joints_[i].sim_joint);
 
     this->dataPtr->joints_[i].joint_position = jointPositions->Data()[0];
     this->dataPtr->joints_[i].joint_velocity = jointVelocity->Data()[0];
@@ -578,33 +547,30 @@ hardware_interface::return_type GZSystem::read(
     gz::physics::Vector3d force_or_torque;
     if (this->dataPtr->joints_[i].joint_type == sdf::JointType::PRISMATIC) {
       force_or_torque = {jointWrench->Data().force().x(), jointWrench->Data().force().y(),
-        jointWrench->Data().force().z()};
+                         jointWrench->Data().force().z()};
     } else {  // REVOLUTE and CONTINUOUS
       force_or_torque = {jointWrench->Data().torque().x(), jointWrench->Data().torque().y(),
-        jointWrench->Data().torque().z()};
+                         jointWrench->Data().torque().z()};
     }
     // Calculate the scalar effort along the joint axis
-    this->dataPtr->joints_[i].joint_effort = force_or_torque.dot(
-      gz::physics::Vector3d{this->dataPtr->joints_[i].joint_axis.Xyz()[0],
-        this->dataPtr->joints_[i].joint_axis.Xyz()[1],
-        this->dataPtr->joints_[i].joint_axis.Xyz()[2]});
+    this->dataPtr->joints_[i].joint_effort =
+        force_or_torque.dot(gz::physics::Vector3d{this->dataPtr->joints_[i].joint_axis.Xyz()[0],
+                                                  this->dataPtr->joints_[i].joint_axis.Xyz()[1],
+                                                  this->dataPtr->joints_[i].joint_axis.Xyz()[2]});
   }
 
   for (unsigned int i = 0; i < this->dataPtr->imus_.size(); ++i) {
     if (this->dataPtr->imus_[i]->topicName.empty()) {
-      auto sensorTopicComp =
-        this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(
-        this->dataPtr->imus_[i]->sim_imu_sensors_);
+      auto sensorTopicComp = this->dataPtr->ecm->Component<gz::sim::components::SensorTopic>(
+          this->dataPtr->imus_[i]->sim_imu_sensors_);
       if (sensorTopicComp) {
         this->dataPtr->imus_[i]->topicName = sensorTopicComp->Data();
-        RCLCPP_INFO_STREAM(
-          this->nh_->get_logger(),
-          "IMU " << this->dataPtr->imus_[i]->name
-                 << " has a topic name: " << sensorTopicComp->Data());
+        RCLCPP_INFO_STREAM(this->nh_->get_logger(),
+                           "IMU " << this->dataPtr->imus_[i]->name
+                                  << " has a topic name: " << sensorTopicComp->Data());
 
-        this->dataPtr->node.Subscribe(
-          this->dataPtr->imus_[i]->topicName, &ImuData::OnIMU,
-          this->dataPtr->imus_[i].get());
+        this->dataPtr->node.Subscribe(this->dataPtr->imus_[i]->topicName, &ImuData::OnIMU,
+                                      this->dataPtr->imus_[i].get());
       }
     }
   }
@@ -612,46 +578,39 @@ hardware_interface::return_type GZSystem::read(
 }
 
 hardware_interface::return_type GZSystem::perform_command_mode_switch(
-  const std::vector<std::string> & start_interfaces,
-  const std::vector<std::string> & stop_interfaces)
-{
-  if(!is_sim_init) {
+    const std::vector<std::string>& start_interfaces,
+    const std::vector<std::string>& stop_interfaces) {
+  if (!is_sim_init) {
     return hardware_interface::return_type::OK;
   }
-  for (unsigned int j = 0; j < this->dataPtr->joints_.size(); j++) {
-    for (const std::string & interface_name : stop_interfaces) {
+  for (unsigned int j = 0; j < this->dataPtr->joints_.size(); j++) {  // NOLINT
+    for (const std::string& interface_name : stop_interfaces) {
       // Clear joint control method bits corresponding to stop interfaces
       if (interface_name ==
-        (this->dataPtr->joints_[j].name + "/" + hardware_interface::HW_IF_POSITION))
-      {
+          (this->dataPtr->joints_[j].name + "/" + hardware_interface::HW_IF_POSITION)) {
         this->dataPtr->joints_[j].joint_control_method &=
-          static_cast<ControlMethod_>(VELOCITY & EFFORT);
+            static_cast<ControlMethod_>(VELOCITY & EFFORT);
       } else if (interface_name == (this->dataPtr->joints_[j].name + "/" +  // NOLINT
-        hardware_interface::HW_IF_VELOCITY))
-      {
+                                    hardware_interface::HW_IF_VELOCITY)) {
         this->dataPtr->joints_[j].joint_control_method &=
-          static_cast<ControlMethod_>(POSITION & EFFORT);
+            static_cast<ControlMethod_>(POSITION & EFFORT);
       } else if (interface_name == (this->dataPtr->joints_[j].name + "/" +  // NOLINT
-        hardware_interface::HW_IF_EFFORT))
-      {
+                                    hardware_interface::HW_IF_EFFORT)) {
         this->dataPtr->joints_[j].joint_control_method &=
-          static_cast<ControlMethod_>(POSITION & VELOCITY);
+            static_cast<ControlMethod_>(POSITION & VELOCITY);
       }
     }
 
     // Set joint control method bits corresponding to start interfaces
-    for (const std::string & interface_name : start_interfaces) {
+    for (const std::string& interface_name : start_interfaces) {
       if (interface_name ==
-        (this->dataPtr->joints_[j].name + "/" + hardware_interface::HW_IF_POSITION))
-      {
+          (this->dataPtr->joints_[j].name + "/" + hardware_interface::HW_IF_POSITION)) {
         this->dataPtr->joints_[j].joint_control_method |= POSITION;
       } else if (interface_name == (this->dataPtr->joints_[j].name + "/" +  // NOLINT
-        hardware_interface::HW_IF_VELOCITY))
-      {
+                                    hardware_interface::HW_IF_VELOCITY)) {
         this->dataPtr->joints_[j].joint_control_method |= VELOCITY;
       } else if (interface_name == (this->dataPtr->joints_[j].name + "/" +  // NOLINT
-        hardware_interface::HW_IF_EFFORT))
-      {
+                                    hardware_interface::HW_IF_EFFORT)) {
         this->dataPtr->joints_[j].joint_control_method |= EFFORT;
       }
     }
@@ -660,11 +619,9 @@ hardware_interface::return_type GZSystem::perform_command_mode_switch(
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type GZSystem::write(
-  const rclcpp::Time & /*time*/,
-  const rclcpp::Duration & /*period*/)
-{
-  if(!is_sim_init) {
+hardware_interface::return_type GZSystem::write(const rclcpp::Time& /*time*/,
+                                                const rclcpp::Duration& /*period*/) {
+  if (!is_sim_init) {
     return hardware_interface::return_type::OK;
   }
   // Assuming there are 7 joints and gravity_earth is defined
@@ -682,7 +639,7 @@ hardware_interface::return_type GZSystem::write(
   std::array<double, 7> joint_efforts;
   try {
     joint_efforts = kdl_model_.gravity(q, gravity_earth);
-  } catch (const std::logic_error & e) {
+  } catch (const std::logic_error& e) {
     RCLCPP_ERROR(this->nh_->get_logger(), "Gravity compensation error: %s", e.what());
     return hardware_interface::return_type::ERROR;
   }
@@ -694,63 +651,57 @@ hardware_interface::return_type GZSystem::write(
 
     if (this->dataPtr->joints_[i].joint_control_method & VELOCITY) {
       if (!this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-          this->dataPtr->joints_[i].sim_joint))
-      {
-        this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[i].sim_joint,
-          gz::sim::components::JointVelocityCmd({0}));
+              this->dataPtr->joints_[i].sim_joint)) {
+        this->dataPtr->ecm->CreateComponent(this->dataPtr->joints_[i].sim_joint,
+                                            gz::sim::components::JointVelocityCmd({0}));
       } else {
         const auto jointVelCmd =
-          this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-          this->dataPtr->joints_[i].sim_joint);
-        *jointVelCmd = gz::sim::components::JointVelocityCmd(
-          {this->dataPtr->joints_[i].joint_velocity_cmd});
+            this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
+                this->dataPtr->joints_[i].sim_joint);
+        *jointVelCmd =
+            gz::sim::components::JointVelocityCmd({this->dataPtr->joints_[i].joint_velocity_cmd});
       }
     } else if (this->dataPtr->joints_[i].joint_control_method & POSITION) {
       // Get error in position
       double error;
       error = (this->dataPtr->joints_[i].joint_position -
-        this->dataPtr->joints_[i].joint_position_cmd) *
-        this->dataPtr->update_rate;
+               this->dataPtr->joints_[i].joint_position_cmd) *
+              this->dataPtr->update_rate;
 
       // Calculate target velcity
       double target_vel = -this->dataPtr->position_proportional_gain_ * error;
 
       auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-        this->dataPtr->joints_[i].sim_joint);
+          this->dataPtr->joints_[i].sim_joint);
 
       if (vel == nullptr) {
-        this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[i].sim_joint,
-          gz::sim::components::JointVelocityCmd({target_vel}));
+        this->dataPtr->ecm->CreateComponent(this->dataPtr->joints_[i].sim_joint,
+                                            gz::sim::components::JointVelocityCmd({target_vel}));
       } else if (!vel->Data().empty()) {
         vel->Data()[0] = target_vel;
       }
     } else if (this->dataPtr->joints_[i].joint_control_method & EFFORT) {
       if (!this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
-          this->dataPtr->joints_[i].sim_joint))
-      {
-        this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[i].sim_joint,
-          gz::sim::components::JointForceCmd({0}));
+              this->dataPtr->joints_[i].sim_joint)) {
+        this->dataPtr->ecm->CreateComponent(this->dataPtr->joints_[i].sim_joint,
+                                            gz::sim::components::JointForceCmd({0}));
       } else {
         const auto jointEffortCmd =
-          this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
-          this->dataPtr->joints_[i].sim_joint);
-        *jointEffortCmd = gz::sim::components::JointForceCmd(
-          {this->dataPtr->joints_[i].joint_effort_cmd});
+            this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
+                this->dataPtr->joints_[i].sim_joint);
+        *jointEffortCmd =
+            gz::sim::components::JointForceCmd({this->dataPtr->joints_[i].joint_effort_cmd});
         jointEffortCmd->Data()[0] += joint_efforts[i];
       }
     } else if (this->dataPtr->joints_[i].is_actuated) {
       // Fallback case is a velocity command of zero (only for actuated joints)
       double target_vel = 0.0;
       auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-        this->dataPtr->joints_[i].sim_joint);
+          this->dataPtr->joints_[i].sim_joint);
 
       if (vel == nullptr) {
-        this->dataPtr->ecm->CreateComponent(
-          this->dataPtr->joints_[i].sim_joint,
-          gz::sim::components::JointVelocityCmd({target_vel}));
+        this->dataPtr->ecm->CreateComponent(this->dataPtr->joints_[i].sim_joint,
+                                            gz::sim::components::JointVelocityCmd({target_vel}));
       } else if (!vel->Data().empty()) {
         vel->Data()[0] = target_vel;
       }
@@ -758,34 +709,34 @@ hardware_interface::return_type GZSystem::write(
   }
 
   // set values of all mimic joints with respect to mimicked joint
-  for (const auto & mimic_joint : this->dataPtr->mimic_joints_) {
-    for (const auto & mimic_interface : mimic_joint.interfaces_to_mimic) {
+  for (const auto& mimic_joint : this->dataPtr->mimic_joints_) {
+    for (const auto& mimic_interface : mimic_joint.interfaces_to_mimic) {
       if (mimic_interface == "position") {
         // Get the joint position
         double position_mimicked_joint =
-          this->dataPtr->ecm
-          ->Component<gz::sim::components::JointPosition>(
-          this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
-          ->Data()[0];
+            this->dataPtr->ecm
+                ->Component<gz::sim::components::JointPosition>(
+                    this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
+                ->Data()[0];
 
         double position_mimic_joint =
-          this->dataPtr->ecm
-          ->Component<gz::sim::components::JointPosition>(
-          this->dataPtr->joints_[mimic_joint.joint_index].sim_joint)
-          ->Data()[0];
+            this->dataPtr->ecm
+                ->Component<gz::sim::components::JointPosition>(
+                    this->dataPtr->joints_[mimic_joint.joint_index].sim_joint)
+                ->Data()[0];
 
         double position_error =
-          position_mimic_joint - position_mimicked_joint * mimic_joint.multiplier;
+            position_mimic_joint - position_mimicked_joint * mimic_joint.multiplier;
 
         double velocity_sp = (-1.0) * position_error * (this->dataPtr->update_rate);
 
         auto vel = this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-          this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
+            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
 
         if (vel == nullptr) {
           this->dataPtr->ecm->CreateComponent(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            gz::sim::components::JointVelocityCmd({velocity_sp}));
+              this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
+              gz::sim::components::JointVelocityCmd({velocity_sp}));
         } else if (!vel->Data().empty()) {
           vel->Data()[0] = velocity_sp;
         }
@@ -793,39 +744,37 @@ hardware_interface::return_type GZSystem::write(
       if (mimic_interface == "velocity") {
         // get the velocity of mimicked joint
         double velocity_mimicked_joint =
-          this->dataPtr->ecm
-          ->Component<gz::sim::components::JointVelocity>(
-          this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
-          ->Data()[0];
+            this->dataPtr->ecm
+                ->Component<gz::sim::components::JointVelocity>(
+                    this->dataPtr->joints_[mimic_joint.mimicked_joint_index].sim_joint)
+                ->Data()[0];
 
         if (!this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint))
-        {
+                this->dataPtr->joints_[mimic_joint.joint_index].sim_joint)) {
           this->dataPtr->ecm->CreateComponent(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            gz::sim::components::JointVelocityCmd({0}));
+              this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
+              gz::sim::components::JointVelocityCmd({0}));
         } else {
           const auto jointVelCmd =
-            this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
+              this->dataPtr->ecm->Component<gz::sim::components::JointVelocityCmd>(
+                  this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
           *jointVelCmd = gz::sim::components::JointVelocityCmd(
-            {mimic_joint.multiplier * velocity_mimicked_joint});
+              {mimic_joint.multiplier * velocity_mimicked_joint});
         }
       }
       if (mimic_interface == "effort") {
         if (!this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint))
-        {
+                this->dataPtr->joints_[mimic_joint.joint_index].sim_joint)) {
           this->dataPtr->ecm->CreateComponent(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
-            gz::sim::components::JointForceCmd({0}));
+              this->dataPtr->joints_[mimic_joint.joint_index].sim_joint,
+              gz::sim::components::JointForceCmd({0}));
         } else {
           const auto jointEffortCmd =
-            this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
-            this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
+              this->dataPtr->ecm->Component<gz::sim::components::JointForceCmd>(
+                  this->dataPtr->joints_[mimic_joint.joint_index].sim_joint);
           *jointEffortCmd = gz::sim::components::JointForceCmd(
-            {mimic_joint.multiplier *
-              this->dataPtr->joints_[mimic_joint.mimicked_joint_index].joint_effort});
+              {mimic_joint.multiplier *
+               this->dataPtr->joints_[mimic_joint.mimicked_joint_index].joint_effort});
         }
       }
     }

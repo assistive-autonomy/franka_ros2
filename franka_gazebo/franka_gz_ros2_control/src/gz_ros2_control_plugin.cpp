@@ -47,64 +47,51 @@
 #include "gz_ros2_control/gz_system.hpp"
 #include "gz_ros2_control/model_kdl.h"
 
-namespace gz_ros2_control
-{
-class GZResourceManager : public hardware_interface::ResourceManager
-{
-public:
-  GZResourceManager(
-    ModelKDL & kdl_model, rclcpp::Node::SharedPtr & node,
-    gz::sim::EntityComponentManager & ecm,
-    std::map<std::string, gz::sim::Entity> enabledJoints)
-  :hardware_interface::ResourceManager(node->get_node_clock_interface(),
-      node->get_node_logging_interface()),
-    ecm_(ecm),
-    gz_system_loader_("franka_gz_ros2_control", "gz_ros2_control::GZSystemInterface"),
-    logger_(node->get_logger().get_child("GZResourceManager"))
-  {
+namespace gz_ros2_control {
+class GZResourceManager : public hardware_interface::ResourceManager {
+ public:
+  GZResourceManager(ModelKDL& kdl_model,
+                    rclcpp::Node::SharedPtr& node,
+                    gz::sim::EntityComponentManager& ecm,
+                    std::map<std::string, gz::sim::Entity> enabledJoints)
+      : hardware_interface::ResourceManager(node->get_node_clock_interface(),
+                                            node->get_node_logging_interface()),
+        ecm_(ecm),
+        gz_system_loader_("franka_gz_ros2_control", "gz_ros2_control::GZSystemInterface"),
+        logger_(node->get_logger().get_child("GZResourceManager")) {
     node_ = node;
     enabledJoints_ = enabledJoints;
     kdl_model_ = kdl_model;
   }
 
-  GZResourceManager(const GZResourceManager &) = delete;
+  GZResourceManager(const GZResourceManager&) = delete;
 
-  bool load_and_initialize_components(
-    const std::string & urdf, const unsigned int update_rate) override
-  {
+  bool load_and_initialize_components(const std::string& urdf,
+                                      const unsigned int update_rate) override {
     components_are_loaded_and_initialized_ = true;
     const auto hardware_info = hardware_interface::parse_control_resources_from_urdf(urdf);
 
-    for(const auto & individual_hardware_info : hardware_info) {
+    for (const auto& individual_hardware_info : hardware_info) {
       std::string robot_hw_sim_type_str_ = individual_hardware_info.hardware_plugin_name;
-      RCLCPP_DEBUG(
-        logger_, "Load hardware interface %s ...",
-        robot_hw_sim_type_str_.c_str());
+      RCLCPP_DEBUG(logger_, "Load hardware interface %s ...", robot_hw_sim_type_str_.c_str());
 
       std::unique_ptr<gz_ros2_control::GZSystemInterface> gzSimSystem;
       std::scoped_lock guard(resource_interfaces_lock_, claimed_command_interfaces_lock_);
       try {
         gzSimSystem = std::unique_ptr<gz_ros2_control::GZSystemInterface>(
-          gz_system_loader_.createUnmanagedInstance(robot_hw_sim_type_str_)
-        );
-      } catch (pluginlib::PluginlibException & ex) {
-        RCLCPP_ERROR(
-          logger_,
-          "The plugin failed to load for some reason. Error: %s\n",
-          ex.what());
+            gz_system_loader_.createUnmanagedInstance(robot_hw_sim_type_str_));
+      } catch (pluginlib::PluginlibException& ex) {
+        RCLCPP_ERROR(logger_, "The plugin failed to load for some reason. Error: %s\n", ex.what());
         continue;
       }
-      if(!gzSimSystem->initSim(kdl_model_, node_, enabledJoints_, individual_hardware_info,
-        ecm_, update_rate))
-      {
-        RCLCPP_FATAL(
-          logger_, "Could not initialize robot simulation interface");
+      if (!gzSimSystem->initSim(kdl_model_, node_, enabledJoints_, individual_hardware_info, ecm_,
+                                update_rate)) {
+        RCLCPP_FATAL(logger_, "Could not initialize robot simulation interface");
         components_are_loaded_and_initialized_ = false;
         break;
       }
-      RCLCPP_DEBUG(
-        logger_, "Initialized robot simulation interface %s!",
-        robot_hw_sim_type_str_.c_str());
+      RCLCPP_DEBUG(logger_, "Initialized robot simulation interface %s!",
+                   robot_hw_sim_type_str_.c_str());
 
       import_component(std::move(gzSimSystem), individual_hardware_info);
     }
@@ -112,9 +99,9 @@ public:
     return components_are_loaded_and_initialized_;
   }
 
-private:
+ private:
   std::shared_ptr<rclcpp::Node> node_;
-  gz::sim::EntityComponentManager & ecm_;
+  gz::sim::EntityComponentManager& ecm_;
   std::map<std::string, gz::sim::Entity> enabledJoints_;
   ModelKDL kdl_model_;
 
@@ -124,9 +111,9 @@ private:
 };
 //////////////////////////////////////////////////
 class GZROS2ControlPluginPrivate {
-public:
+ public:
   /// \brief Get the URDF XML from the parameter server
-  std::string getURDF() const;
+  [[nodiscard]] std::string getURDF() const;
 
   /// \brief Get a list of enabled, unique, 1-axis joints of the model. If no
   /// joint names are specified in the plugin configuration, all valid 1-axis
@@ -136,8 +123,10 @@ public:
   /// \param[in] _ecm Gazebo Entity Component Manager
   /// \return List of entities containing all enabled joints
   std::map<std::string, gz::sim::Entity> GetEnabledJoints(
-    const gz::sim::Entity & _entity,
-    gz::sim::EntityComponentManager & _ecm) const;
+      const gz::sim::Entity& _entity,
+      gz::sim::EntityComponentManager& _ecm) const;
+
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
   /// \brief Entity ID for sensor within Gazebo.
   gz::sim::Entity entity_;
@@ -156,7 +145,7 @@ public:
 
   /// \brief Interface loader
   std::shared_ptr<pluginlib::ClassLoader<gz_ros2_control::GZSystemInterface>> robot_hw_sim_loader_{
-    nullptr};
+      nullptr};
 
   /// \brief Controller manager
   std::shared_ptr<controller_manager::ControllerManager> controller_manager_{nullptr};
@@ -169,20 +158,20 @@ public:
   std::string robot_description_node_ = "robot_state_publisher";
 
   /// \brief Last time the update method was called
-  rclcpp::Time last_update_sim_time_ros_ = rclcpp::Time((int64_t)0, RCL_ROS_TIME);
+  rclcpp::Time last_update_sim_time_ros_ = rclcpp::Time(static_cast<int64_t>(0), RCL_ROS_TIME);
 
   /// \brief ECM pointer
-  gz::sim::EntityComponentManager * ecm{nullptr};
+  gz::sim::EntityComponentManager* ecm{nullptr};
 
   /// \brief controller update rate
   int update_rate;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 //////////////////////////////////////////////////
 std::map<std::string, gz::sim::Entity> GZROS2ControlPluginPrivate::GetEnabledJoints(
-  const gz::sim::Entity & _entity,
-  gz::sim::EntityComponentManager & _ecm) const
-{
+    const gz::sim::Entity& _entity,
+    gz::sim::EntityComponentManager& _ecm) const {
   std::map<std::string, gz::sim::Entity> output;
 
   std::vector<std::string> enabledJoints;
@@ -191,42 +180,42 @@ std::map<std::string, gz::sim::Entity> GZROS2ControlPluginPrivate::GetEnabledJoi
   auto jointEntities = _ecm.ChildrenByComponents(_entity, gz::sim::components::Joint());
 
   // Iterate over all joints and verify whether they can be enabled or not
-  for (const auto & jointEntity : jointEntities) {
+  for (const auto& jointEntity : jointEntities) {
     const auto jointName = _ecm.Component<gz::sim::components::Name>(jointEntity)->Data();
 
     // Make sure the joint type is supported, i.e. it has exactly one
     // actuated axis
-    const auto * jointType = _ecm.Component<gz::sim::components::JointType>(jointEntity);
+    const auto* jointType = _ecm.Component<gz::sim::components::JointType>(jointEntity);
     switch (jointType->Data()) {
       case sdf::JointType::PRISMATIC:
       case sdf::JointType::REVOLUTE:
       case sdf::JointType::CONTINUOUS:
       case sdf::JointType::GEARBOX: {
         // Supported joint type
-          break;
-        }
+        break;
+      }
       case sdf::JointType::FIXED: {
-          RCLCPP_INFO(node_->get_logger(),
+        RCLCPP_INFO(node_->get_logger(),
                     "[gz_ros2_control] Fixed joint [%s] (Entity=%lu)] is skipped",
                     jointName.c_str(), jointEntity);
-          continue;
-        }
+        continue;
+      }
       case sdf::JointType::REVOLUTE2:
       case sdf::JointType::SCREW:
       case sdf::JointType::BALL:
       case sdf::JointType::UNIVERSAL: {
-          RCLCPP_WARN(node_->get_logger(),
-                      "[gz_ros2_control] Joint [%s] (Entity=%lu)] is of unsupported type."
-                      " Only joints with a single axis are supported.",
-                      jointName.c_str(), jointEntity);
-          continue;
-        }
+        RCLCPP_WARN(node_->get_logger(),
+                    "[gz_ros2_control] Joint [%s] (Entity=%lu)] is of unsupported type."
+                    " Only joints with a single axis are supported.",
+                    jointName.c_str(), jointEntity);
+        continue;
+      }
       default: {
-          RCLCPP_WARN(node_->get_logger(),
-                      "[gz_ros2_control] Joint [%s] (Entity=%lu)] is of unknown type",
-                      jointName.c_str(), jointEntity);
-          continue;
-        }
+        RCLCPP_WARN(node_->get_logger(),
+                    "[gz_ros2_control] Joint [%s] (Entity=%lu)] is of unknown type",
+                    jointName.c_str(), jointEntity);
+        continue;
+      }
     }
     output[jointName] = jointEntity;
   }
@@ -235,18 +224,17 @@ std::map<std::string, gz::sim::Entity> GZROS2ControlPluginPrivate::GetEnabledJoi
 }
 
 //////////////////////////////////////////////////
-std::string GZROS2ControlPluginPrivate::getURDF() const
-{
+std::string GZROS2ControlPluginPrivate::getURDF() const {
   std::string urdf_string;
 
   using namespace std::chrono_literals;
   auto parameters_client =
-    std::make_shared<rclcpp::AsyncParametersClient>(node_, robot_description_node_);
+      std::make_shared<rclcpp::AsyncParametersClient>(node_, robot_description_node_);
   while (!parameters_client->wait_for_service(0.5s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for %s service. Exiting.",
                    robot_description_node_.c_str());
-      return 0;
+      return {};
     }
     RCLCPP_ERROR(node_->get_logger(), "%s service not available, waiting again...",
                  robot_description_node_.c_str());
@@ -264,7 +252,7 @@ std::string GZROS2ControlPluginPrivate::getURDF() const
       f.wait();
       std::vector<rclcpp::Parameter> values = f.get();
       urdf_string = values[0].as_string();
-    } catch (const std::exception & e) {
+    } catch (const std::exception& e) {
       RCLCPP_ERROR(node_->get_logger(), "%s", e.what());
     }
 
@@ -285,11 +273,10 @@ std::string GZROS2ControlPluginPrivate::getURDF() const
 
 //////////////////////////////////////////////////
 GZROS2ControlPlugin::GZROS2ControlPlugin()
-: dataPtr(std::make_unique<GZROS2ControlPluginPrivate>()) {}
+    : dataPtr(std::make_unique<GZROS2ControlPluginPrivate>()) {}
 
 //////////////////////////////////////////////////
-GZROS2ControlPlugin::~GZROS2ControlPlugin()
-{
+GZROS2ControlPlugin::~GZROS2ControlPlugin() {
   // Stop controller manager thread
   if (!this->dataPtr->controller_manager_) {
     return;
@@ -300,9 +287,8 @@ GZROS2ControlPlugin::~GZROS2ControlPlugin()
 }
 
 // Function to get the root link from the URDF model
-urdf::LinkConstSharedPtr GZROS2ControlPlugin::getRootLink(const urdf::Model & model)
-{
-  for (const auto & link_pair : model.links_) {
+urdf::LinkConstSharedPtr GZROS2ControlPlugin::getRootLink(const urdf::Model& model) {
+  for (const auto& link_pair : model.links_) {
     if (!link_pair.second->parent_joint) {
       return link_pair.second;
     }
@@ -311,8 +297,7 @@ urdf::LinkConstSharedPtr GZROS2ControlPlugin::getRootLink(const urdf::Model & mo
 }
 
 // Function to iteratively find the tip link in the URDF model
-std::string GZROS2ControlPlugin::findTipLink(const urdf::Model & model)
-{
+std::string GZROS2ControlPlugin::findTipLink(const urdf::Model& model) {
   urdf::LinkConstSharedPtr root_link = getRootLink(model);
   if (!root_link) {
     std::cerr << "No root link found in the URDF model." << std::endl;
@@ -332,7 +317,7 @@ std::string GZROS2ControlPlugin::findTipLink(const urdf::Model & model)
       tip_link = current_link->name;
     } else {
       // Add all child links to the queue
-      for (const auto & child : current_link->child_links) {
+      for (const auto& child : current_link->child_links) {
         link_queue.push(child);
       }
     }
@@ -342,12 +327,10 @@ std::string GZROS2ControlPlugin::findTipLink(const urdf::Model & model)
 }
 
 //////////////////////////////////////////////////
-void GZROS2ControlPlugin::Configure(
-  const gz::sim::Entity & _entity,
-  const std::shared_ptr<const sdf::Element> & _sdf,
-  gz::sim::EntityComponentManager & _ecm,
-  gz::sim::EventManager &)
-{
+void GZROS2ControlPlugin::Configure(const gz::sim::Entity& _entity,
+                                    const std::shared_ptr<const sdf::Element>& _sdf,
+                                    gz::sim::EntityComponentManager& _ecm,
+                                    gz::sim::EventManager&) {
   rclcpp::Logger logger = rclcpp::get_logger("GazeboSimROS2ControlPlugin");
   // Make sure the controller is attached to a valid model
   const auto model = gz::sim::Model(_entity);
@@ -362,7 +345,7 @@ void GZROS2ControlPlugin::Configure(
   }
 
   // Get params from SDF
-  std::string paramFileName = _sdf->Get<std::string>("parameters");
+  auto paramFileName = _sdf->Get<std::string>("parameters");
 
   if (paramFileName.empty()) {
     RCLCPP_ERROR(logger,
@@ -372,13 +355,13 @@ void GZROS2ControlPlugin::Configure(
   }
 
   // Get params from SDF
-  std::string robot_param_node = _sdf->Get<std::string>("robot_param_node");
+  auto robot_param_node = _sdf->Get<std::string>("robot_param_node");
   if (!robot_param_node.empty()) {
     this->dataPtr->robot_description_node_ = robot_param_node;
   }
   RCLCPP_INFO(logger, "robot_param_node is %s", this->dataPtr->robot_description_node_.c_str());
 
-  std::string robot_description = _sdf->Get<std::string>("robot_param");
+  auto robot_description = _sdf->Get<std::string>("robot_param");
   if (!robot_description.empty()) {
     this->dataPtr->robot_description_ = robot_description;
   }
@@ -386,11 +369,11 @@ void GZROS2ControlPlugin::Configure(
 
   std::vector<std::string> arguments = {"--ros-args"};
 
-  auto sdfPtr = const_cast<sdf::Element *>(_sdf.get());
+  auto sdfPtr = const_cast<sdf::Element*>(_sdf.get());
 
   sdf::ElementPtr argument_sdf = sdfPtr->GetElement("parameters");
   while (argument_sdf) {
-    std::string argument = argument_sdf->Get<std::string>();
+    auto argument = argument_sdf->Get<std::string>();
     arguments.push_back(RCL_PARAM_FILE_FLAG);
     arguments.push_back(argument);
     argument_sdf = argument_sdf->GetNextElement("parameters");
@@ -425,7 +408,7 @@ void GZROS2ControlPlugin::Configure(
 
       arguments.push_back(RCL_ROS_ARGS_FLAG);
       while (argument_sdf) {
-        std::string argument = argument_sdf->Get<std::string>();
+        auto argument = argument_sdf->Get<std::string>();
         arguments.push_back(RCL_REMAP_FLAG);
         arguments.push_back(argument);
         argument_sdf = argument_sdf->GetNextElement("remapping");
@@ -433,9 +416,9 @@ void GZROS2ControlPlugin::Configure(
     }
   }
 
-  std::vector<const char *> argv;
-  for (const auto & arg : arguments) {
-    argv.push_back(reinterpret_cast<const char *>(arg.data()));
+  std::vector<const char*> argv;
+  for (const auto& arg : arguments) {
+    argv.push_back(reinterpret_cast<const char*>(arg.data()));
   }
 
   // Create a default context, if not already
@@ -448,7 +431,7 @@ void GZROS2ControlPlugin::Configure(
   this->dataPtr->node_ = rclcpp::Node::make_shared(node_name, ns);
   this->dataPtr->executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   this->dataPtr->executor_->add_node(this->dataPtr->node_);
-  auto spin = [this]() {this->dataPtr->executor_->spin();};
+  auto spin = [this]() { this->dataPtr->executor_->spin(); };
   this->dataPtr->thread_executor_spin_ = std::thread(spin);
 
   RCLCPP_DEBUG_STREAM(this->dataPtr->node_->get_logger(),
@@ -478,7 +461,7 @@ void GZROS2ControlPlugin::Configure(
     std::string tip_link = findTipLink(model);
 
     kdl_model_ = ModelKDL(model, root_link, tip_link);
-  } catch (const std::runtime_error & ex) {
+  } catch (const std::runtime_error& ex) {
     RCLCPP_ERROR_STREAM(
         this->dataPtr->node_->get_logger(),
         "Error parsing URDF in gz_ros2_control plugin, plugin not active : " << ex.what());
@@ -486,8 +469,8 @@ void GZROS2ControlPlugin::Configure(
   }
 
   std::unique_ptr<hardware_interface::ResourceManager> resource_manager_ =
-    std::make_unique<gz_ros2_control::GZResourceManager>(kdl_model_, this->dataPtr->node_,
-      _ecm, enabledJoints);
+      std::make_unique<gz_ros2_control::GZResourceManager>(kdl_model_, this->dataPtr->node_, _ecm,
+                                                           enabledJoints);
 
   // Create the controller manager
   RCLCPP_INFO(this->dataPtr->node_->get_logger(), "Loading controller_manager");
@@ -511,17 +494,15 @@ void GZROS2ControlPlugin::Configure(
     return;
   }
 
-  this->dataPtr->update_rate =
-    this->dataPtr->controller_manager_->get_update_rate();
+  this->dataPtr->update_rate = this->dataPtr->controller_manager_->get_update_rate();
   this->dataPtr->control_period_ =
-    rclcpp::Duration(std::chrono::duration_cast<std::chrono::nanoseconds>(
-      std::chrono::duration<double>(1.0 / static_cast<double>(this->dataPtr->update_rate))));
+      rclcpp::Duration(std::chrono::duration_cast<std::chrono::nanoseconds>(
+          std::chrono::duration<double>(1.0 / static_cast<double>(this->dataPtr->update_rate))));
 
   // Wait for CM to receive robot description from the topic and then initialize Resource Manager
   while (!this->dataPtr->controller_manager_->is_resource_manager_initialized()) {
-    RCLCPP_WARN(
-      this->dataPtr->node_->get_logger(),
-      "Waiting RM to load and initialize hardware...");
+    RCLCPP_WARN(this->dataPtr->node_->get_logger(),
+                "Waiting RM to load and initialize hardware...");
     std::this_thread::sleep_for(std::chrono::microseconds(2000000));
   }
 
@@ -529,10 +510,8 @@ void GZROS2ControlPlugin::Configure(
 }
 
 //////////////////////////////////////////////////
-void GZROS2ControlPlugin::PreUpdate(
-  const gz::sim::UpdateInfo & _info,
-  gz::sim::EntityComponentManager & /*_ecm*/)
-{
+void GZROS2ControlPlugin::PreUpdate(const gz::sim::UpdateInfo& _info,
+                                    gz::sim::EntityComponentManager& /*_ecm*/) {
   if (!this->dataPtr->controller_manager_) {
     return;
   }
@@ -558,7 +537,7 @@ void GZROS2ControlPlugin::PreUpdate(
   }
 
   rclcpp::Time sim_time_ros(
-    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
+      std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
   rclcpp::Duration sim_period = sim_time_ros - this->dataPtr->last_update_sim_time_ros_;
   // Always set commands on joints, otherwise at low control frequencies the
   // joints tremble as they are updated at a fraction of gazebo sim time
@@ -566,16 +545,14 @@ void GZROS2ControlPlugin::PreUpdate(
 }
 
 //////////////////////////////////////////////////
-void GZROS2ControlPlugin::PostUpdate(
-  const gz::sim::UpdateInfo & _info,
-  const gz::sim::EntityComponentManager & /*_ecm*/)
-{
+void GZROS2ControlPlugin::PostUpdate(const gz::sim::UpdateInfo& _info,
+                                     const gz::sim::EntityComponentManager& /*_ecm*/) {
   if (!this->dataPtr->controller_manager_) {
     return;
   }
   // Get the simulation time and period
   rclcpp::Time sim_time_ros(
-    std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
+      std::chrono::duration_cast<std::chrono::nanoseconds>(_info.simTime).count(), RCL_ROS_TIME);
   rclcpp::Duration sim_period = sim_time_ros - this->dataPtr->last_update_sim_time_ros_;
 
   if (sim_period >= this->dataPtr->control_period_) {

@@ -69,7 +69,6 @@ std::vector<double> FrankaSemanticComponentInterface::get_values_state_interface
   std::vector<double> state_interface_values;
   // insert all the state_interface_values
   for (const auto& state_interface : state_interfaces_) {
-    // state_interface_values.emplace_back(state_interface.get().get_value());
     state_interface_values.emplace_back(state_interface.get().get_optional().value());
   }
   return state_interface_values;
@@ -79,7 +78,6 @@ std::vector<double> FrankaSemanticComponentInterface::get_values_command_interfa
   std::vector<double> command_interface_values;
   // insert all the command_interface_values
   for (const auto& command_interface : command_interfaces_) {
-    // command_interface_values.emplace_back(command_interface.get().get_value());
     command_interface_values.emplace_back(command_interface.get().get_optional().value());
   }
 
