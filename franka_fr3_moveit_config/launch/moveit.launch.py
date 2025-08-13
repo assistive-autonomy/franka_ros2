@@ -216,7 +216,7 @@ def generate_launch_description():
         executable='ros2_control_node',
         namespace=namespace,
         parameters=[robot_description, ros2_controllers_path],
-        # arguments=['--controller-ros-args', '--remap', ('joint_states', 'franka/joint_states')],
+        remappings=[('joint_states', 'franka/joint_states')],
         output={
             'stdout': 'screen',
             'stderr': 'screen',
