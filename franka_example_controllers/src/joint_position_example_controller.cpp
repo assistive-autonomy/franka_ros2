@@ -56,31 +56,16 @@ controller_interface::return_type JointPositionExampleController::update(
     const rclcpp::Duration& /*period*/) {
   if (initialization_flag_) {
     for (int i = 0; i < num_joints; ++i) {
-      if (auto q_i = state_interfaces_[i].get_optional<double>()) {
-        initial_q_.at(i) = q_i.value();
-      } else {
-        RCLCPP_ERROR(get_node()->get_logger(), "Failed to get initial joint state");
-        return controller_interface::return_type::ERROR;
-      }
+      initial_q_.at(i) = state_interfaces_[i].get_optional<double>().value();
     }
     initialization_flag_ = false;
     if (!is_gazebo_) {
-      if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-        initial_robot_time_ = time_op.value();
-      } else {
-        RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-        return controller_interface::return_type::ERROR;
-      }
+      initial_robot_time_ = state_interfaces_.back().get_optional<double>().value();
     }
     elapsed_time_ = 0.0;
   } else {
     if (!is_gazebo_) {
-      if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-        robot_time_ = time_op.value();
-      } else {
-        RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-        return controller_interface::return_type::ERROR;
-      }
+      robot_time_ = state_interfaces_.back().get_optional<double>().value();
       elapsed_time_ = robot_time_ - initial_robot_time_;
     } else {
       elapsed_time_ += trajectory_period_;

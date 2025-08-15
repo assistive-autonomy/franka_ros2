@@ -44,25 +44,15 @@ CartesianOrientationExampleController::state_interface_configuration() const {
 controller_interface::return_type CartesianOrientationExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  robot_time_ = state_interfaces_.back().get_optional<double>().value();
+
   if (initialization_flag_) {
     std::tie(orientation_, position_) =
         franka_cartesian_pose_->getCurrentOrientationAndTranslation();
-    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-      initial_robot_time_ = time_op.value();
-    } else {
-      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-      return controller_interface::return_type::ERROR;
-    }
+    initial_robot_time_ = robot_time_;
     elapsed_time_ = 0.0;
-
     initialization_flag_ = false;
   } else {
-    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-      robot_time_ = time_op.value();
-    } else {
-      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-      return controller_interface::return_type::ERROR;
-    }
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
 

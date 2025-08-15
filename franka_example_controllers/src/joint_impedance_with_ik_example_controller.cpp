@@ -67,15 +67,10 @@ void JointImpedanceWithIKExampleController::update_joint_states() {
     const auto& position_interface = state_interfaces_.at(16 + i);
     const auto& velocity_interface = state_interfaces_.at(23 + i);
     const auto& effort_interface = state_interfaces_.at(30 + i);
-    if (auto op = position_interface.get_optional()) {
-      joint_positions_current_[i] = op.value();
-    }
-    if (auto op = velocity_interface.get_optional()) {
-      joint_velocities_current_[i] = op.value();
-    }
-    if (auto op = effort_interface.get_optional()) {
-      joint_efforts_current_[i] = op.value();
-    }
+
+    joint_positions_current_[i] = position_interface.get_optional().value();
+    joint_velocities_current_[i] = velocity_interface.get_optional().value();
+    joint_efforts_current_[i] = effort_interface.get_optional().value();
   }
 }
 
@@ -143,25 +138,15 @@ Vector7d JointImpedanceWithIKExampleController::compute_torque_command(
 controller_interface::return_type JointImpedanceWithIKExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  robot_time_ = state_interfaces_.back().get_optional<double>().value();
+
   if (initialization_flag_) {
     std::tie(orientation_, position_) =
         franka_cartesian_pose_->getCurrentOrientationAndTranslation();
-
-    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-      initial_robot_time_ = time_op.value();
-    } else {
-      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-      return controller_interface::return_type::ERROR;
-    }
+    initial_robot_time_ = robot_time_;
     elapsed_time_ = 0.0;
     initialization_flag_ = false;
   } else {
-    if (auto time_op = state_interfaces_.back().get_optional<double>()) {
-      robot_time_ = time_op.value();
-    } else {
-      RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot time");
-      return controller_interface::return_type::ERROR;
-    }
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
   update_joint_states();
