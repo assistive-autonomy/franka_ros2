@@ -123,7 +123,7 @@
       lock_try_count: 5 # Number of attempts to acquire the lock in a single on_update()
       lock_sleep_interval: 5 # microseconds sleep between attempts
       lock_log_error: true #  Log error if lock acquisition fails - false == do not log  
-      lock_update_success: false # return update OK, although lock fails (no update occurs)
+      lock_update_success: true # return update OK, although lock fails (no update occurs)
 
 /**:
   gravity_compensation_example_controller:
