@@ -56,16 +56,16 @@ controller_interface::return_type JointPositionExampleController::update(
     const rclcpp::Duration& /*period*/) {
   if (initialization_flag_) {
     for (int i = 0; i < num_joints; ++i) {
-      initial_q_.at(i) = state_interfaces_[i].get_value();
+      initial_q_.at(i) = state_interfaces_[i].get_optional<double>().value();
     }
     initialization_flag_ = false;
     if (!is_gazebo_) {
-      initial_robot_time_ = state_interfaces_.back().get_value();
+      initial_robot_time_ = state_interfaces_.back().get_optional<double>().value();
     }
     elapsed_time_ = 0.0;
   } else {
     if (!is_gazebo_) {
-      robot_time_ = state_interfaces_.back().get_value();
+      robot_time_ = state_interfaces_.back().get_optional<double>().value();
       elapsed_time_ = robot_time_ - initial_robot_time_;
     } else {
       elapsed_time_ += trajectory_period_;
@@ -75,10 +75,11 @@ controller_interface::return_type JointPositionExampleController::update(
   double delta_angle = M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_)) * 0.2;
 
   for (int i = 0; i < num_joints; ++i) {
-    if (i == 4) {
-      command_interfaces_[i].set_value(initial_q_.at(i) - delta_angle);
-    } else {
-      command_interfaces_[i].set_value(initial_q_.at(i) + delta_angle);
+    double target_q = i == 4 ? initial_q_.at(i) - delta_angle : initial_q_.at(i) + delta_angle;
+    if (!command_interfaces_[i].set_value(target_q)) {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to set command interface %s value",
+                   command_interfaces_[i].get_name().c_str());
+      return controller_interface::return_type::ERROR;
     }
   }
 

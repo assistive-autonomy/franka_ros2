@@ -182,10 +182,10 @@ TEST_F(FrankaCartesianPoseTest,
   franka_cartesian_command_friend->assign_loaned_command_interfaces(temp_command_interfaces);
 
   auto success = franka_cartesian_command_friend->setCommand(new_hw_cartesian_pose_command);
-
   ASSERT_FALSE(success);
-
+  
   franka_cartesian_command_friend->release_interfaces();
+  temp_command_interfaces.clear();
 }
 
 TEST_F(

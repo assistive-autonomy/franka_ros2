@@ -46,15 +46,14 @@ controller_interface::InterfaceConfiguration ElbowExampleController::state_inter
 controller_interface::return_type ElbowExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  robot_time_ = state_interfaces_.back().get_optional<double>().value();
+
   if (initialization_flag_) {
     initial_elbow_configuration_ = franka_cartesian_velocity_->getCurrentElbowConfiguration();
-
-    initial_robot_time_ = state_interfaces_.back().get_value();
+    initial_robot_time_ = robot_time_;
     elapsed_time_ = 0.0;
-
     initialization_flag_ = false;
   } else {
-    robot_time_ = state_interfaces_.back().get_value();
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
 

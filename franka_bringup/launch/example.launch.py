@@ -47,6 +47,7 @@
 
 import os
 import sys
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
@@ -104,7 +105,7 @@ def generate_robot_nodes(context):
                 namespace=namespace,
                 arguments=[controller_name, '--controller-manager-timeout', '30'],
                 parameters=[PathJoinSubstitution([
-                    FindPackageShare('franka_bringup'), 'config', "controllers.yaml",
+                    FindPackageShare('franka_bringup'), 'config', 'controllers.yaml',
 
                 ])],
                 output='screen',

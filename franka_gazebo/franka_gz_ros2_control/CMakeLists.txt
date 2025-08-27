@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 # Suppress CMP0002 warning
 option(CHECK_TIDY "Enable clang-tidy checks" OFF)
 
-project(franka_ign_ros2_control)
+project(franka_gz_ros2_control)
 
 # Default to C11
 if(NOT CMAKE_C_STANDARD)
@@ -34,40 +34,21 @@ find_package(Franka 0.13.3 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 
-if("$ENV{IGNITION_VERSION}" STREQUAL "citadel")
-  find_package(ignition-gazebo3 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo3_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Citadel")
-
-elseif("$ENV{IGNITION_VERSION}" STREQUAL "edifice")
-  find_package(ignition-gazebo5 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo5_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Edifice")
-
-elseif("$ENV{IGNITION_VERSION}" STREQUAL "fortress")
-  find_package(ignition-gazebo6 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Fortress")
-
-else()
-  find_package(ignition-gazebo6 REQUIRED)
-  set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
-  message(STATUS "Compiling against Ignition Fortress")
-endif()
-
-find_package(ignition-plugin1 REQUIRED)
-set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
+find_package(gz_sim_vendor REQUIRED)
+find_package(gz-sim REQUIRED)
+find_package(gz_plugin_vendor REQUIRED)
+find_package(gz-plugin REQUIRED)
 
 include_directories(include)
 
 add_library(${PROJECT_NAME}-system SHARED
-  src/ign_ros2_control_plugin.cpp
+  src/gz_ros2_control_plugin.cpp
   src/model_kdl.cpp
 )
-
 target_link_libraries(${PROJECT_NAME}-system
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-plugin${IGN_PLUGIN_VER}::register
+  gz-plugin::gz-plugin
+  gz-plugin::core
+  gz-sim::gz-sim
 )
 ament_target_dependencies(${PROJECT_NAME}-system
   ament_index_cpp
@@ -87,11 +68,16 @@ ament_target_dependencies(${PROJECT_NAME}-system
 
 #########
 
-add_library(ign_hardware_plugins SHARED
-  src/ign_system.cpp
+add_library(franka_gz_hardware_plugins SHARED
+  src/gz_system.cpp
   src/model_kdl.cpp
 )
-ament_target_dependencies(ign_hardware_plugins
+target_link_libraries(franka_gz_hardware_plugins
+  gz-plugin::gz-plugin
+  gz-plugin::core
+  gz-sim::gz-sim
+)
+ament_target_dependencies(franka_gz_hardware_plugins
   rclcpp_lifecycle
   hardware_interface
   rclcpp
@@ -101,14 +87,13 @@ ament_target_dependencies(ign_hardware_plugins
   kdl_parser
   tf2_geometry_msgs
   tf2_eigen
+  pluginlib
 )
-target_link_libraries(ign_hardware_plugins
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-)
+
 
 ## Install
 install(TARGETS
-  ign_hardware_plugins
+  franka_gz_hardware_plugins
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -121,19 +106,39 @@ install(DIRECTORY
 
 # Testing and linting
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_clang_format REQUIRED)
+  find_package(ament_cmake_copyright REQUIRED)
+  find_package(ament_cmake_cppcheck REQUIRED)
+  find_package(ament_cmake_flake8 REQUIRED)
+  find_package(ament_cmake_lint_cmake REQUIRED)
+  find_package(ament_cmake_pep257 REQUIRED)
+  find_package(ament_cmake_xmllint REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
+
+  set(CPP_DIRECTORIES src include)
+  ament_clang_format(CONFIG_FILE ../../.clang-format ${CPP_DIRECTORIES})
+  ament_copyright(src ${CPP_DIRECTORIES} package.xml)
+  ament_cppcheck(${CPP_DIRECTORIES})
+  ament_lint_cmake(CMakeLists.txt)
+  ament_flake8()
+  ament_pep257()
+  ament_xmllint()
+  if(CHECK_TIDY)
+    find_package(ament_cmake_clang_tidy REQUIRED)
+    set(ament_cmake_clang_tidy_CONFIG_FILE ../../.clang-tidy)
+    ament_clang_tidy(${CMAKE_BINARY_DIR} --jobs 6)
+  endif()
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME}-system ign_hardware_plugins)
+ament_export_libraries(${PROJECT_NAME}-system franka_gz_hardware_plugins)
 
 # Install directories
 install(TARGETS ${PROJECT_NAME}-system
   DESTINATION lib
 )
 
-pluginlib_export_plugin_description_file(franka_ign_ros2_control ign_hardware_plugins.xml)
+pluginlib_export_plugin_description_file(${PROJECT_NAME} franka_gz_hardware_plugins.xml)
 
 # Setup the project
 ament_package()

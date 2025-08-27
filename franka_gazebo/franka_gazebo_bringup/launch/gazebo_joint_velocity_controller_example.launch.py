@@ -120,6 +120,13 @@ def generate_launch_description():
         output='screen',
     )
 
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
     # Visualize in RViz
     rviz_file = os.path.join(get_package_share_directory('franka_description'), 'rviz',
                              'visualize_franka.rviz')
@@ -151,6 +158,7 @@ def generate_launch_description():
         robot_state_publisher,
         rviz,
         spawn,
+        bridge,
         RegisterEventHandler(
                 event_handler=OnProcessExit(
                     target_action=spawn,

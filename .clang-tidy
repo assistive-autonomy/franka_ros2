@@ -20,7 +20,15 @@ Checks: -cppcoreguidelines-pro-type-vararg,
         -readability-function-cognitive-complexity,modernize-*,
         -modernize-use-trailing-return-type,
         -modernize-pass-by-value,
-        -bugprone-lambda-function-name
+        -bugprone-lambda-function-name,
+        -misc-include-cleaner,
+        -misc-const-correctness,
+        -modernize-type-traits,
+        -modernize-use-override,
+        -modernize-use-emplace,
+        -performance-inefficient-vector-operation,
+        -performance-avoid-endl,
+        -performance-enum-size
 # These were added as a result of some updates to ros-humble-generate-parameter-library which  causes the generated code in franka_robot_state_broadcaster
 # Namely: build/franka_robot_state_broadcaster/include/franka_robot_state_broadcaster_parameters.hpp
 # Generated via CMake : generate_parameter_library(franka_robot_state_broadcaster_parameters src/franka_robot_state_broadcaster_parameters.yaml)

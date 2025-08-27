@@ -216,6 +216,7 @@ TEST_F(FrankaCartesianVelocityTest,
   ASSERT_FALSE(success);
 
   franka_cartesian_command_friend->release_interfaces();
+  temp_command_interfaces.clear();
 }
 
 TEST_F(FrankaCartesianVelocityTest,

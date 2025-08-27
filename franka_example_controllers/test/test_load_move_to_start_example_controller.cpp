@@ -26,8 +26,10 @@ TEST(TestLoadMoveToStartExampleController, load_controller) {
   std::shared_ptr<rclcpp::Executor> executor =
       std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
+  rclcpp::Logger logger = rclcpp::get_logger("load_controller");
+  
   controller_manager::ControllerManager cm(std::make_unique<hardware_interface::ResourceManager>(
-                                               ros2_control_test_assets::minimal_robot_urdf),
+                                               ros2_control_test_assets::minimal_robot_urdf,std::make_shared<rclcpp::Clock>(),logger),
                                            executor, "test_controller_manager");
 
   auto response = cm.load_controller("test_move_to_start_example_controller",

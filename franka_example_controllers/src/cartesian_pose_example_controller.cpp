@@ -44,16 +44,16 @@ CartesianPoseExampleController::state_interface_configuration() const {
 controller_interface::return_type CartesianPoseExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  robot_time_ = state_interfaces_.back().get_optional<double>().value();
+
   if (initialization_flag_) {
     // Get initial orientation and translation
     std::tie(orientation_, position_) =
         franka_cartesian_pose_->getCurrentOrientationAndTranslation();
-    initial_robot_time_ = state_interfaces_.back().get_value();
+    initial_robot_time_ = robot_time_;
     elapsed_time_ = 0.0;
-
     initialization_flag_ = false;
   } else {
-    robot_time_ = state_interfaces_.back().get_value();
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
 
