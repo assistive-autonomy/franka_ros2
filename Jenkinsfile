@@ -18,7 +18,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    . /opt/ros/humble/setup.sh
+                    . /opt/ros/jazzy/setup.sh
                     colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCHECK_TIDY=ON -DBUILD_TESTS=OFF
                 '''
             }
@@ -26,7 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    . /opt/ros/humble/setup.sh
+                    . /opt/ros/jazzy/setup.sh
                     . install/setup.sh
                     colcon test --packages-ignore libfranka --event-handlers console_direct+
                     colcon test-result --verbose
