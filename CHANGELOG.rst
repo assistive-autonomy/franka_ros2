@@ -3,11 +3,13 @@ Changelog for package franka_ros2
 
 v2.0.2 (2025-07-09)
 -------------------
-Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humble
+Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humble and Jazzy
 
 * refactor: srdf files come from franka description
 * Fix: FrankaHardwareInterface: Fix eager claiming bug when multiple hardware components are present
 * Fix: joint_state_publisher uses correct topics to avoid rviz glitches
+* Add support for ROS 2 Jazzy
+* Add docs under each package
 
 v2.0.1 (2025-06-26)
 -------------------
@@ -37,7 +39,7 @@ Requires libfranka >= 0.15.0 and franka_description >= 0.5.0 requires ROS 2 Humb
 
 
 v1.0.1 (2025-05-26)
-------------------
+-------------------
 
 Requires libfranka >= 0.15.0 and franka_description >= 0.5.0 requires ROS 2 Humble
 
@@ -61,7 +63,8 @@ Requires libfranka >= 0.15.0 and franka_description >= 0.3.0 requires ROS 2 Humb
 * fix: reduced acceleration discontinuities by adding new robot_time state to franka_hardware that allows to update controllers with same time that robot uses
 * refactor: Improved Docker image for development with VSCode
 * BREAKING_CHANGE: initial_joint_position state removed from franka_hardware. rename/replace functions in franka_semantic_components as follows:
-::
+
+  ::
 
         -  initial_cartesian_pose, initial_elbow_state
         +  cartesian_pose_state,   elbow_state.
@@ -70,7 +73,7 @@ Requires libfranka >= 0.15.0 and franka_description >= 0.3.0 requires ROS 2 Humb
 
 
 0.1.15 (2024-06-21)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.2 and franka_description >= 0.3.0 requires ROS 2 Humble
 
@@ -79,7 +82,7 @@ Requires libfranka >= 0.13.2 and franka_description >= 0.3.0 requires ROS 2 Humb
 * fix: the joint-impedance-with-IK example to work without a gripper
 
 0.1.14 (2024-05-13)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.2, and franka_description >= 0.2.0 requires ROS 2 Humble
 
@@ -91,7 +94,7 @@ Requires libfranka >= 0.13.2, and franka_description >= 0.2.0 requires ROS 2 Hum
 * fix: franka_hardware prefixes the robot_state and robot model state interfaces with the read robot name from the urdf.
 
 0.1.13 (2024-01-18)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.2, requires ROS 2 Humble
 
@@ -99,7 +102,7 @@ Requires libfranka >= 0.13.2, requires ROS 2 Humble
 * fix: devcontainer typo
 
 0.1.12 (2024-01-12)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.2, requires ROS 2 Humble
 
@@ -107,7 +110,7 @@ Requires libfranka >= 0.13.2, requires ROS 2 Humble
 * feat: franka_state_broadcaster: Publish visualizable topics seperately.
 
 0.1.11 (2023-12-20)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.2, requires ROS 2 Humble
 
@@ -115,7 +118,7 @@ Requires libfranka >= 0.13.2, requires ROS 2 Humble
 * feat: franka_hardware: Register initial joint positions and cartesian pose state interface without having running command interfaces.
 
 0.1.10 (2023-12-04)
-------------------
+----------------------
 
 Requires libfranka >= 0.13.0, required ROS 2 Humble
 
