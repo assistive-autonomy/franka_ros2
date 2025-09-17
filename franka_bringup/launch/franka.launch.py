@@ -210,7 +210,7 @@ def generate_launch_description():
                                 [
                                     FindPackageShare('franka_bringup'),
                                     'config',
-                                    "controllers.yaml"
+                                    'controllers.yaml'
                                 ]),
                               description='Override the default controllers.yaml file.'),
     ]
