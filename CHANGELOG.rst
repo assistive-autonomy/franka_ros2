@@ -1,6 +1,11 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+UNRELEASED
+----------
+
+* Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
+
 v2.0.2 (2025-07-09)
 -------------------
 Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humble and Jazzy

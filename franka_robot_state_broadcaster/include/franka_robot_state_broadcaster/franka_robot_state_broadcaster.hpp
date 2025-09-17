@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -35,11 +36,10 @@
 namespace franka_robot_state_broadcaster {
 class FrankaRobotStateBroadcaster : public controller_interface::ControllerInterface {
  public:
-  // NOLINTBEGIN
   explicit FrankaRobotStateBroadcaster(
-      std::unique_ptr<franka_semantic_components::FrankaRobotState> franka_robot_state = nullptr)
-      : franka_robot_state_(std::move(franka_robot_state)){};
-  // NOLINTEND
+      std::unique_ptr<franka_semantic_components::FrankaRobotState> franka_robot_state = nullptr);
+
+  ~FrankaRobotStateBroadcaster() override;
 
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()
       const override;
@@ -133,5 +133,17 @@ class FrankaRobotStateBroadcaster : public controller_interface::ControllerInter
   bool lock_update_success_;
   franka_msgs::msg::FrankaRobotState franka_robot_state_msg_;
   std::unique_ptr<franka_semantic_components::FrankaRobotState> franka_robot_state_;
+
+  // Publish thread to not block the RT loop
+  std::thread publish_thread_;
+  std::mutex publish_mutex_;
+  std::atomic<bool> is_publish_thread_running_{false};
+  std::atomic<bool> publish_now_{false};
+  std::condition_variable condition_variable_publish_next_;
+
+  /**
+   * The function runs in a separate thread to publish the robot state to avoid blocking the RT loop
+   */
+  auto publishRunner() -> void;
 };
 }  // namespace franka_robot_state_broadcaster
