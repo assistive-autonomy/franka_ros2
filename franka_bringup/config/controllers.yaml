@@ -33,6 +33,7 @@
     ros__parameters:
       update_rate: 1000
       thread_priority: 98
+      enable_overrun: false
 
       cartesian_elbow_example_controller:
         type: franka_example_controllers/CartesianElbowExampleController
