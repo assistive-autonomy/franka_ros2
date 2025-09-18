@@ -9,6 +9,7 @@ Requires libfranka >= 0.15.0 and franka_description >= 2.0.0 requires ROS 2 Humb
 * Add support for ROS 2 Jazzy
 * Add docs under each package
 * Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
+* Added fixed forked of the controller manager to avoid the [issue #2529](https://github.com/ros-controls/ros2_control/issues/2529) in ros2_control
 
 v2.0.2 (2025-07-09)
 -------------------
