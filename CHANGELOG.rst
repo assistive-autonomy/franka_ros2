@@ -1,9 +1,14 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-UNRELEASED
-----------
+v3.0.0 (2025-09-18)
+-------------------
 
+Requires libfranka >= 0.15.0 and franka_description >= 2.0.0 requires ROS 2 Humble and Jazzy
+
+* Add support for ROS 2 Jazzy
+* Add docs under each package
+* Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
 * Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
 
 v2.0.2 (2025-07-09)
@@ -13,8 +18,6 @@ Requires libfranka >= 0.15.0 and franka_description >= 1.0.0 requires ROS 2 Humb
 * refactor: srdf files come from franka description
 * Fix: FrankaHardwareInterface: Fix eager claiming bug when multiple hardware components are present
 * Fix: joint_state_publisher uses correct topics to avoid rviz glitches
-* Add support for ROS 2 Jazzy
-* Add docs under each package
 
 v2.0.1 (2025-06-26)
 -------------------

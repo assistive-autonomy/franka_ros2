@@ -28,7 +28,7 @@ pipeline {
                 sh '''
                     . /opt/ros/jazzy/setup.sh
                     . install/setup.sh
-                    colcon test --packages-ignore libfranka --event-handlers console_direct+
+                    colcon test --packages-ignore libfranka controller_manager --event-handlers console_direct+
                     colcon test-result --verbose
                 '''
             }
