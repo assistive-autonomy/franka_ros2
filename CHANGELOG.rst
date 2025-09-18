@@ -9,7 +9,6 @@ Requires libfranka >= 0.15.0 and franka_description >= 2.0.0 requires ROS 2 Humb
 * Add support for ROS 2 Jazzy
 * Add docs under each package
 * Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
-* Refactor: Optimized the franka_robot_state_broadcaster to not block the RT loop of ros2_control
 
 v2.0.2 (2025-07-09)
 -------------------
