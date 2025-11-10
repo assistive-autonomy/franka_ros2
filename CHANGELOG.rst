@@ -1,6 +1,12 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+v3.1.1 (2025-11-10)
+-------------------
+Requires libfranka >= 0.18.0 and franka_description >= 2.0.0 requires ROS 2 Jazzy
+
+* Fix: controller manager overrun feature disabled
+
 v3.1.0 (2025-10-24)
 -------------------
 Requires libfranka >= 0.18.0 and franka_description >= 2.0.0 requires ROS 2 Jazzy
