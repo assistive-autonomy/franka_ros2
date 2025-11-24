@@ -1,6 +1,12 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+UNRELEASED
+-------------------
+Requires libfranka >= 0.18.0 and franka_description >= 1.2.0 requires ROS 2 Humble
+
+* Feat: TMRv0.2 teleoperation example controller added
+
 v2.1.0 (2025-10-24)
 -------------------
 Requires libfranka >= 0.18.0 and franka_description >= 1.2.0 requires ROS 2 Humble

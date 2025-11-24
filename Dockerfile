@@ -66,6 +66,10 @@ RUN sudo apt-get update \
         ros-humble-moveit-simple-controller-manager \
         ros-humble-rviz2 \
         ros-humble-xacro \
+        ros-humble-teleop-twist-keyboard \
+        ros-humble-joy \
+        ros-humble-teleop-twist-joy \
+
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/*
 

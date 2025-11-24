@@ -72,10 +72,11 @@ from launch_utils import load_yaml  # noqa: E402
 
 def generate_robot_nodes(context):
     config_file = LaunchConfiguration('robot_config_file').perform(context)
-    controller_name = LaunchConfiguration('controller_name').perform(context)
+    controller_names = LaunchConfiguration('controller_names').perform(context)
+    controller_names_vector = controller_names.split(',')
     configs = load_yaml(config_file)
     nodes = []
-    for item_name, config in configs.items():
+    for index, (_,config) in enumerate(configs.items()):
         namespace = config['namespace']
         nodes.append(
             IncludeLaunchDescription(
@@ -88,7 +89,6 @@ def generate_robot_nodes(context):
                     'arm_id': str(config['arm_id']),
                     'arm_prefix': str(config['arm_prefix']),
                     'namespace': str(namespace),
-                    'urdf_file': str(config['urdf_file']),
                     'robot_ip': str(config['robot_ip']),
                     'load_gripper': str(config['load_gripper']),
                     'use_fake_hardware': str(config['use_fake_hardware']),
@@ -97,6 +97,10 @@ def generate_robot_nodes(context):
                 }.items(),
             )
         )
+        if len(controller_names_vector) == len(configs):
+            controller_name = controller_names_vector[index]
+        else:
+            controller_name = controller_names_vector[0]
         nodes.append(
             Node(
                 package='controller_manager',
@@ -141,8 +145,8 @@ def generate_launch_description():
             description='Path to the robot configuration file to load',
         ),
         DeclareLaunchArgument(
-            'controller_name',
-            description='Name of the controller to spawn (required, no default)',
+            'controller_names',
+            description='Names of the controllers to spawn (required, no default)',
         ),
         OpaqueFunction(function=generate_robot_nodes),
     ])
