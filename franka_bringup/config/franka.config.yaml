@@ -9,14 +9,13 @@
 # Ensure each robot has a unique namespace to prevent topic conflicts.
 
 ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic) 
-  arm_id: "fr3" # Reserved for future use, unique arm (i.e. robot model) identifier
+  arm_id: "tmrv0_2" # Reserved for future use, unique arm (i.e. robot model) identifier
   arm_prefix: "" # Reserved for future use (e.g., robot unique prefix)
   fake_sensor_commands: "false" # Enable fake sensor commands for simulation
   joint_state_rate: 30 # Publishing rate for joint states (Hz)
   load_gripper: "false" # Enable Franka Gripper ("true" or "false")
   namespace: "NS_1" # Namespace for robot, any string (empty string allowed - meaningful names recommended)
-  robot_ip: "172.16.0.3" # Robot’s IP address or hostname
-  urdf_file: "fr3/fr3.urdf.xacro" # Relative path to URDF in franka_description/robots
+  robot_ip: "10.2.130.76" # Robot’s IP address or hostname
   use_fake_hardware: "false" # Use simulated hardware ("true" or "false")
   use_rviz: "false" # Launch RViz if "true" (single instance for all namespaces)
 # Uncomment the following lines to add more robots in Namespaces
@@ -28,7 +27,6 @@ ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic)
 #   load_gripper: "false"
 #   namespace: "NS_2"
 #   robot_ip: "172.16.0.4"
-#   urdf_file: "fr3/fr3.urdf.xacro"
 #   use_fake_hardware: "false"
 #   use_rviz: "false" 
 # ROBOT3:
@@ -39,7 +37,6 @@ ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic)
 #   load_gripper: "false"
 #   namespace: "NS_3"
 #   robot_ip: "172.16.0.5"
-#   urdf_file: "fr3/fr3.urdf.xacro"
 #   use_fake_hardware: "false"
 #   use_rviz: "false"  
 

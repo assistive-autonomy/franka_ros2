@@ -17,7 +17,6 @@
 # arm_id: ID of the type of arm used (default: '')
 # arm_prefix: Prefix for arm topics (default: '')
 # namespace: Namespace for the robot (default: '')
-# urdf_file: URDF file path relative to franka_description/robots (default: 'fr3/fr3.urdf.xacro')
 # robot_ip: Hostname or IP address of the robot (default: '172.16.0.3')
 # load_gripper: Use Franka Gripper as an end-effector (default: 'false')
 # use_fake_hardware: Use fake hardware (default: 'false')
@@ -87,21 +86,36 @@ import xacro
 def generate_robot_nodes(context):
     load_gripper_launch_configuration = LaunchConfiguration('load_gripper').perform(context)
     load_gripper = load_gripper_launch_configuration.lower() == 'true'
+    arm_id = LaunchConfiguration('arm_id').perform(context)
     urdf_path = PathJoinSubstitution([
-        FindPackageShare('franka_description'), 'robots', LaunchConfiguration('urdf_file')
+        FindPackageShare('franka_description'), 'robots', f"{arm_id}", f"{arm_id}.urdf.xacro"
     ]).perform(context)
-    robot_description = xacro.process_file(
-        urdf_path,
-        mappings={
-            'ros2_control': 'true',
-            'arm_id': LaunchConfiguration('arm_id').perform(context),
-            'arm_prefix': LaunchConfiguration('arm_prefix').perform(context),
-            'robot_ip': LaunchConfiguration('robot_ip').perform(context),
-            'hand': load_gripper_launch_configuration,
-            'use_fake_hardware': LaunchConfiguration('use_fake_hardware').perform(context),
-            'fake_sensor_commands': LaunchConfiguration('fake_sensor_commands').perform(context),
-        }
-    ).toprettyxml(indent='  ')
+    if arm_id == 'tmrv0_2':
+        print("tmrv0_2 detected, omitting arm_prefix")
+        robot_description = xacro.process_file(
+            urdf_path,
+            mappings={
+                'ros2_control': 'true',
+                'arm_id': LaunchConfiguration('arm_id').perform(context),
+                'robot_ip': LaunchConfiguration('robot_ip').perform(context),
+                'use_fake_hardware': LaunchConfiguration('use_fake_hardware').perform(context),
+                'fake_sensor_commands': LaunchConfiguration('fake_sensor_commands').perform(context),
+            }
+        ).toprettyxml(indent='  ')
+        print("Processed URDF for tmrv0_2")
+    else:
+        robot_description = xacro.process_file(
+            urdf_path,
+            mappings={
+                'ros2_control': 'true',
+                'arm_id': LaunchConfiguration('arm_id').perform(context),
+                'arm_prefix': LaunchConfiguration('arm_prefix').perform(context),
+                'robot_ip': LaunchConfiguration('robot_ip').perform(context),
+                'hand': load_gripper_launch_configuration,
+                'use_fake_hardware': LaunchConfiguration('use_fake_hardware').perform(context),
+                'fake_sensor_commands': LaunchConfiguration('fake_sensor_commands').perform(context),
+            }
+        ).toprettyxml(indent='  ')
 
     namespace = LaunchConfiguration('namespace').perform(context)
 
@@ -187,9 +201,6 @@ def generate_launch_description():
         DeclareLaunchArgument('namespace',
                               default_value='',
                               description='Namespace for the robot'),
-        DeclareLaunchArgument('urdf_file',
-                              default_value='fr3/fr3.urdf.xacro',
-                              description='Path to URDF file'),
         DeclareLaunchArgument('robot_ip',
                               default_value='172.16.0.3',
                               description='Hostname or IP address of the robot'),

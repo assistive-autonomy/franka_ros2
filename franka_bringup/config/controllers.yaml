@@ -85,6 +85,9 @@
       move_to_start_example_controller:
         type: franka_example_controllers/MoveToStartExampleController
 
+      mobile_cartesian_velocity_example_controller:
+        type: franka_example_controllers/MobileCartesianVelocityExampleController
+
 /**:
   cartesian_elbow_example_controller:
     ros__parameters:
