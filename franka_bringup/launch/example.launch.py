@@ -60,6 +60,9 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+# constant for the controller name parameter
+CONTROLLER_EXAMPLE = 'controller'
+
 package_share = get_package_share_directory('franka_bringup')
 utils_path = os.path.abspath(
     os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
@@ -113,7 +116,7 @@ def generate_robot_nodes(context):
         )
         if controller_names_vector:
             if len(controller_names_vector) == len(configs):
-                controller_name = controller_names_vector[index]
+
             else:
                 print(
                     'Warning: Number of controller names does not match number of robot configs.'
@@ -125,24 +128,38 @@ def generate_robot_nodes(context):
                 'Error: No controller names provided. Please provide at least one controller name.'
             )
             sys.exit(1)
-        nodes.append(
-            Node(
-                package='controller_manager',
-                executable='spawner',
-                namespace=namespace,
-                arguments=[controller_name, '--controller-manager-timeout', '30'],
-                parameters=[
-                    PathJoinSubstitution(
+
+        if CONTROLLER_EXAMPLE in controller_name:
+            # Spawn the example as ros2_control controller
+            controller_name = controller_names_vector[index]
+            nodes.append(
+                Node(
+                    package='controller_manager',
+                    executable='spawner',
+                    namespace=namespace,
+                    arguments=[controller_name, '--controller-manager-timeout', '30'],
+                    parameters=[PathJoinSubstitution([
+                        FindPackageShare('franka_bringup'), 'config', 'controllers.yaml',
                         [
                             FindPackageShare('franka_bringup'),
                             'config',
                             'controllers.yaml',
                         ]
-                    )
-                ],
-                output='screen',
+                    ])],
+                    output='screen',
+                )
             )
-        )
+        else:
+            # Spawn the example as node
+            nodes.append(
+                Node(
+                    package='franka_example_controllers',
+                    executable=controller_name,
+                    namespace=namespace,
+                    output='screen',
+                )
+            )
+
     if any(
         str(config.get('use_rviz', 'false')).lower() == 'true'
         for config in configs.values()
@@ -184,10 +201,6 @@ def generate_launch_description():
                     [FindPackageShare('franka_bringup'), 'config', 'franka.config.yaml']
                 ),
                 description='Path to the robot configuration file to load',
-            ),
-            DeclareLaunchArgument(
-                'controller_names',
-                description='Names of the controllers to spawn (required, no default)',
             ),
             OpaqueFunction(function=generate_robot_nodes),
         ]

@@ -29,6 +29,8 @@ add_library(franka_hardware SHARED
         src/franka_param_service_server.cpp
         src/robot.cpp
         src/ros_libfranka_logger.cpp
+
+        src/actions_helper/ptp_motion_handler.cpp
 )
 
 target_include_directories(

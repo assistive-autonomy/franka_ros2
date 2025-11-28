@@ -25,6 +25,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -45,7 +46,8 @@ add_library(
         src/joint_velocity_example_controller.cpp
         src/model_example_controller.cpp
         src/motion_generator.cpp
-        src/move_to_start_example_controller.cpp)
+        src/move_to_start_example_controller.cpp
+)
 target_include_directories(
         ${PROJECT_NAME}
         PUBLIC
@@ -82,6 +84,20 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+# PTP Motion example executable (binary)
+add_executable(ptp_motion_example_node
+    src/async_motions/ptp_motion_example_node.cpp)
+
+target_include_directories(ptp_motion_example_node PRIVATE include ${EIGEN3_INCLUDE_DIRS})
+
+ament_target_dependencies(ptp_motion_example_node
+    rclcpp
+    rclcpp_action
+    franka_msgs)
+
+install(TARGETS ptp_motion_example_node
+    RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
     find_package(ament_cmake_clang_format REQUIRED)
