@@ -177,9 +177,11 @@ class FrankaHardwareInterface : public hardware_interface::SystemInterface {
   static rclcpp::Logger getLogger();
 
   std::string robot_type_{"fr3"};
+  std::string prefix_;  // Prefix for joint names in dual-arm setups (e.g., "left_", "right_")
   const std::string k_robot_state_interface_name{"robot_state"};
   const std::string k_robot_model_interface_name{"robot_model"};
   const size_t max_number_start_interfaces = 45;
+  std::mutex control_mutex_;
 
   std::unordered_set<std::string> exported_command_interfaces_;
 };

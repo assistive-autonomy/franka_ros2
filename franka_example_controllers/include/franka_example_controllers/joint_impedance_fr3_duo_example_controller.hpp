@@ -25,9 +25,10 @@ using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface
 namespace franka_example_controllers {
 
 /**
- * The joint impedance example controller moves joint 4 and 5 in a very compliant periodic movement.
+ * The joint impedance FR3 duo example controller moves joint 4 and 5 in a very compliant periodic
+ * movement.
  */
-class JointImpedanceDuoExampleController : public controller_interface::ControllerInterface {
+class JointImpedanceFr3DuoExampleController : public controller_interface::ControllerInterface {
  public:
   using Vector7d = Eigen::Matrix<double, 7, 1>;
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()
@@ -41,7 +42,7 @@ class JointImpedanceDuoExampleController : public controller_interface::Controll
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::vector<std::string> arm_ids_;
+  std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
   std::string robot_description_;
   bool is_gazebo{false};

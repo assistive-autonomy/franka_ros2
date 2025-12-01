@@ -88,7 +88,45 @@ Then, for example, to run the *move_to_start_example_controller*, use the follow
 
 .. code-block:: shell
 
-    ros2 launch franka_bringup example.launch.py controller_name:=move_to_start_example_controller
+    ros2 launch franka_bringup example.launch.py controller_names:=move_to_start_example_controller
+
+FR3 Duo (Dual-Arm Setup)
+------------------------
+
+The ``franka_bringup`` package supports launching a dual-arm FR3 setup using the ``fr3_duo.config.yaml`` configuration file.
+
+.. important::
+
+    The FR3 Duo setup currently only supports the **torque (effort) command interface**. Position, velocity, 
+    and Cartesian pose/velocity interfaces are not supported for dual-arm configurations.
+
+Configuration
+^^^^^^^^^^^^^
+
+The dual-arm configuration is defined in ``franka_bringup/config/fr3_duo.config.yaml``. The key parameters are:
+
+* ``robot_types``: Types of the robot arms as a string list (e.g., ``"['fr3','fr3']"``)
+* ``arm_prefixes``: Unique prefixes for each arm (e.g., ``"['right','left']"``)
+* ``robot_ips``: IP addresses of the robots as a string list (e.g., ``"['172.16.0.3','172.16.0.5']"``)
+
+.. note::
+
+    All three arrays (``robot_types``, ``robot_ips``, ``arm_prefixes``) must have the same length, 
+    and ``arm_prefixes`` must contain unique values.
+
+Launching the FR3 Duo
+^^^^^^^^^^^^^^^^^^^^^
+
+To launch the dual-arm setup with the joint impedance controller:
+
+.. code-block:: shell
+
+    ros2 launch franka_bringup example.launch.py \
+        controller_names:=joint_impedance_fr3_duo_example_controller \
+        robot_config_file:=fr3_duo.config.yaml
+
+You can also specify just the config filename, and the launch file will automatically look in the 
+``franka_bringup/config/`` directory.
 
 Non-realtime robot parameter setting
 ------------------------------------

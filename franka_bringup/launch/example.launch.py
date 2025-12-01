@@ -14,15 +14,17 @@
 
 ############################################################################
 # Parameters:
-# controller_name: Name of the controller to spawn (required, no default)
-# robot_config_file: Path to the robot configuration file to load
-#                   (default: franka.config.yaml in franka_bringup/config)
+# controller_names: Comma-separated list of controller names to spawn (required, no default)
+# robot_config_file: Configuration file name or path. If just a filename is
+#                   provided (e.g., 'fr3_duo.config.yaml'), it will be
+#                   looked up in franka_bringup/config/ directory.
+#                   (default: franka.config.yaml)
 #
 # The example.launch.py launch file provides a flexible and unified interface
-# for launching Franka Robotics example controllers via the 'controller_name'
+# for launching Franka Robotics example controllers via the 'controller_names'
 # parameter, such as 'elbow_example_controller'.
 # Example:
-# ros2 launch franka_bringup example.launch.py controller_name:=elbow_example_controller
+# ros2 launch franka_bringup example.launch.py controller_names:=elbow_example_controller
 #
 # This script "includes" franka.launch.py to declare core component nodes,
 # including: robot_state_publisher, ros2_control_node, joint_state_publisher,
@@ -40,10 +42,11 @@
 # specific use cases, example.launch.py enhances scalability and ease of use
 # for a wide range of Franka Robotics applications.
 #
-# Ensure the specified  controller_name matches a controller defined in
-#  controllers.yaml to avoid runtime errors.
+# Ensure the specified controller_names match controllers defined in
+# controllers.yaml to avoid runtime errors.
 ############################################################################
 
+import ast
 import importlib.util
 import os
 import sys
@@ -62,6 +65,19 @@ from launch_ros.substitutions import FindPackageShare
 
 # constant for the controller name parameter
 CONTROLLER_EXAMPLE = 'controller'
+
+
+def parse_string_list(string_list_repr):
+    """Parse a string representation of a list into an actual Python list.
+
+    Handles formats like "['item1','item2']" or "['item1', 'item2']".
+    """
+    try:
+        return ast.literal_eval(string_list_repr)
+    except (ValueError, SyntaxError):
+        # Fallback: try to parse manually if ast fails
+        cleaned = string_list_repr.strip('[]').replace("'", '').replace('"', '')
+        return [item.strip() for item in cleaned.split(',')]
 
 package_share = get_package_share_directory('franka_bringup')
 utils_path = os.path.abspath(
@@ -85,35 +101,104 @@ load_yaml = launch_utils.load_yaml
 
 def generate_robot_nodes(context):
     config_file = LaunchConfiguration('robot_config_file').perform(context)
+    
+    # If config_file is just a filename (no path separators), look in franka_bringup/config/
+    if not os.path.isabs(config_file) and os.path.sep not in config_file:
+        config_file = os.path.join(package_share, 'config', config_file)
+    
     controller_names = LaunchConfiguration('controller_names').perform(context)
     controller_names_vector = controller_names.split(',')
     configs = load_yaml(config_file)
     nodes = []
+
     for index, (_, config) in enumerate(configs.items()):
-        namespace = config['namespace']
-        nodes.append(
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    PathJoinSubstitution(
-                        [
-                            FindPackageShare('franka_bringup'),
-                            'launch',
-                            'franka.launch.py',
-                        ]
-                    )
-                ),
-                launch_arguments={
-                    'robot_type': str(config['robot_type']),
-                    'arm_prefix': str(config['arm_prefix']),
-                    'namespace': str(namespace),
-                    'robot_ip': str(config['robot_ip']),
-                    'load_gripper': str(config['load_gripper']),
-                    'use_fake_hardware': str(config['use_fake_hardware']),
-                    'fake_sensor_commands': str(config['fake_sensor_commands']),
-                    'joint_state_rate': str(config['joint_state_rate']),
-                }.items(),
+        namespace = config.get('namespace', '')
+        # Detect duo setup by checking for plural keys (robot_types, robot_ips, arm_prefixes)
+        # that are unique to multi-robot configurations
+        duo_keys = {'robot_types', 'robot_ips', 'arm_prefixes'}
+        is_duo = duo_keys.issubset(config.keys())
+
+        if is_duo:
+            # Validate that all duo arrays have the same length
+            robot_types_list = parse_string_list(str(config['robot_types']))
+            robot_ips_list = parse_string_list(str(config['robot_ips']))
+            arm_prefixes_list = parse_string_list(str(config['arm_prefixes']))
+
+            if not (len(robot_types_list) == len(robot_ips_list) == len(arm_prefixes_list)):
+                print(
+                    f'Error: Duo configuration arrays must have the same length.\n'
+                    f'  robot_types:  {len(robot_types_list)} items: {robot_types_list}\n'
+                    f'  robot_ips:    {len(robot_ips_list)} items: {robot_ips_list}\n'
+                    f'  arm_prefixes: {len(arm_prefixes_list)} items: {arm_prefixes_list}\n'
+                    f'Please check your configuration file and ensure all arrays '
+                    f'have the same number of elements.'
+                )
+                sys.exit(1)
+
+            # Validate that arm_prefixes are unique
+            if len(arm_prefixes_list) != len(set(arm_prefixes_list)):
+                duplicates = [p for p in arm_prefixes_list if arm_prefixes_list.count(p) > 1]
+                print(
+                    f'Error: arm_prefixes must be unique.\n'
+                    f'  arm_prefixes: {arm_prefixes_list}\n'
+                    f'  Duplicate values: {list(set(duplicates))}\n'
+                    f'Each robot arm requires a unique prefix to avoid naming conflicts.'
+                )
+                sys.exit(1)
+
+            # Duo configuration: use fr3_duo.launch.py for dual-arm setup
+            nodes.append(
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_bringup'),
+                                'launch',
+                                'fr3_duo.launch.py',
+                            ]
+                        )
+                    ),
+                    launch_arguments={
+                        'robot_types': str(config['robot_types']),
+                        'arm_prefixes': str(config['arm_prefixes']),
+                        'robot_ips': str(config['robot_ips']),
+                        'namespace': str(namespace),
+                        'load_gripper': str(config.get('load_gripper', 'false')),
+                        'use_fake_hardware': str(config.get('use_fake_hardware', 'false')),
+                        'fake_sensor_commands': str(
+                            config.get('fake_sensor_commands', 'false')
+                        ),
+                        'joint_state_rate': str(config.get('joint_state_rate', 30)),
+                    }.items(),
+                )
             )
-        )
+        else:
+            # Single robot configuration: use franka.launch.py
+            nodes.append(
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_bringup'),
+                                'launch',
+                                'franka.launch.py',
+                            ]
+                        )
+                    ),
+                    launch_arguments={
+                        'robot_type': str(config['robot_type']),
+                        'arm_prefix': str(config['arm_prefix']),
+                        'namespace': str(namespace),
+                        'robot_ip': str(config['robot_ip']),
+                        'load_gripper': str(config['load_gripper']),
+                        'use_fake_hardware': str(config['use_fake_hardware']),
+                        'fake_sensor_commands': str(config['fake_sensor_commands']),
+                        'joint_state_rate': str(config['joint_state_rate']),
+                    }.items(),
+                )
+            )
+
+        # Determine which controller to use for this config
         if controller_names_vector:
             if len(controller_names_vector) == len(configs):
                 controller_name = controller_names_vector[index]
@@ -131,21 +216,21 @@ def generate_robot_nodes(context):
 
         if CONTROLLER_EXAMPLE in controller_name:
             # Spawn the example as ros2_control controller
-            controller_name = controller_names_vector[index]
             nodes.append(
                 Node(
                     package='controller_manager',
                     executable='spawner',
                     namespace=namespace,
                     arguments=[controller_name, '--controller-manager-timeout', '30'],
-                    parameters=[PathJoinSubstitution([
-                        FindPackageShare('franka_bringup'), 'config', 'controllers.yaml',
-                        [
-                            FindPackageShare('franka_bringup'),
-                            'config',
-                            'controllers.yaml',
-                        ]
-                    ])],
+                    parameters=[
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_bringup'),
+                                'config',
+                                'controllers.yaml',
+                            ]
+                        )
+                    ],
                     output='screen',
                 )
             )
@@ -197,10 +282,12 @@ def generate_launch_description():
         [
             DeclareLaunchArgument(
                 'robot_config_file',
-                default_value=PathJoinSubstitution(
-                    [FindPackageShare('franka_bringup'), 'config', 'franka.config.yaml']
-                ),
-                description='Path to the robot configuration file to load',
+                default_value='franka.config.yaml',
+                description='Config file name (looked up in franka_bringup/config/) or full path',
+            ),
+            DeclareLaunchArgument(
+                'controller_names',
+                description='Comma-separated list of controller names to spawn (required)',
             ),
             OpaqueFunction(function=generate_robot_nodes),
         ]
