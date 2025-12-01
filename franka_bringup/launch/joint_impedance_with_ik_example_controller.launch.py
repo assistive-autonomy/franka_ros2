@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import sys
+import importlib.util
 import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, OpaqueFunction
@@ -21,12 +22,17 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 
-# Add the path to the `utils` folder
 package_share = get_package_share_directory('franka_bringup')
-utils_path = os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
-sys.path.append(os.path.abspath(utils_path))
+utils_path = os.path.abspath(
+    os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
+)
+launch_utils_path = os.path.join(utils_path, 'launch_utils.py')
 
-from launch_utils import load_yaml  # noqa: E402
+spec = importlib.util.spec_from_file_location('launch_utils', launch_utils_path)
+launch_utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(launch_utils)
+
+load_yaml = launch_utils.load_yaml
 
 
 def generate_robot_nodes(context):
@@ -89,7 +95,6 @@ def generate_robot_nodes(context):
 
 def generate_launch_description():
     return LaunchDescription([
-        # Declare launch arguments and add additional ones if needed
         DeclareLaunchArgument(
             'robot_config_file',
             default_value=PathJoinSubstitution([
@@ -97,6 +102,5 @@ def generate_launch_description():
             ]),
             description='Path to the robot configuration file to load',
         ),
-        # Generate robot nodes
         OpaqueFunction(function=generate_robot_nodes),
     ])

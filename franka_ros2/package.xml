@@ -12,6 +12,7 @@
   <depend>franka_bringup</depend>
   <depend>franka_description</depend>
   <depend>franka_example_controllers</depend>
+  <depend>franka_mobile_example_controllers</depend>
   <depend>franka_fr3_moveit_config</depend>
   <depend>franka_gazebo_bringup</depend>
   <depend>franka_ign_ros2_control</depend>

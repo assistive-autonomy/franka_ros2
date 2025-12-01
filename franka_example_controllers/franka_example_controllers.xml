@@ -77,11 +77,4 @@
             The Gripper example controller demonstrates the use of the Robot gripper.
         </description>
     </class>
-    <class name="franka_example_controllers/MobileCartesianVelocityExampleController"
-        type="franka_example_controllers::MobileCartesianVelocityExampleController"
-        base_class_type="controller_interface::ControllerInterface">
-        <description>
-            The cartseian velocity controller sends sine waves as cartesian velocities.
-        </description>
-    </class>
 </library>
