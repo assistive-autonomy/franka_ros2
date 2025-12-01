@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/mobile_cartesian_velocity_example_controller.hpp>
-#include <franka_example_controllers/default_robot_behavior_utils.hpp>
-#include <franka_example_controllers/robot_utils.hpp>
+#include <franka_mobile_example_controllers/mobile_cartesian_velocity_example_controller.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -23,7 +21,7 @@
 
 #include <Eigen/Eigen>
 
-namespace franka_example_controllers {
+namespace franka_mobile_example_controllers {
 
 controller_interface::InterfaceConfiguration
 MobileCartesianVelocityExampleController::command_interface_configuration() const {
@@ -41,47 +39,52 @@ MobileCartesianVelocityExampleController::state_interface_configuration() const 
 }
 
 controller_interface::return_type MobileCartesianVelocityExampleController::update(
-    const rclcpp::Time &, const rclcpp::Duration &period)
-{
+    const rclcpp::Time&,
+    const rclcpp::Duration& period) {
   last_cmd_time_ += period.seconds();
 
-  double target_vx = 0.0;
-  double target_vy = 0.0;
-  double target_omega = 0.0;
+  double target_linear_velocity_x = 0.0;
+  double target_linear_velocity_y = 0.0;
+  double target_angular_velocity_z = 0.0;
 
-  if (last_cmd_vel_ && last_cmd_time_ < timeout_sec)
-    {
-      target_vx = last_cmd_vel_->twist.linear.x;
-      target_vy = last_cmd_vel_->twist.linear.y;
-      target_omega = last_cmd_vel_->twist.angular.z;
-    }
-
-  auto limit_acc = [&](double target_a, double &prev_a, double max_jerk, double max_acc)
-  {
-      double delta_a = target_a - prev_a;
-      double max_delta = max_jerk * dt;
-      if (std::abs(delta_a) > max_delta)
-          delta_a = std::copysign(max_delta, delta_a);
-      double limited_a = prev_a + delta_a;
-      if (std::abs(limited_a) > max_acc)
-          return std::copysign(max_acc, limited_a);
-      return limited_a;
+  if (last_cmd_vel_ && last_cmd_time_ < timeout_sec) {
+    target_linear_velocity_x = last_cmd_vel_->twist.linear.x;
+    target_linear_velocity_y = last_cmd_vel_->twist.linear.y;
+    target_angular_velocity_z = last_cmd_vel_->twist.angular.z;
   };
-  
-  double target_ax = (target_vx - prev_vx_) / dt;
-  double target_ay = (target_vy - prev_vy_) / dt;
-  double target_alpha = (target_omega - prev_omega_) / dt;
 
-  double prev_ax_ = limit_acc(target_ax, prev_ax_, max_jerk_linear_, max_acceleration_linear_);
-  double prev_ay_ = limit_acc(target_ay, prev_ay_, max_jerk_linear_, max_acceleration_linear_);
-  double prev_alpha_ = limit_acc(target_alpha, prev_alpha_, max_jerk_angular_, max_acceleration_angular_);
+  auto limit_acc = [&](double target_a, double prev_a, double max_jerk, double max_acc) {
+    double delta_a = target_a - prev_a;
+    double max_delta = max_jerk * dt;
+    if (std::abs(delta_a) > max_delta)
+      delta_a = std::copysign(max_delta, delta_a);
+    double limited_a = prev_a + delta_a;
+    if (std::abs(limited_a) > max_acc)
+      return std::copysign(max_acc, limited_a);
+    return limited_a;
+  };
 
-  prev_vx_ += prev_ax_ * dt;
-  prev_vy_ += prev_ay_ * dt;
-  prev_omega_  += prev_alpha_ * dt;
+  double target_linear_acceleration_x = (target_linear_velocity_x - prev_linear_velocity_x_) / dt;
+  double target_linear_acceleration_y = (target_linear_velocity_y - prev_linear_velocity_y_) / dt;
+  double target_angular_acceleration_z =
+      (target_angular_velocity_z - prev_angular_velocity_z_) / dt;
 
-  Eigen::Vector3d cartesian_linear_velocity(prev_vx_, prev_vy_, 0.0);
-  Eigen::Vector3d cartesian_angular_velocity(0.0, 0.0, prev_omega_);
+  double prev_linear_acceleration_x_ =
+      limit_acc(target_linear_acceleration_x, prev_linear_acceleration_x_, max_jerk_linear_,
+                max_acceleration_linear_);
+  double prev_linear_acceleration_y_ =
+      limit_acc(target_linear_acceleration_y, prev_linear_acceleration_y_, max_jerk_linear_,
+                max_acceleration_linear_);
+  double prev_angular_acceleration_z_ =
+      limit_acc(target_angular_acceleration_z, prev_angular_acceleration_z_, max_jerk_angular_,
+                max_acceleration_angular_);
+
+  prev_linear_velocity_x_ += prev_linear_acceleration_x_ * dt;
+  prev_linear_velocity_y_ += prev_linear_acceleration_y_ * dt;
+  prev_angular_velocity_z_ += prev_angular_acceleration_z_ * dt;
+
+  Eigen::Vector3d cartesian_linear_velocity(prev_linear_velocity_x_, prev_linear_velocity_y_, 0.0);
+  Eigen::Vector3d cartesian_angular_velocity(0.0, 0.0, prev_angular_velocity_z_);
 
   if (franka_cartesian_velocity_->setCommand(cartesian_linear_velocity,
                                              cartesian_angular_velocity)) {
@@ -106,10 +109,10 @@ CallbackReturn MobileCartesianVelocityExampleController::on_configure(
           franka_semantic_components::FrankaCartesianVelocityInterface(false));
 
   cmd_vel_sub_ = get_node()->create_subscription<geometry_msgs::msg::TwistStamped>(
-      "/NS_1/mobile_cartesian_velocity_controller/cmd_vel", 10,
-      [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg){
-      last_cmd_vel_ = msg;
-      last_cmd_time_ = 0.0;
+      "/NS_1/mobile_cartesian_velocity_controller/cmd_vel", queue_size_,
+      [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
+        last_cmd_vel_ = msg;
+        last_cmd_time_ = 0.0;
       });
 
   return CallbackReturn::SUCCESS;
@@ -128,8 +131,8 @@ controller_interface::CallbackReturn MobileCartesianVelocityExampleController::o
   return CallbackReturn::SUCCESS;
 }
 
-}  // namespace franka_example_controllers
+}  // namespace franka_mobile_example_controllers
 #include "pluginlib/class_list_macros.hpp"
 // NOLINTNEXTLINE
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::MobileCartesianVelocityExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_mobile_example_controllers::MobileCartesianVelocityExampleController,
                        controller_interface::ControllerInterface)

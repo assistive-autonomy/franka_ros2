@@ -17,15 +17,15 @@
 #include <string>
 
 #include <controller_interface/controller_interface.hpp>
-#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include <franka_semantic_components/franka_cartesian_velocity_interface.hpp>
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-namespace franka_example_controllers {
+namespace franka_mobile_example_controllers {
 
 /**
  * The cartesian velocity example controller
@@ -49,21 +49,22 @@ class MobileCartesianVelocityExampleController : public controller_interface::Co
   geometry_msgs::msg::TwistStamped::SharedPtr last_cmd_vel_;
   rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_sub_;
 
-  double prev_vx_ = 0.0;
-  double prev_vy_ = 0.0;
-  double prev_omega_ = 0.0;
-  double prev_ax_ = 0.0;
-  double prev_ay_ = 0.0;
-  double prev_alpha_ = 0.0;
+  double prev_linear_velocity_x_ = 0.0;
+  double prev_linear_velocity_y_ = 0.0;
+  double prev_angular_velocity_z_ = 0.0;
+  double prev_linear_acceleration_x_ = 0.0;
+  double prev_linear_acceleration_y_ = 0.0;
+  double prev_angular_acceleration_z_ = 0.0;
 
-  double max_acceleration_linear_ = 5.0; 
+  double max_acceleration_linear_ = 5.0;
   double max_acceleration_angular_ = 10.0;
-  double max_jerk_linear_ = 3000.0; 
-  double max_jerk_angular_ = 5000.0; 
-  
+  double max_jerk_linear_ = 3000.0;
+  double max_jerk_angular_ = 5000.0;
+
   double last_cmd_time_;
   double timeout_sec = 0.2;
   double dt = 0.001;
+  size_t queue_size_ = 10;
 };
 
-}  // namespace franka_example_controllers
+}  // namespace franka_mobile_example_controllers

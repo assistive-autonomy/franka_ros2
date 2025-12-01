@@ -201,7 +201,7 @@ You can select one of the controllers from `controllers.yaml`.
 
 ### Run different controllers for different robots
 
-If you want to run different controllers for each robot, you must specify the controllers you want to run as follows:
+If you want to run a specific controller for each robot, you must specify the controllers you want to run as follows (example for three robots):
 
 ```bash
 ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_example_controller,joint_impedance_example_controller,cartesian_velocity_example_controller" 
