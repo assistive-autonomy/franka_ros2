@@ -48,7 +48,7 @@ class ModelExampleController : public controller_interface::ControllerInterface 
       const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::string arm_id_;
+  std::string robot_id_;
   std::unique_ptr<franka_semantic_components::FrankaRobotModel> franka_robot_model_;
 
   const std::string k_robot_state_interface_name{"robot_state"};

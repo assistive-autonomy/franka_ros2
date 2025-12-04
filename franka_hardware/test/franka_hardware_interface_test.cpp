@@ -45,7 +45,7 @@ using namespace std::chrono_literals;
 class FrankaHardwareInterfaceTest : public ::testing::TestWithParam<std::string> {
  public:
   auto SetUp() -> void override {
-    auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + arm_id + ".urdf");
+    auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_id + ".urdf");
     auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
     auto number_of_expected_hardware_components = 1;
 
@@ -56,11 +56,11 @@ class FrankaHardwareInterfaceTest : public ::testing::TestWithParam<std::string>
   }
 
  protected:
-  std::string arm_id{"fr3"};
+  std::string robot_id{"fr3"};
   std::shared_ptr<MockRobot> default_mock_robot = std::make_shared<MockRobot>();
   hardware_interface::HardwareInfo default_hardware_info;
   franka_hardware::FrankaHardwareInterface default_franka_hardware_interface{default_mock_robot,
-                                                                             arm_id};
+                                                                             robot_id};
 
   /* Helper function to get the response of a service */
   template <typename service_client_type,
@@ -103,7 +103,7 @@ auto FrankaHardwareInterfaceTest::get_param_service_response(
 }
 
 TEST_F(FrankaHardwareInterfaceTest, givenUnsupportedURDFVersion_thenReturnError) {
-  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + arm_id + "_unsupported_version.urdf");
+  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_id + "_unsupported_version.urdf");
   auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
   auto number_of_expected_hardware_components = 1;
 
@@ -117,7 +117,7 @@ TEST_F(FrankaHardwareInterfaceTest, givenUnsupportedURDFVersion_thenReturnError)
 }
 
 TEST_F(FrankaHardwareInterfaceTest, givenFR3ComponentInfo_whenOnInitCalled_expectSuccess) {
-  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + arm_id + ".urdf");
+  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_id + ".urdf");
   auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
   auto number_of_expected_hardware_components = 1;
 
@@ -183,18 +183,18 @@ TEST_F(
     }
     const std::string joint_name = k_joint_name + std::to_string(joint_index);
     if (i % 3 == 0) {
-      ASSERT_EQ(states[i].get_name(), arm_id + "_" + joint_name + "/" + k_position_controller);
+      ASSERT_EQ(states[i].get_name(), robot_id + "_" + joint_name + "/" + k_position_controller);
     } else if (i % 3 == 1) {
-      ASSERT_EQ(states[i].get_name(), arm_id + "_" + joint_name + "/" + k_velocity_controller);
+      ASSERT_EQ(states[i].get_name(), robot_id + "_" + joint_name + "/" + k_velocity_controller);
     } else if (i % 3 == 2) {
-      ASSERT_EQ(states[i].get_name(), arm_id + "_" + joint_name + "/" + k_effort_controller);
+      ASSERT_EQ(states[i].get_name(), robot_id + "_" + joint_name + "/" + k_effort_controller);
     }
     ASSERT_EQ(states[i].get_value(), 0.0);
   }
 
-  ASSERT_EQ(states[joint_interfaces].get_name(), arm_id + "/robot_state");
-  ASSERT_EQ(states[joint_interfaces + 1].get_name(), arm_id + "/robot_model");
-  ASSERT_EQ(states[states.size() - 1].get_name(), arm_id + "/robot_time");
+  ASSERT_EQ(states[joint_interfaces].get_name(), robot_id + "/robot_state");
+  ASSERT_EQ(states[joint_interfaces + 1].get_name(), robot_id + "/robot_model");
+  ASSERT_EQ(states[states.size() - 1].get_name(), robot_id + "/robot_time");
 
   // Verify total number of interfaces
   ASSERT_EQ(states.size(), state_interface_size);
@@ -253,7 +253,7 @@ TEST_P(FrankaHardwareInterfaceTest,
   std::vector<std::string> stop_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     stop_interface.push_back(joint_name + "/" + command_interface);
   }
   std::vector<std::string> start_interface = {};
@@ -270,7 +270,7 @@ TEST_P(
   std::vector<std::string> stop_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     stop_interface.push_back(joint_name + "/" + command_interface);
   }
   std::vector<std::string> start_interface = {"fr3_joint1/effort"};
@@ -286,7 +286,7 @@ TEST_P(FrankaHardwareInterfaceTest,
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -305,7 +305,7 @@ TEST_P(
   std::vector<std::string> start_interface, stop_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     stop_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -324,7 +324,7 @@ TEST_P(FrankaHardwareInterfaceTest, whenWriteCalled_expectOk) {
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -359,7 +359,7 @@ TEST_F(FrankaHardwareInterfaceTest, whenWriteCalledWithInifiteCommand_expectErro
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + k_position_controller);
   }
 
@@ -390,7 +390,7 @@ TEST_F(
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + k_position_controller);
   }
 
@@ -446,7 +446,7 @@ TEST_P(FrankaHardwareInterfaceTest,
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -470,7 +470,7 @@ TEST_P(FrankaHardwareInterfaceTest,
   std::vector<std::string> start_interface;
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     start_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -485,7 +485,7 @@ TEST_P(FrankaHardwareInterfaceTest,
             hardware_interface::return_type::OK);
 
   for (size_t i = 0; i < default_hardware_info.joints.size(); i++) {
-    const std::string joint_name = k_arm_id + "_" + k_joint_name + std::to_string(i + 1);
+    const std::string joint_name = k_robot_id + "_" + k_joint_name + std::to_string(i + 1);
     stop_interface.push_back(joint_name + "/" + command_interface);
   }
 
@@ -722,9 +722,9 @@ TEST_F(FrankaHardwareInterfaceTest,
   // Now it only claims interfaces that it actually exports
   std::vector<std::string> mixed_interfaces = {
       // Franka interfaces (should be claimed)
-      arm_id + "_joint1/position", arm_id + "_joint2/position", arm_id + "_joint3/position",
-      arm_id + "_joint4/position", arm_id + "_joint5/position", arm_id + "_joint6/position",
-      arm_id + "_joint7/position",
+      robot_id + "_joint1/position", robot_id + "_joint2/position", robot_id + "_joint3/position",
+      robot_id + "_joint4/position", robot_id + "_joint5/position", robot_id + "_joint6/position",
+      robot_id + "_joint7/position",
 
       // Gripper interfaces (should NOT be claimed by Franka)
       "gripper_finger1/position", "gripper_finger2/position",

@@ -9,7 +9,7 @@
 # Ensure each robot has a unique namespace to prevent topic conflicts.
 
 ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic) 
-  arm_id: "tmrv0_2" # Reserved for future use, unique arm (i.e. robot model) identifier
+  robot_id: "tmrv0_2" # Reserved for future use, unique arm (i.e. robot model) identifier
   arm_prefix: "" # Reserved for future use (e.g., robot unique prefix)
   fake_sensor_commands: "false" # Enable fake sensor commands for simulation
   joint_state_rate: 30 # Publishing rate for joint states (Hz)
@@ -20,7 +20,7 @@ ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic)
   use_rviz: "false" # Launch RViz if "true" (single instance for all namespaces)
 # Uncomment the following lines to add more robots in Namespaces
 # ROBOT2:
-#   arm_id: ""
+#   robot_id: ""
 #   arm_prefix: ""
 #   fake_sensor_commands: "false"
 #   joint_state_rate: 30 
@@ -30,7 +30,7 @@ ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic)
 #   use_fake_hardware: "false"
 #   use_rviz: "false" 
 # ROBOT3:
-#   arm_id: ""
+#   robot_id: ""
 #   arm_prefix: ""
 #   fake_sensor_commands: "false"
 #   joint_state_rate: 30

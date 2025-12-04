@@ -31,21 +31,21 @@ import sensor_msgs.msg
 def generate_test_description():
     robot_ip_parameter_name = 'robot_ip'
     use_fake_hardware_parameter_name = 'use_fake_hardware'
-    arm_parameter_name = 'arm_id'
+    arm_parameter_name = 'robot_id'
     joint_names_parameter_name = 'joint_names'
     robot_ip = LaunchConfiguration(robot_ip_parameter_name)
     use_fake_hardware = LaunchConfiguration(use_fake_hardware_parameter_name)
-    arm_id = LaunchConfiguration(arm_parameter_name)
+    robot_id = LaunchConfiguration(arm_parameter_name)
     joint_names = LaunchConfiguration(joint_names_parameter_name)
 
     default_joint_name_postfix = '_finger_joint'
     arm_default_argument = [
         '[',
-        arm_id,
+        robot_id,
         default_joint_name_postfix,
         '1',
         ',',
-        arm_id,
+        robot_id,
         default_joint_name_postfix,
         '2',
         ']',
@@ -66,7 +66,7 @@ def generate_test_description():
         launch_arguments={
             robot_ip_parameter_name: robot_ip,
             use_fake_hardware_parameter_name: use_fake_hardware,
-            arm_parameter_name: arm_id,
+            arm_parameter_name: robot_id,
             joint_names_parameter_name: joint_names,
         }.items(),
     )

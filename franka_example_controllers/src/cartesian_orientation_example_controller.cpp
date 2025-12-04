@@ -37,7 +37,7 @@ CartesianOrientationExampleController::state_interface_configuration() const {
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   config.names = franka_cartesian_pose_->get_state_interface_names();
 
-  config.names.push_back(arm_id_ + "/robot_time");
+  config.names.push_back(robot_id_ + "/robot_time");
   return config;
 }
 
@@ -112,7 +112,8 @@ CallbackReturn CartesianOrientationExampleController::on_configure(
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
 
-  arm_id_ = robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
+  robot_id_ =
+      robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   return CallbackReturn::SUCCESS;
 }

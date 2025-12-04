@@ -90,27 +90,27 @@
 /**:
   cartesian_elbow_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   cartesian_orientation_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   cartesian_pose_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   cartesian_velocity_example_controller:
     ros__parameters:
-      arm_id: "fr3"   
+      robot_id: "fr3"   
 
 /**:
   elbow_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
       joints:
         - fr3_joint1
         - fr3_joint2
@@ -131,12 +131,12 @@
 /**:
   gravity_compensation_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
       
 /**:
   joint_impedance_example_controller:
     ros__parameters:
-      arm_id: "fr3"    
+      robot_id: "fr3"    
       k_gains:
         - 24.0
         - 24.0
@@ -157,7 +157,7 @@
 /**:
   joint_impedance_with_ik_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
       k_gains:
         - 600.0
         - 600.0
@@ -178,17 +178,17 @@
 /**:
   joint_position_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   joint_velocity_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   joint_state_broadcaster:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
       joints:
         - fr3_joint1
         - fr3_joint2
@@ -201,12 +201,12 @@
 /**:
   joint_velocity_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
  
 /**:
   model_example_controller:
     ros__parameters:
-      arm_id: "fr3"
+      robot_id: "fr3"
 
 /**:
   move_to_start_example_controller:

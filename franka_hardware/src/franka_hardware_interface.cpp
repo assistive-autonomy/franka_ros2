@@ -32,7 +32,7 @@
 
 const std::string kVersionName = "version";
 const std::string kRobotIpName = "robot_ip";
-const std::string kArmIdName = "arm_id";
+const std::string kArmIdName = "robot_id";
 
 namespace {
 
@@ -69,10 +69,10 @@ using StateInterface = hardware_interface::StateInterface;
 using CommandInterface = hardware_interface::CommandInterface;
 
 FrankaHardwareInterface::FrankaHardwareInterface(const std::shared_ptr<Robot>& robot,
-                                                 const std::string& arm_id)
+                                                 const std::string& robot_id)
     : FrankaHardwareInterface() {
   robot_ = robot;  // NOLINT(cppcoreguidelines-prefer-member-initializer)
-  arm_id_ = arm_id;
+  robot_id_ = robot_id;
 }
 
 FrankaHardwareInterface::FrankaHardwareInterface()
@@ -102,11 +102,11 @@ std::vector<StateInterface> FrankaHardwareInterface::export_state_interfaces() {
   }
 
   state_interfaces.emplace_back(StateInterface(
-      arm_id_, k_robot_state_interface_name,
+      robot_id_, k_robot_state_interface_name,
       reinterpret_cast<double*>(  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
           &hw_franka_robot_state_addr_)));
   state_interfaces.emplace_back(StateInterface(
-      arm_id_, k_robot_model_interface_name,
+      robot_id_, k_robot_model_interface_name,
       reinterpret_cast<double*>(  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
           &hw_franka_model_ptr_)));
 
@@ -122,7 +122,7 @@ std::vector<StateInterface> FrankaHardwareInterface::export_state_interfaces() {
         StateInterface(elbow_state_names_.at(i), k_HW_IF_ELBOW_STATE, &elbow_state_.at(i)));
   }
 
-  state_interfaces.emplace_back(StateInterface(arm_id_, "robot_time", &robot_time_state_));
+  state_interfaces.emplace_back(StateInterface(robot_id_, "robot_time", &robot_time_state_));
 
   return state_interfaces;
 }
@@ -312,12 +312,12 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
   }
 
   try {
-    arm_id_ = info_.hardware_parameters.at(kArmIdName);
+    robot_id_ = info_.hardware_parameters.at(kArmIdName);
   } catch (const std::out_of_range& ex) {
     RCLCPP_WARN(getLogger(), "Parameter '%s' is not set.", kArmIdName.c_str());
     RCLCPP_WARN(getLogger(),
-                "Deprecation Warning: In the next release, 'arm_id' should be set in the URDF. "
-                "Using 'panda' as default 'arm_id' will not be supported."
+                "Deprecation Warning: In the next release, 'robot_id' should be set in the URDF. "
+                "Using 'panda' as default 'robot_id' will not be supported."
                 "Please use the latest franka_description package from: "
                 "https://github.com/frankarobotics/franka_description");
   }

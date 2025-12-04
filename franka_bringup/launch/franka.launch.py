@@ -14,7 +14,7 @@
 
 ############################################################################
 # Parameters:
-# arm_id: ID of the type of arm used (default: '')
+# robot_id: ID of the type of arm used (default: '')
 # arm_prefix: Prefix for arm topics (default: '')
 # namespace: Namespace for the robot (default: '')
 # robot_ip: Hostname or IP address of the robot (default: '172.16.0.3')
@@ -29,7 +29,7 @@
 # franka_robot_state_broadcaster, and optionally franka_gripper, with support
 # for both namespaced and non-namespaced environments.
 # Example:
-# ros2 launch franka_bringup franka.launch.py arm_id:=fr3 namespace:=NS1 robot_ip:=172.16.0.3
+# ros2 launch franka_bringup franka.launch.py robot_id:=fr3 namespace:=NS1 robot_ip:=172.16.0.3
 
 # This is an error prone commandline, you may prefer to write the parameters into a YAML file like:
 #   franka_bringup/config/franka.config.yaml
@@ -88,20 +88,20 @@ def generate_robot_nodes(context):
         context
     )
     load_gripper = load_gripper_launch_configuration.lower() == 'true'
-    arm_id = LaunchConfiguration('arm_id').perform(context)
+    robot_id = LaunchConfiguration('robot_id').perform(context)
     urdf_path = PathJoinSubstitution(
         [
             FindPackageShare('franka_description'),
             'robots',
-            f'{arm_id}',
-            f'{arm_id}.urdf.xacro',
+            f'{robot_id}',
+            f'{robot_id}.urdf.xacro',
         ]
     ).perform(context)
     robot_description = xacro.process_file(
         urdf_path,
         mappings={
             'ros2_control': 'true',
-            'arm_id': LaunchConfiguration('arm_id').perform(context),
+            'robot_id': LaunchConfiguration('robot_id').perform(context),
             'arm_prefix': LaunchConfiguration('arm_prefix').perform(context),
             'robot_ip': LaunchConfiguration('robot_ip').perform(context),
             'hand': load_gripper_launch_configuration,
@@ -171,7 +171,7 @@ def generate_robot_nodes(context):
             executable='spawner',
             namespace=namespace,
             arguments=['franka_robot_state_broadcaster'],
-            parameters=[{'arm_id': LaunchConfiguration('arm_id').perform(context)}],
+            parameters=[{'robot_id': LaunchConfiguration('robot_id').perform(context)}],
             condition=UnlessCondition(LaunchConfiguration('use_fake_hardware')),
             output='screen',
         ),
@@ -208,7 +208,7 @@ def generate_robot_nodes(context):
 def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument(
-            'arm_id', default_value='', description='ID of the type of arm used'
+            'robot_id', default_value='', description='ID of the type of arm used'
         ),
         DeclareLaunchArgument(
             'arm_prefix', default_value='', description='Prefix for arm topics'

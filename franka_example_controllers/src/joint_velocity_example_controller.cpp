@@ -31,7 +31,7 @@ JointVelocityExampleController::command_interface_configuration() const {
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
   for (int i = 1; i <= num_joints; ++i) {
-    config.names.push_back(arm_id_ + "_joint" + std::to_string(i) + "/velocity");
+    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/velocity");
   }
   return config;
 }
@@ -41,8 +41,8 @@ JointVelocityExampleController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   for (int i = 1; i <= num_joints; ++i) {
-    config.names.push_back(arm_id_ + "_joint" + std::to_string(i) + "/position");
-    config.names.push_back(arm_id_ + "_joint" + std::to_string(i) + "/velocity");
+    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/position");
+    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/velocity");
   }
   return config;
 }
@@ -100,7 +100,8 @@ CallbackReturn JointVelocityExampleController::on_configure(
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
 
-  arm_id_ = robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
+  robot_id_ =
+      robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   if (!is_gazebo) {
     auto client = get_node()->create_client<franka_msgs::srv::SetFullCollisionBehavior>(
