@@ -39,7 +39,7 @@ class JointVelocityExampleController : public controller_interface::ControllerIn
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::string arm_id_;
+  std::string robot_id_;
   std::string robot_description_;
   bool is_gazebo{false};
   const int num_joints = 7;

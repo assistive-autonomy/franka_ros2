@@ -53,7 +53,7 @@ class ElbowExampleController : public controller_interface::ControllerInterface 
   double initial_robot_time_{0.0};
   double robot_time_{0.0};
   std::string robot_description_;
-  std::string arm_id_;
+  std::string robot_id_;
 };
 
 }  // namespace franka_example_controllers

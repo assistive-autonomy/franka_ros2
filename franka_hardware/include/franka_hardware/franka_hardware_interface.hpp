@@ -41,7 +41,8 @@ namespace franka_hardware {
 
 class FrankaHardwareInterface : public hardware_interface::SystemInterface {
  public:
-  explicit FrankaHardwareInterface(const std::shared_ptr<Robot>& robot, const std::string& arm_id);
+  explicit FrankaHardwareInterface(const std::shared_ptr<Robot>& robot,
+                                   const std::string& robot_id);
   FrankaHardwareInterface();
   FrankaHardwareInterface(const FrankaHardwareInterface&) = delete;
   FrankaHardwareInterface& operator=(const FrankaHardwareInterface& other) = delete;
@@ -175,7 +176,7 @@ class FrankaHardwareInterface : public hardware_interface::SystemInterface {
 
   static rclcpp::Logger getLogger();
 
-  std::string arm_id_{"fr3"};
+  std::string robot_id_{"fr3"};
   const std::string k_robot_state_interface_name{"robot_state"};
   const std::string k_robot_model_interface_name{"robot_model"};
   const size_t max_number_start_interfaces = 45;
