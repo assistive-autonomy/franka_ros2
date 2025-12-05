@@ -100,7 +100,7 @@ def generate_robot_nodes(context):
                     )
                 ),
                 launch_arguments={
-                    'robot_id': str(config['robot_id']),
+                    'robot_type': str(config['robot_type']),
                     'arm_prefix': str(config['arm_prefix']),
                     'namespace': str(namespace),
                     'robot_ip': str(config['robot_ip']),

@@ -33,7 +33,7 @@ JointImpedanceWithIKExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   for (int i = 1; i <= num_joints_; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/effort");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
   return config;
 }
@@ -44,19 +44,19 @@ JointImpedanceWithIKExampleController::state_interface_configuration() const {
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   config.names = franka_cartesian_pose_->get_state_interface_names();
   for (int i = 1; i <= num_joints_; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/position");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/position");
   }
   for (int i = 1; i <= num_joints_; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/velocity");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/velocity");
   }
   for (int i = 1; i <= num_joints_; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/effort");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
   for (const auto& franka_robot_model_name : franka_robot_model_->get_state_interface_names()) {
     config.names.push_back(franka_robot_model_name);
   }
 
-  config.names.push_back(robot_id_ + "/robot_time");
+  config.names.push_back(robot_type_ + "/robot_time");
 
   return config;
 }
@@ -98,8 +98,8 @@ JointImpedanceWithIKExampleController::create_ik_service_request(
     const std::vector<double>& joint_efforts_current) {
   auto service_request = std::make_shared<moveit_msgs::srv::GetPositionIK::Request>();
 
-  service_request->ik_request.group_name = robot_id_ + "_arm";
-  service_request->ik_request.pose_stamped.header.frame_id = robot_id_ + "_link0";
+  service_request->ik_request.group_name = robot_type_ + "_arm";
+  service_request->ik_request.pose_stamped.header.frame_id = robot_type_ + "_link0";
   service_request->ik_request.pose_stamped.pose.position.x = position.x();
   service_request->ik_request.pose_stamped.pose.position.y = position.y();
   service_request->ik_request.pose_stamped.pose.position.z = position.z();
@@ -108,14 +108,15 @@ JointImpedanceWithIKExampleController::create_ik_service_request(
   service_request->ik_request.pose_stamped.pose.orientation.z = orientation.z();
   service_request->ik_request.pose_stamped.pose.orientation.w = orientation.w();
   service_request->ik_request.robot_state.joint_state.name = {
-      robot_id_ + "_joint1", robot_id_ + "_joint2", robot_id_ + "_joint3", robot_id_ + "_joint4",
-      robot_id_ + "_joint5", robot_id_ + "_joint6", robot_id_ + "_joint7"};
+      robot_type_ + "_joint1", robot_type_ + "_joint2", robot_type_ + "_joint3",
+      robot_type_ + "_joint4", robot_type_ + "_joint5", robot_type_ + "_joint6",
+      robot_type_ + "_joint7"};
   service_request->ik_request.robot_state.joint_state.position = joint_positions_current;
   service_request->ik_request.robot_state.joint_state.velocity = joint_velocities_current;
   service_request->ik_request.robot_state.joint_state.effort = joint_efforts_current;
 
   if (is_gripper_loaded_) {
-    service_request->ik_request.ik_link_name = robot_id_ + "_hand_tcp";
+    service_request->ik_request.ik_link_name = robot_type_ + "_hand_tcp";
   }
   return service_request;
 }
@@ -206,7 +207,7 @@ CallbackReturn JointImpedanceWithIKExampleController::on_init() {
 }
 
 bool JointImpedanceWithIKExampleController::assign_parameters() {
-  robot_id_ = get_node()->get_parameter("robot_id").as_string();
+  robot_type_ = get_node()->get_parameter("robot_type").as_string();
   is_gripper_loaded_ = get_node()->get_parameter("load_gripper").as_bool();
 
   auto k_gains = get_node()->get_parameter("k_gains").as_double_array();
@@ -243,8 +244,9 @@ CallbackReturn JointImpedanceWithIKExampleController::on_configure(
   }
 
   franka_robot_model_ = std::make_unique<franka_semantic_components::FrankaRobotModel>(
-      franka_semantic_components::FrankaRobotModel(robot_id_ + "/" + k_robot_model_interface_name,
-                                                   robot_id_ + "/" + k_robot_state_interface_name));
+      franka_semantic_components::FrankaRobotModel(
+          robot_type_ + "/" + k_robot_model_interface_name,
+          robot_type_ + "/" + k_robot_state_interface_name));
 
   auto collision_client = get_node()->create_client<franka_msgs::srv::SetFullCollisionBehavior>(
       "service_server/set_full_collision_behavior");
@@ -282,7 +284,7 @@ CallbackReturn JointImpedanceWithIKExampleController::on_configure(
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
 
-  robot_id_ =
+  robot_type_ =
       robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   return CallbackReturn::SUCCESS;

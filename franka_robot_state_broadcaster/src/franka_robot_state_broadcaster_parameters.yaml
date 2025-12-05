@@ -1,5 +1,5 @@
 franka_robot_state_broadcaster:
-  robot_id: {
+  robot_type: {
     type: string,
     default_value: "fr3",
   }

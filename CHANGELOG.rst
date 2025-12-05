@@ -5,9 +5,9 @@ UNRELEASED
 -------------------
 Requires libfranka >= 0.18.0 and franka_description >= 2.0.0 requires ROS 2 Jazzy
 
-* BREAKING CHANGE: arm_id replaced by robot_id and controller_name by controller_names
+* BREAKING CHANGE: arm_id replaced by robot_type and controller_name by controller_names
 * Feat: TMRv0.2 teleoperation example controller added
-* Feat: arm_id replaced by robot_id
+* Feat: arm_id replaced by robot_type
 
 v3.1.1 (2025-11-10)
 -------------------

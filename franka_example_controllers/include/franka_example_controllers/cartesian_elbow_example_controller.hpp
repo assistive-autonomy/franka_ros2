@@ -54,7 +54,7 @@ class CartesianElbowExampleController : public controller_interface::ControllerI
   double initial_robot_time_{0.0};
   double robot_time_{0.0};
   std::string robot_description_;
-  std::string robot_id_;
+  std::string robot_type_;
 };
 
 }  // namespace franka_example_controllers
