@@ -30,7 +30,7 @@ JointImpedanceExampleController::command_interface_configuration() const {
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
   for (int i = 1; i <= num_joints; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/effort");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
   return config;
 }
@@ -40,8 +40,8 @@ JointImpedanceExampleController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   for (int i = 1; i <= num_joints; ++i) {
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/position");
-    config.names.push_back(robot_id_ + "_joint" + std::to_string(i) + "/velocity");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/position");
+    config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/velocity");
   }
   return config;
 }
@@ -69,7 +69,7 @@ controller_interface::return_type JointImpedanceExampleController::update(
 
 CallbackReturn JointImpedanceExampleController::on_init() {
   try {
-    auto_declare<std::string>("robot_id", "");
+    auto_declare<std::string>("robot_type", "");
     auto_declare<std::vector<double>>("k_gains", {});
     auto_declare<std::vector<double>>("d_gains", {});
   } catch (const std::exception& e) {
@@ -81,7 +81,7 @@ CallbackReturn JointImpedanceExampleController::on_init() {
 
 CallbackReturn JointImpedanceExampleController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  robot_id_ = get_node()->get_parameter("robot_id").as_string();
+  robot_type_ = get_node()->get_parameter("robot_type").as_string();
   auto k_gains = get_node()->get_parameter("k_gains").as_double_array();
   auto d_gains = get_node()->get_parameter("d_gains").as_double_array();
   if (k_gains.empty()) {
@@ -120,7 +120,7 @@ CallbackReturn JointImpedanceExampleController::on_configure(
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
 
-  robot_id_ =
+  robot_type_ =
       robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   return CallbackReturn::SUCCESS;

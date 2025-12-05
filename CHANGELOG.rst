@@ -5,9 +5,9 @@ UNRELEASED
 -------------------
 Requires libfranka >= 0.18.0 and franka_description >= 1.2.0 requires ROS 2 Humble
 
-* BREAKING CHANGE: arm_id replaced by robot_id and controller_name by controller_names
+* BREAKING CHANGE: arm_id replaced by robot_type and controller_name by controller_names
 * Feat: TMRv0.2 teleoperation example controller added
-* Feat: arm_id replaced by robot_id
+* Feat: arm_id replaced by robot_type
 
 v2.1.0 (2025-10-24)
 -------------------

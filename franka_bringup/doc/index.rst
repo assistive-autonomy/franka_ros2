@@ -25,7 +25,7 @@ can be used to start the robot without any controllers.
 
 When you start the robot with::
 
-    ros2 launch franka_bringup franka.launch.py robot_id:=fr3 robot_ip:=<fci-ip> use_rviz:=true
+    ros2 launch franka_bringup franka.launch.py robot_type:=fr3 robot_ip:=<fci-ip> use_rviz:=true
 
 There is no controller running apart from the ``joint_state_broadcaster``. However, a connection with the robot is still
 established and the current robot pose is visualized in RViz. In this mode the robot can be guided when the user stop
@@ -113,12 +113,12 @@ Service message descriptions are given below.
    (damping is automatically derived from the stiffness).
  * ``franka_msgs::srv::SetCartesianStiffness`` specifies Cartesian stiffness for the internal
    controller (damping is automatically derived from the stiffness).
- * ``franka_msgs::srv::SetTCPFrame`` specifies the transformation from <robot_id>_EE (end effector) to
-   <robot_id>_NE (nominal end effector) frame. The transformation from flange to end effector frame
-   is split into two transformations: <robot_id>_EE to <robot_id>_NE frame and <robot_id>_NE to
-   <robot_id>_link8 frame. The transformation from <robot_id>_NE to <robot_id>_link8 frame can only be
+ * ``franka_msgs::srv::SetTCPFrame`` specifies the transformation from <robot_type>_EE (end effector) to
+   <robot_type>_NE (nominal end effector) frame. The transformation from flange to end effector frame
+   is split into two transformations: <robot_type>_EE to <robot_type>_NE frame and <robot_type>_NE to
+   <robot_type>_link8 frame. The transformation from <robot_type>_NE to <robot_type>_link8 frame can only be
    set through the administrator's interface.
- * ``franka_msgs::srv::SetStiffnessFrame`` specifies the transformation from <robot_id>_K to <robot_id>_EE frame.
+ * ``franka_msgs::srv::SetStiffnessFrame`` specifies the transformation from <robot_type>_K to <robot_type>_EE frame.
  * ``franka_msgs::srv::SetForceTorqueCollisionBehavior`` sets thresholds for external Cartesian
    wrenches to configure the collision reflex.
  * ``franka_msgs::srv::SetFullCollisionBehavior`` sets thresholds for external forces on Cartesian
@@ -145,12 +145,12 @@ Here is a minimal example:
 
 .. important::
 
-    The <robot_id>_EE frame denotes the part of the
+    The <robot_type>_EE frame denotes the part of the
     configurable end effector frame which can be adjusted during run time through `franka_ros`. The
-    <robot_id>_K frame marks the center of the internal
+    <robot_type>_K frame marks the center of the internal
     Cartesian impedance. It also serves as a reference frame for external wrenches. *Neither the
-    <robot_id>_EE nor the <robot_id>_K are contained in the URDF as they can be changed at run time*.
-    By default, <robot_id> is set to "panda".
+    <robot_type>_EE nor the <robot_type>_K are contained in the URDF as they can be changed at run time*.
+    By default, <robot_type> is set to "panda".
 
     .. figure:: ../../docs/assets/frames.svg
         :align: center

@@ -38,7 +38,7 @@ controller_interface::InterfaceConfiguration ElbowExampleController::state_inter
   config.names = franka_cartesian_velocity_->get_state_interface_names();
 
   // add the robot time interface
-  config.names.push_back(robot_id_ + "/robot_time");
+  config.names.push_back(robot_type_ + "/robot_time");
 
   return config;
 }
@@ -113,7 +113,7 @@ CallbackReturn ElbowExampleController::on_configure(
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
 
-  robot_id_ =
+  robot_type_ =
       robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   return CallbackReturn::SUCCESS;

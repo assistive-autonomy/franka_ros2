@@ -41,7 +41,7 @@ class JointPositionExampleController : public controller_interface::ControllerIn
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::string robot_id_;
+  std::string robot_type_;
   bool is_gazebo_{false};
   std::string robot_description_;
   const int num_joints = 7;

@@ -67,7 +67,7 @@ def generate_launch_description():
             ' ros2_control:=false',
             ' hand:=',
             load_gripper,
-            ' robot_id:=fr3',
+            ' robot_type:=fr3',
             ' robot_ip:=',
             robot_ip,
             ' use_fake_hardware:=',
