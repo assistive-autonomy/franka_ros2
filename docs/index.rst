@@ -14,3 +14,4 @@ franka_ros2
    ../franka_fr3_moveit_config/doc/index
    ../franka_gazebo/doc/index
    ../franka_msgs/doc/index
+   ../franka_ros2/doc/compatibility_matrix
