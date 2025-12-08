@@ -44,7 +44,7 @@ GripperExampleController::state_interface_configuration() const {
 
 CallbackReturn GripperExampleController::on_init() {
   try {
-    auto_declare<std::string>("arm_id", "fr3");
+    auto_declare<std::string>("robot_type", "fr3");
   } catch (const std::exception& e) {
     fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
     return CallbackReturn::ERROR;

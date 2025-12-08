@@ -46,7 +46,7 @@ class GravityCompensationExampleController : public controller_interface::Contro
                                            const rclcpp::Duration& period) override;
 
  private:
-  std::string arm_id_;
+  std::string robot_type_;
   const int num_joints = 7;
 };
 }  // namespace franka_example_controllers

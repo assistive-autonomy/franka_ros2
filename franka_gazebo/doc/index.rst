@@ -18,11 +18,11 @@ Launch an example which spawns RVIZ and Gazebo showing the robot:
 
     ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py
 
-If you want to display another robot, you can define the arm_id:
+If you want to display another robot, you can define the robot_type:
 
 .. code-block:: shell
 
-    ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py arm_id:=fp3
+    ros2 launch franka_gazebo_bringup visualize_franka_robot.launch.py robot_type:=fp3
 
 If you want to start the simulation including the franka_hand:
 

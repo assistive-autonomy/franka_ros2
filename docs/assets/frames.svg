@@ -86,7 +86,7 @@
          font-weight="bold"
          font-size="14.00"
          fill="#000000"
-         id="text4704">&lt;arm_id&gt;_link8</text>
+         id="text4704">&lt;robot_type&gt;_link8</text>
       <text
          text-anchor="start"
          x="365.8675"
@@ -118,7 +118,7 @@
          font-weight="bold"
          font-size="14.00"
          fill="#000000"
-         id="text4713">&lt;arm_id&gt;_hand</text>
+         id="text4713">&lt;robot_type&gt;_hand</text>
       <text
          text-anchor="start"
          x="75.4497"
@@ -126,7 +126,7 @@
          font-family="Times,serif"
          font-size="14.00"
          fill="#000000"
-         id="text4715"> &lt;arm_id&gt;link8 rotated by -45 degree around Z-axis </text>
+         id="text4715"> &lt;robot_type&gt;link8 rotated by -45 degree around Z-axis </text>
     </g>
     <!-- panda_link8&#45;&gt;panda_hand -->
     <g
@@ -175,7 +175,7 @@
          font-weight="bold"
          font-size="14.00"
          fill="#000000"
-         id="text4731">&lt;arm_id&gt;_NE</text>
+         id="text4731">&lt;robot_type&gt;_NE</text>
       <text
          text-anchor="start"
          x="525.8885"
@@ -231,7 +231,7 @@
          id="text4749"
          text-anchor="start"
          font-family="Times,serif"
-         fill="#000000">&lt;arm_id&gt;_hand_tcp</text>
+         fill="#000000">&lt;robot_type&gt;_hand_tcp</text>
       <text
          x="76.8699"
          y="-190.9645"
@@ -247,7 +247,7 @@
          id="text4753"
          text-anchor="start"
          font-family="Times,serif"
-         fill="#000000">Is equal to &lt;arm_id&gt;_NE if the end-effector</text>
+         fill="#000000">Is equal to &lt;robot_type&gt;_NE if the end-effector</text>
       <text
          x="81.3366"
          y="-162.9645"
@@ -321,7 +321,7 @@
          font-weight="bold"
          font-size="14.00"
          fill="#000000"
-         id="text4771">&lt;arm_id&gt;_EE</text>
+         id="text4771">&lt;robot_type&gt;_EE</text>
       <text
          text-anchor="start"
          x="571.135"
@@ -345,7 +345,7 @@
          font-family="Times,serif"
          font-size="14.00"
          fill="#000000"
-         id="text4777">Equal to &lt;arm_id&gt;_NE by default</text>
+         id="text4777">Equal to &lt;robot_type&gt;_NE by default</text>
     </g>
     <!-- panda_NE&#45;&gt;panda_EE -->
     <g
@@ -394,7 +394,7 @@
          font-weight="bold"
          font-size="14.00"
          fill="#000000"
-         id="text4793">&lt;arm_id&gt;_K</text>
+         id="text4793">&lt;robot_type&gt;_K</text>
       <text
          text-anchor="start"
          x="577.932"
@@ -418,7 +418,7 @@
          font-family="Times,serif"
          font-size="14.00"
          fill="#000000"
-         id="text4799">Equal to &lt;arm_id&gt;_EE by default</text>
+         id="text4799">Equal to &lt;robot_type&gt;_EE by default</text>
     </g>
     <!-- panda_EE&#45;&gt;panda_K -->
     <g

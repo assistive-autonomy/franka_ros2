@@ -199,10 +199,42 @@ ros2 launch franka_bringup example.launch.py controller_name:=your_desired_contr
 ```
 You can select one of the controllers from `controllers.yaml`.
 
+### Run different controllers for different robots
+
+If you want to run a specific controller for each robot, you must specify the controllers you want to run as follows (example for three robots):
+
+```bash
+ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_example_controller,joint_impedance_example_controller,cartesian_velocity_example_controller" 
+```
+If less controllers than the number of robots are specified, only the first controller would be used for all the robots. TMR controllers can also be used.
+
+### Move the TMRv0.2
+
+You can move the TMRv0.2 either:
+
+- By using a remote XBOX controller:
+
+```bash
+ros2 launch franka_bringup mobile_teleop.launch.py controller_names:="mobile_cartesian_velocity_example_controller" 
+```
+
+This launch file spawns the required additional nodes for remote control.
+
+- By using the PC keyboard:
+
+Launch on one terminal:
+```bash
+ros2 launch franka_bringup example.launch.py controller_names:="mobile_cartesian_velocity_example_controller" 
+```
+On another terminal launch:
+```bash
+`ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true --remap /cmd_vel:=/${NS}/mobile_cartesian_velocity_controller/cmd_vel`
+```
+Replace ${NS} with the corresponding namespace.
+
 ### Run Gazebo examples with ROS 2
 
 If you want to use Gazebo to run your code, you can find some examples here: [franka_gazebo](./franka_gazebo/README)
-
 
 ## Troubleshooting
 ### `libfranka: UDP receive: Timeout error`

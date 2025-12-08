@@ -65,6 +65,10 @@ RUN sudo apt-get update \
         ros-jazzy-moveit-simple-controller-manager \
         ros-jazzy-rviz2 \
         ros-jazzy-xacro \
+        ros-jazzy-teleop-twist-keyboard \
+        ros-jazzy-joy \
+        ros-jazzy-teleop-twist-joy \
+
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/*
 

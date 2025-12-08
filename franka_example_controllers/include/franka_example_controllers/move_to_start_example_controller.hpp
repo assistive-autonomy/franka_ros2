@@ -42,7 +42,7 @@ class MoveToStartExampleController : public controller_interface::ControllerInte
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::string arm_id_;
+  std::string robot_type_;
   const int num_joints = 7;
   Vector7d q_;
   Vector7d q_goal_;

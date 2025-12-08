@@ -82,7 +82,7 @@ class JointImpedanceWithIKExampleController : public controller_interface::Contr
                                   const Vector7d& joint_velocities_current);
 
   /**
-   * @brief assigns the Kp, Kd and arm_id parameters
+   * @brief assigns the Kp, Kd and robot_type parameters
    *
    * @return true when parameters are present, false when parameters are not available
    */
@@ -97,7 +97,7 @@ class JointImpedanceWithIKExampleController : public controller_interface::Contr
   const bool k_elbow_activated_{false};
   bool initialization_flag_{true};
 
-  std::string arm_id_;
+  std::string robot_type_;
   bool is_gripper_loaded_ = true;
   std::string robot_description_;
 

@@ -41,7 +41,7 @@ class JointImpedanceExampleController : public controller_interface::ControllerI
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::string arm_id_;
+  std::string robot_type_;
   std::string robot_description_;
   const int num_joints = 7;
   Vector7d q_;

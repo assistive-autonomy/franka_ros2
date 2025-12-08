@@ -6,7 +6,7 @@ This package contains the configuration for MoveIt2.
 Move Group
 ----------
 
-There is one move group called ``(arm_id)_arm``, where ``(arm_id)`` is the arm type specified by the user. 
+There is one move group called ``(robot_type)_arm``, where ``(robot_type)`` is the arm type specified by the user. 
 The TCP placement varies depending on the end-effector configuration. If the Franka Hand is set, the TCP is located 
 in the center between the fingertips and the TCP-frame-axes are in parallel with the gripper frame. 
 Otherwise, the TCP is located at the robot flange.

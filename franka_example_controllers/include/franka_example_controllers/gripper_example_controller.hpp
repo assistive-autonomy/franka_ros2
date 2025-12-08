@@ -105,7 +105,7 @@ class GripperExampleController : public controller_interface::ControllerInterfac
   rclcpp_action::Client<franka_msgs::action::Move>::SendGoalOptions move_goal_options_;
   rclcpp_action::Client<franka_msgs::action::Grasp>::SendGoalOptions grasp_goal_options_;
 
-  std::string arm_id_;
+  std::string robot_type_;
   std::string namespace_;
 };
 
