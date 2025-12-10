@@ -18,11 +18,11 @@ public:
     {
         this->declare_parameter("urdf_path", "/ros2_ws/src/franka_description/urdfs/fr3_duo.urdf");
         this->declare_parameter("srdf_path", "/ros2_ws/src/franka_description/urdfs/fr3_duo.srdf");
-        this->declare_parameter("meshes_path", "/ros2_ws/src/franka_description/");
+        this->declare_parameter("security_margin", 0.045);
 
         auto urdf_path = this->get_parameter("urdf_path").as_string();
         auto srdf_path = this->get_parameter("srdf_path").as_string();
-        auto meshes_path = this->get_parameter("meshes_path").as_string();
+        double security_margin = this->get_parameter("security_margin").as_double();
 
         if (urdf_path.empty() || srdf_path.empty()) {
             RCLCPP_ERROR(this->get_logger(), "Please provide 'urdf_path' and 'srdf_path' parameters.");
@@ -58,7 +58,14 @@ public:
             data_ = std::make_shared<pinocchio::Data>(model_);
             geom_data_ = std::make_shared<pinocchio::GeometryData>(geom_model_);
 
+            //Apply security margin
+            for (auto& request : geom_data_->collisionRequests) {
+                request.security_margin = security_margin;
+                request.enable_contact = true;
+            }
+
             //check that everything is setup correctly
+            RCLCPP_INFO(this->get_logger(), "Security Margin set to: %.3f meters", security_margin);
             RCLCPP_INFO(this->get_logger(), "--- Pinocchio Joint List ---");
             for (size_t i = 0; i < model_.names.size(); ++i) {
                 RCLCPP_INFO(this->get_logger(), "Joint Index %zu: %s", i, model_.names[i].c_str());
