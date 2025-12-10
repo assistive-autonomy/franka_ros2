@@ -33,7 +33,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/$USERNAME/.bashrc \
     && echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> /home/$USERNAME/.bashrc
-    
+
 USER $USERNAME
 
 # Install some ROS 2 dependencies to create a cache layer
@@ -78,7 +78,7 @@ WORKDIR /ros2_ws
 # Install the missing ROS 2 dependencies
 COPY . /ros2_ws/src
 RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
-    && vcs import src < src/franka.repos --recursive --skip-existing \
+    && vcs import src < src/dependency.repos --recursive --skip-existing \
     && sudo apt-get update \
     && rosdep update \
     && rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y \

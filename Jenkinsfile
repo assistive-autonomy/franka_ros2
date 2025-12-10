@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        dockerfile true 
+        dockerfile true
     }
     triggers {
         pollSCM('H/5 * * * *')
@@ -12,7 +12,7 @@ pipeline {
                     notifyBitbucket()
                 }
                 sh 'rm -rf build log install'
-                sh 'vcs import < franka.repos --recursive'
+                sh 'vcs import < dependency.repos --recursive'
             }
         }
         stage('Build') {

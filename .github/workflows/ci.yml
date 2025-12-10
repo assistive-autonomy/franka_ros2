@@ -20,7 +20,7 @@ jobs:
         working-directory: src/franka_ros2
         run: |
           sudo pip install vcstool
-          vcs import < franka.repos --recursive
+          vcs import < dependency.repos --recursive
 
       - name: Build Docker Image
         uses: docker/build-push-action@v2

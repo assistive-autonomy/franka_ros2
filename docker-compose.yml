@@ -1,12 +1,12 @@
 services:
-  franka_ros2:
+  franka_ros2_humble:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - USER_UID=${USER_UID}
         - USER_GID=${USER_GID}
-    container_name: franka_ros2
+    container_name: franka_ros2_humble
     network_mode: "host"
     privileged: true
     command: /bin/bash
