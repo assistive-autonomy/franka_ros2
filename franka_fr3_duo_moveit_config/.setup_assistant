@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: franka_description
+    relative_path: robots/fr3_duo/fr3_duo.urdf.xacro
+  srdf:
+    relative_path: config/fr3_duo.srdf
+  package_settings:
+    author_name: Jakob
+    author_email: jakob.schlichting@agile-robots.com
+    generated_timestamp: 1765190014
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

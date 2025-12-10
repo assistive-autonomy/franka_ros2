@@ -56,7 +56,7 @@ def generate_launch_description():
 
     franka_xacro_file = os.path.join(
         get_package_share_directory('franka_description'),
-        'robots', 'fr3', 'fr3.urdf.xacro'
+        'robots', 'fr3_duo', 'fr3_duo.urdf.xacro'
     )
 
     robot_description_command = Command(
@@ -82,7 +82,7 @@ def generate_launch_description():
 
     franka_semantic_xacro_file = os.path.join(
         get_package_share_directory('franka_description'),
-        'robots', 'fr3', 'fr3.srdf.xacro'
+        'robots', 'fr3_duo', 'fr3_duo.srdf.xacro'
     )
 
     robot_description_semantic_command = Command(

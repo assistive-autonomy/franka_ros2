@@ -58,6 +58,7 @@ def generate_launch_description():
     namespace_parameter_name = 'namespace'
     load_gripper_parameter_name = 'load_gripper'
     ee_id_parameter_name = 'ee_id'
+    arm_id_parameter_name = 'arm_id'
 
     robot_ip = LaunchConfiguration(robot_ip_parameter_name)
     use_fake_hardware = LaunchConfiguration(use_fake_hardware_parameter_name)
@@ -66,6 +67,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration(namespace_parameter_name)
     load_gripper = LaunchConfiguration(load_gripper_parameter_name)
     ee_id = LaunchConfiguration(ee_id_parameter_name)
+    arm_id = LaunchConfiguration(ee_id_parameter_name)
 
     # Command-line arguments
 
