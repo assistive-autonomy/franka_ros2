@@ -17,7 +17,7 @@ public:
     CollisionCheckerNode() : Node("self_collision_node")
     {
         this->declare_parameter("urdf_path", "/ros2_ws/src/franka_description/urdfs/fr3_duo.urdf");
-        this->declare_parameter("srdf_path", "/ros2_ws/src/franka_description/urdfs/fr3_duo.srdf");
+        this->declare_parameter("srdf_path", "/ros2_ws/src/franka_description/urdfs/fr3_duo_arms.srdf");
         this->declare_parameter("security_margin", 0.045);
 
         auto urdf_path = this->get_parameter("urdf_path").as_string();
@@ -59,9 +59,9 @@ public:
             geom_data_ = std::make_shared<pinocchio::GeometryData>(geom_model_);
 
             //Apply security margin
-            for (auto& request : geom_data_->collisionRequests) {
-                request.security_margin = security_margin;
-                request.enable_contact = true;
+            for (auto& collision_request : geom_data_->collisionRequests) {
+                collision_request.security_margin = security_margin;
+                collision_request.enable_contact = true;
             }
 
             //check that everything is setup correctly
@@ -90,6 +90,9 @@ public:
     void check_collision_callback(const std::shared_ptr<franka_msgs::srv::SelfCollision::Request> request,
                                   std::shared_ptr<franka_msgs::srv::SelfCollision::Response> response)
     {
+        
+        auto start = std::chrono::high_resolution_clock::now();
+        
         // Safety check
         if (request->joint_configuration.size() != (size_t)model_.nq){
             RCLCPP_WARN(this->get_logger(), "Dimension mismatch: Req %zu vs Model %d ", 
@@ -104,20 +107,18 @@ public:
         );
 
         //pinocchio::updateGeometryPlacements(model_, *data_, geom_model_, *geom_data_, q);
-        
-        auto start = std::chrono::high_resolution_clock::now();
 
-        bool is_colliding = pinocchio::computeCollisions(model_, *data_, geom_model_, *geom_data_, q, true);
+        pinocchio::computeCollisions(model_, *data_, geom_model_, *geom_data_, q, true);
 
         auto end = std::chrono::high_resolution_clock::now();
 
         double elapsed = std::chrono::duration<double, std::milli>(end-start).count();
-        RCLCPP_INFO(this->get_logger(), "Math only %.4f ms", elapsed);
         
-        if (is_colliding){
-            RCLCPP_INFO(this->get_logger(), "Collision detected!");
+        if (print_time){
+            RCLCPP_INFO(this->get_logger(), "Math only %.4f ms", elapsed);
         }
-
+        
+        
         bool collision_found = false;
 
         for(size_t k = 0; k < geom_model_.collisionPairs.size(); ++k)
@@ -132,8 +133,9 @@ public:
                 std::string name1 = geom_model_.geometryObjects[cp.first].name;
                 std::string name2 = geom_model_.geometryObjects[cp.second].name;
 
-                RCLCPP_INFO(this->get_logger(), "Collision detected: Pair %zu (%s, %s)", 
-                            k, name1.c_str(), name2.c_str());
+                RCLCPP_INFO(this->get_logger(), "Collision detected: Pair (%s <--> %s)", 
+                        name1.c_str(), name2.c_str());
+                
             }
         }
             
@@ -142,6 +144,7 @@ public:
     }
 
 private:
+    bool print_time = false;
     pinocchio::Model model_;
     pinocchio::GeometryModel geom_model_;
     std::shared_ptr<pinocchio::Data> data_;

@@ -24,6 +24,11 @@ find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(pinocchio REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(urdf_parser_plugin REQUIRED)
+find_package(urdf REQUIRED)
+find_package(srdfdom REQUIRED)
 
 find_package(Franka 0.13.2 REQUIRED)
 
@@ -35,6 +40,27 @@ add_executable(self_collision_node
 target_link_libraries(self_collision_node 
         pinocchio::pinocchio)
 
+
+add_executable(self_collision_node_fast
+        src/collision_checker_fast.cpp    
+        src/collision_checker_impl.cpp 
+)
+
+target_include_directories(self_collision_node_fast PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(self_collision_node_fast
+        pinocchio::pinocchio     
+)
+
+add_executable(self_collision_node_bullet
+        src/collision_checker_bullet.cpp)
+
+target_link_libraries(self_collision_node_bullet
+)       
+
 ament_target_dependencies(self_collision_node
         rclcpp
         franka_msgs
@@ -45,8 +71,34 @@ ament_target_dependencies(self_collision_node
         std_srvs
         control_msgs)
 
+
+ament_target_dependencies(self_collision_node_fast
+        rclcpp
+        franka_msgs
+        rclcpp_action
+        rclcpp_components
+        Franka
+        sensor_msgs
+        std_srvs
+        control_msgs)
+
+ament_target_dependencies(self_collision_node_bullet
+        rclcpp
+        moveit_core
+        franka_msgs
+        rclcpp_action
+        rclcpp_components
+        Franka
+        sensor_msgs
+        std_srvs
+        control_msgs
+        urdf
+        srdfdom)
+
 install(TARGETS
         self_collision_node
+        self_collision_node_fast
+        self_collision_node_bullet
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

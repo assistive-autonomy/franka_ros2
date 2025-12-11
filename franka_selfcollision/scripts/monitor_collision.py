@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from franka_msgs.srv import SelfCollision
+from visualization_msgs.msg import Marker
 import time
 from functools import partial
 
@@ -18,11 +19,15 @@ class CollisionMonitor(Node):
         ]
         self.sub = self.create_subscription(JointState, '/joint_states', self.joint_callback, 10)
 
+        self.marker_pub = self.create_publisher(Marker, '/collision_marker', 10)
+
         self.latest_positions = None
 
         self.was_colliding = False
+
+        self.publish_marker(True)
         
-        self.create_timer(1, self.timer_callback)
+        self.create_timer(0.033, self.timer_callback)
 
         self.cli = self.create_client(SelfCollision, '/check_self_collision')
         while not self.cli.wait_for_service(timeout_sec=10):
@@ -62,20 +67,57 @@ class CollisionMonitor(Node):
             response = future.result()
             is_colliding = response.collision
 
-            self.get_logger().info(f"Check finished in {elapsed_time*1000:.2f} ms")
+            self.publish_marker(is_colliding)
+
+            print_time = False
+
+            if print_time:
+                self.get_logger().info(f"Check finished in {elapsed_time*1000:.2f} ms")
 
 
             if is_colliding and not self.was_colliding:
-                self.get_logger().error(" COLLISION DETECTED! ")
+                self.get_logger().error("⚠️  COLLISION DETECTED!")
                 self.was_colliding = True
 
             elif not is_colliding and self.was_colliding:
-                self.get_logger().info(" Collision Cleared :)")
+                self.get_logger().info("✅ Collision Cleared:)")
                 self.was_colliding = False
 
         except Exception as e:
             self.get_logger().error(f"Service failed : {e}")
+
+    def publish_marker(self, is_colliding):
+        marker = Marker()
+        marker.header.frame_id = 'base'
+        marker.header.stamp = self.get_clock().now().to_msg()
+
+        marker.ns = 'collision_status'
+        marker.id = 0
+        marker.type = Marker.TEXT_VIEW_FACING
+        marker.action = Marker.ADD
+
+        marker.pose.position.x = 0.0
+        marker.pose.position.y = 0.0
+        marker.pose.position.z = 1.0
+        marker.pose.orientation.w = 1.0
+
+        marker.scale.z = 0.15
+
+        marker.color.a = 1.0
+
+        if is_colliding:
+            marker.text = " COLLISION! "
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
         
+        else:
+            marker.text = "SYSTEM SAFE"
+            marker.color.r = 0.2
+            marker.color.g = 1.0
+            marker.color.b = 0.2
+
+        self.marker_pub.publish(marker)
 
 def main():
     rclpy.init()

@@ -1,0 +1,5 @@
+# Request: 14 joints (Arm 1 followed by Arm 2)
+float64[18] joint_configuration
+---
+# Response
+bool collision
