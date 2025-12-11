@@ -75,7 +75,7 @@ This repository contains a `.repos` file that helps you clone the required depen
     ```
 4. **Install the dependencies**
     ```bash
-    vcs import src < src/franka.repos --recursive --skip-existing
+    vcs import src < src/dependency.repos --recursive --skip-existing
     ```
 5. **Detect and install project dependencies**
    ```bash
@@ -130,7 +130,7 @@ For detailed instructions, on preparing VSCode to use the `.devcontainer` follow
       ```
   6. **Clone the latests dependencies:**
       ```bash
-      vcs import src < src/franka.repos --recursive --skip-existing
+      vcs import src < src/dependency.repos --recursive --skip-existing
       ```
   7. **Build the workspace:**
       ```bash
@@ -157,7 +157,7 @@ For detailed instructions, on preparing VSCode to use the `.devcontainer` follow
 
   4. **Clone the latests dependencies:**
       ```bash
-      vcs import src < src/franka.repos --recursive --skip-existing
+      vcs import src < src/dependency.repos --recursive --skip-existing
       ```
 
   5. **Open a terminal and build the workspace:**
@@ -204,7 +204,7 @@ You can select one of the controllers from `controllers.yaml`.
 If you want to run a specific controller for each robot, you must specify the controllers you want to run as follows (example for three robots):
 
 ```bash
-ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_example_controller,joint_impedance_example_controller,cartesian_velocity_example_controller" 
+ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_example_controller,joint_impedance_example_controller,cartesian_velocity_example_controller"
 ```
 If less controllers than the number of robots are specified, only the first controller would be used for all the robots. TMR controllers can also be used.
 
@@ -215,7 +215,7 @@ You can move the TMRv0.2 either:
 - By using a remote XBOX controller:
 
 ```bash
-ros2 launch franka_bringup mobile_teleop.launch.py controller_names:="mobile_cartesian_velocity_example_controller" 
+ros2 launch franka_bringup mobile_teleop.launch.py controller_names:="mobile_cartesian_velocity_example_controller"
 ```
 
 This launch file spawns the required additional nodes for remote control.
@@ -224,7 +224,7 @@ This launch file spawns the required additional nodes for remote control.
 
 Launch on one terminal:
 ```bash
-ros2 launch franka_bringup example.launch.py controller_names:="mobile_cartesian_velocity_example_controller" 
+ros2 launch franka_bringup example.launch.py controller_names:="mobile_cartesian_velocity_example_controller"
 ```
 On another terminal launch:
 ```bash
