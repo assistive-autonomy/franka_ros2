@@ -104,7 +104,6 @@ int main(int argc, char** argv) {
       RCLCPP_INFO(cm->get_logger(), "Successful set up FIFO RT scheduling policy with priority %i.",
                   thread_priority);
     }
-    RCLCPP_INFO(cm->get_logger(), "HELLO WORLD!!!!");
     // for calculating sleep time
     auto const period = std::chrono::nanoseconds(1'000'000'000 / cm->get_update_rate());
 

@@ -28,21 +28,16 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "franka_hardware/franka_hardware_interface.hpp"
+#include "franka_hardware/logging_utils.hpp"
 #include "franka_hardware/ros_libfranka_logger.hpp"
+
+using franka_hardware::logRclcppFatalRed;
 
 const std::string kVersionName = "version";
 const std::string kRobotIpName = "robot_ip";
 const std::string kArmIdName = "robot_type";
 
 namespace {
-
-auto logRclcppFatalRed(const rclcpp::Logger& logger, const char* text, ...) {
-  va_list args;
-  va_start(args, text);
-  std::string formatted_text = fmt::format("\033[1;31m{}\033[0m", text);
-  RCLCPP_FATAL(logger, formatted_text.c_str(), args);
-  va_end(args);
-}
 
 auto parseVersion(const std::string& version_str) {
   std::vector<std::string> version_parts;
