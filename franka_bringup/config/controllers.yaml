@@ -33,10 +33,12 @@
     ros__parameters:
       update_rate: 1000
       thread_priority: 98
-      enable_overrun: false
+      overruns:
+        manage: false
+        print_warnings: false
 
-      joint_impedance_fr3_duo_example_controller:
-        type: franka_example_controllers/JointImpedanceFr3DuoExampleController
+      fr3_duo_joint_impedance_example_controller:
+        type: franka_example_controllers/Fr3DuoJointImpedanceExampleController
 
       multi_arm_joint_impedance_example_controller:
         type: franka_example_controllers/MultiArmJointImpedanceExampleController
@@ -237,28 +239,29 @@
         - 5.0
 
 
-joint_impedance_fr3_duo_example_controller:
-  ros__parameters:
-    update_rate: 1000
-    k_gains:
-      - 24.0
-      - 24.0
-      - 24.0
-      - 24.0
-      - 10.0
-      - 6.0
-      - 2.0
-    d_gains:
-      - 2.0
-      - 2.0
-      - 2.0
-      - 1.0
-      - 1.0
-      - 1.0
-      - 0.5
-    robot_types:
-      - "fr3"
-      - "fr3"
-    arm_prefixes:
-      - "left"
-      - "right"
+/**:
+  fr3_duo_joint_impedance_example_controller:
+    ros__parameters:
+      update_rate: 1000
+      k_gains:
+        - 24.0
+        - 24.0
+        - 24.0
+        - 24.0
+        - 10.0
+        - 6.0
+        - 2.0
+      d_gains:
+        - 2.0
+        - 2.0
+        - 2.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 0.5
+      robot_types:
+        - "fr3"
+        - "fr3"
+      arm_prefixes:
+        - "left"
+        - "right"

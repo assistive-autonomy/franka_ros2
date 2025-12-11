@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2025 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/joint_impedance_fr3_duo_example_controller.hpp>
+#include <franka_example_controllers/fr3_duo_joint_impedance_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
 
 #include <cassert>
@@ -179,8 +179,22 @@ void JointImpedanceFr3DuoExampleController::updateJointStates() {
       const auto& position_interface = state_interfaces_.at(pos_index);
       const auto& velocity_interface = state_interfaces_.at(vel_index);
 
-      q_[robot_index](i) = position_interface.get_value();
-      dq_[robot_index](i) = velocity_interface.get_value();
+      auto position_value = position_interface.get_optional();
+      auto velocity_value = velocity_interface.get_optional();
+
+      if (position_value.has_value()) {
+        q_[robot_index](i) = position_value.value();
+      } else {
+        RCLCPP_WARN(get_node()->get_logger(),
+                    "Failed to get position value for joint %d of robot %zu", i, robot_index);
+      }
+
+      if (velocity_value.has_value()) {
+        dq_[robot_index](i) = velocity_value.value();
+      } else {
+        RCLCPP_WARN(get_node()->get_logger(),
+                    "Failed to get velocity value for joint %d of robot %zu", i, robot_index);
+      }
     }
   }
 }

@@ -88,3 +88,5 @@ TEST_F(LoggingUtilsTest, givenLogRclcppFatalRed_whenCalled_expectNoThrow) {
   EXPECT_NO_THROW(franka_hardware::logRclcppFatalRed(logger, "String value: %s", "test"));
   EXPECT_NO_THROW(franka_hardware::logRclcppFatalRed(logger, "Mixed: %s %d %d", "version", 1, 2));
 }
+
+

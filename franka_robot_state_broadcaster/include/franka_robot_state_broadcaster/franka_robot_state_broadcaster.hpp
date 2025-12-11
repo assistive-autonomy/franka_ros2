@@ -128,9 +128,7 @@ class FrankaRobotStateBroadcaster : public controller_interface::ControllerInter
   const std::string kLockSleepInterval = "lock_sleep_interval";
   const std::string kLockLogError = "lock_log_error";
   const std::string kLockUpdateSuccess = "lock_update_success";
-  const std::string kArmIdName = "arm_id";
 
-  std::string arm_id_;
   bool lock_log_error_;
   bool lock_update_success_;
   franka_msgs::msg::FrankaRobotState franka_robot_state_msg_;

@@ -93,11 +93,12 @@ Then, for example, to run the *move_to_start_example_controller*, use the follow
 FR3 Duo (Dual-Arm Setup)
 ------------------------
 
-The ``franka_bringup`` package supports launching a dual-arm FR3 setup using the ``fr3_duo.config.yaml`` configuration file.
+The ``franka_bringup`` package supports launching a dual-arm FR3 setup using the ``fr3_duo.launch.py``
+launch file with the ``fr3_duo.config.yaml`` configuration file.
 
 .. important::
 
-    The FR3 Duo setup currently only supports the **torque (effort) command interface**. Position, velocity, 
+    The FR3 Duo setup currently only supports the **torque (effort) command interface**. Position, velocity,
     and Cartesian pose/velocity interfaces are not supported for dual-arm configurations.
 
 Configuration
@@ -111,22 +112,28 @@ The dual-arm configuration is defined in ``franka_bringup/config/fr3_duo.config.
 
 .. note::
 
-    All three arrays (``robot_types``, ``robot_ips``, ``arm_prefixes``) must have the same length, 
+    All three arrays (``robot_types``, ``robot_ips``, ``arm_prefixes``) must have the same length,
     and ``arm_prefixes`` must contain unique values.
 
 Launching the FR3 Duo
 ^^^^^^^^^^^^^^^^^^^^^
 
-To launch the dual-arm setup with the joint impedance controller:
+
+To launch the dual-arm setup with the joint impedance controller using a config file:
 
 .. code-block:: shell
 
-    ros2 launch franka_bringup example.launch.py \
-        controller_names:=joint_impedance_fr3_duo_example_controller \
-        robot_config_file:=fr3_duo.config.yaml
+    ros2 launch franka_bringup fr3_duo.launch.py \
+        robot_config_file:=fr3_duo.config.yaml \
+        controller_name:=fr3_duo_joint_impedance_example_controller
 
-You can also specify just the config filename, and the launch file will automatically look in the 
+You can also specify just the config filename, and the launch file will automatically look in the
 ``franka_bringup/config/`` directory.
+
+.. note::
+
+    The FR3 Duo setup supports only **one controller** at a time using the ``controller_name`` parameter (singular),
+    unlike ``example.launch.py`` which supports multiple controllers with ``controller_names`` (plural).
 
 Non-realtime robot parameter setting
 ------------------------------------

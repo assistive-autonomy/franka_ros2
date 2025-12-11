@@ -195,7 +195,7 @@ If you want to run this example with namespaces, you would need to use the argum
 To run any example controller, make sure to add your desired configuration in `franka.config.yaml` and run:
 
 ```bash
-ros2 launch franka_bringup example.launch.py controller_name:=your_desired_controller
+ros2 launch franka_bringup example.launch.py controller_names:=your_desired_controller
 ```
 You can select one of the controllers from `controllers.yaml`.
 
@@ -207,6 +207,18 @@ If you want to run a specific controller for each robot, you must specify the co
 ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_example_controller,joint_impedance_example_controller,cartesian_velocity_example_controller"
 ```
 If less controllers than the number of robots are specified, only the first controller would be used for all the robots. TMR controllers can also be used.
+
+### Run FR3 Duo (Dual-Arm Setup)
+
+For dual-arm FR3 setups, use the `fr3_duo.launch.py` launch file with the `fr3_duo.config.yaml` configuration:
+
+```bash
+ros2 launch franka_bringup fr3_duo.launch.py \
+  robot_config_file:=fr3_duo.config.yaml \
+  controller_name:=fr3_duo_joint_impedance_example_controller
+```
+
+**Note:** The FR3 Duo setup supports only **one controller** at a time and uses the `controller_name` parameter (singular). The dual-arm setup currently only supports the torque (effort) command interface.
 
 ### Move the TMRv0.2
 

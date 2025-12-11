@@ -9,6 +9,9 @@ Requires libfranka >= 0.18.0 and franka_description >= 2.0.0 requires ROS 2 Jazz
 * BREAKING CHANGE: arm_id replaced by robot_type and controller_name by controller_names
 * Feat: TMRv0.2 teleoperation example controller added
 * Feat: arm_id replaced by robot_type
+* chore: bump required ros2_control version from franka_description to 1.0.0 from franka_hardware_interface
+* feat: pass is_async argument to franka_arm.ros2_control.xacro
+* feat: support dual arm fr3 setup only with torque command interface using is_async from ros2_control
 
 v3.1.1 (2025-11-10)
 -------------------
