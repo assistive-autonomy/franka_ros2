@@ -84,6 +84,7 @@ RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
     && sudo apt-get update \
     && rosdep update \
     && rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y \
+       --skip-keys "moveit_collision_detection_bullet olv_module_descriptions" \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* \
     && rm -rf /home/$USERNAME/.ros \

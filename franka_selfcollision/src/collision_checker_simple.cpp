@@ -108,7 +108,7 @@ public:
 
         //pinocchio::updateGeometryPlacements(model_, *data_, geom_model_, *geom_data_, q);
 
-        pinocchio::computeCollisions(model_, *data_, geom_model_, *geom_data_, q, true);
+        pinocchio::computeCollisions(model_, *data_, geom_model_, *geom_data_, q, false);
 
         auto end = std::chrono::high_resolution_clock::now();
 

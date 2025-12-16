@@ -23,7 +23,7 @@
 #include <Eigen/Eigen>
 
 namespace franka_example_controllers {
-
+//claiming command interface
 controller_interface::InterfaceConfiguration
 JointImpedanceExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
@@ -32,6 +32,9 @@ JointImpedanceExampleController::command_interface_configuration() const {
   for (int i = 1; i <= num_joints; ++i) {
     config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
+
+  config.names.push_back(arm_id_ + "/collision_detected");
+
   return config;
 }
 
@@ -61,6 +64,18 @@ controller_interface::return_type JointImpedanceExampleController::update(
   dq_filtered_ = (1 - kAlpha) * dq_filtered_ + kAlpha * dq_;
   Vector7d tau_d_calculated =
       k_gains_.cwiseProduct(q_goal - q_) + d_gains_.cwiseProduct(-dq_filtered_);
+  //after 5s ccheck, if larget then 5s trigger a collision_detection -> flag should be changed here
+
+  double collision_detected_ = 0.0;
+
+  if(elapsed_time_ > 5.0){
+    collision_detected_ = 1.0;
+  }
+
+  if(!command_interfaces_[num_joints].set_value(collision_detected_)){
+    RCLCPP_FATAL(get_node()->get_logger(), "Failed to write collision command");
+    return controller_interface::return_type::ERROR;
+  }
 
   for (int i = 0; i < num_joints; ++i) {
     if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
@@ -70,7 +85,7 @@ controller_interface::return_type JointImpedanceExampleController::update(
   }
   return controller_interface::return_type::OK;
 }
-
+//create a timer from header
 CallbackReturn JointImpedanceExampleController::on_init() {
   try {
     auto_declare<std::string>("robot_type", "");

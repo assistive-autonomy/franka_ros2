@@ -153,11 +153,16 @@ std::vector<CommandInterface> FrankaHardwareInterface::export_command_interfaces
     }
   }
 
+  command_interfaces.emplace_back(
+      CommandInterface(arm_id_, "collision_detected", &collision_detected_));
+  RCLCPP_INFO(getLogger(), "Registering command interface: collision_detected ");
+
   return command_interfaces;
 }
 
 CallbackReturn FrankaHardwareInterface::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
+  collision_detected_ = 0.0;
   read(rclcpp::Time(0),
        rclcpp::Duration(0, 0));  // makes sure that the robot state is properly initialized.
   return CallbackReturn::SUCCESS;
@@ -220,6 +225,18 @@ bool hasInfinite(const CommandType& commands) {
 
 hardware_interface::return_type FrankaHardwareInterface::write(const rclcpp::Time& /*time*/,
                                                                const rclcpp::Duration& /*period*/) {
+
+  if(collision_detected_ > 0.5) {
+    //maybe change to logRclcppFatalRed ?
+    logRclcppFatalRed(getLogger(), "EXTERNAL COLLISION DETECTED VIA ROS2! Stopping robot immediately.");
+    try{
+        robot_->stopRobot();
+    } catch (const franka::Exception& e) {
+      RCLCPP_ERROR(getLogger(), "Exception while stopping robot %s", e.what());
+    }
+    return hardware_interface::return_type::ERROR;
+  }
+
   if (hasInfinite(hw_position_commands_) || hasInfinite(hw_effort_commands_) ||
       hasInfinite(hw_velocity_commands_) || hasInfinite(hw_cartesian_velocities_) ||
       hasInfinite(hw_elbow_command_) || hasInfinite(hw_cartesian_pose_commands_)) {

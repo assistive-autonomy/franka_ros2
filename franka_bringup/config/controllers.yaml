@@ -90,8 +90,13 @@
       move_to_start_example_controller:
         type: franka_example_controllers/MoveToStartExampleController
 
+<<<<<<< HEAD
       mobile_cartesian_velocity_example_controller:
         type: franka_mobile_example_controllers/MobileCartesianVelocityExampleController
+=======
+      self_collision_controller:
+        type: franka_example_controllers/SelfCollisionController
+>>>>>>> bf80260 (controller added)
 
 /**:
   cartesian_elbow_example_controller:
@@ -262,3 +267,9 @@
       arm_prefixes:
         - "left"
         - "right"
+/**:
+  joint_position_example_controller:
+    ros__parameters:
+      is_async: true
+      arm_ids: ["left_fr3v2", "right_lr3v2"]
+      update_rate: 400
