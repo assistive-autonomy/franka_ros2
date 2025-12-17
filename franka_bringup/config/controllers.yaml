@@ -40,9 +40,6 @@
       fr3_duo_joint_impedance_example_controller:
         type: franka_example_controllers/Fr3DuoJointImpedanceExampleController
 
-      multi_arm_joint_impedance_example_controller:
-        type: franka_example_controllers/MultiArmJointImpedanceExampleController
-
       cartesian_elbow_example_controller:
         type: franka_example_controllers/CartesianElbowExampleController
 

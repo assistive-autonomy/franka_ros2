@@ -81,7 +81,8 @@ utils_path = os.path.abspath(
 )
 launch_utils_path = os.path.join(utils_path, 'launch_utils.py')
 
-spec = importlib.util.spec_from_file_location('launch_utils', launch_utils_path)
+spec = importlib.util.spec_from_file_location(
+    'launch_utils', launch_utils_path)
 launch_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(launch_utils)
 
@@ -91,12 +92,17 @@ validate_duo_arrays_length = launch_utils.validate_duo_arrays_length
 validate_arm_prefixes_unique = launch_utils.validate_arm_prefixes_unique
 is_duo_config = launch_utils.is_duo_config
 
-def generate_robot_nodes(context):
-    robot_config_file = LaunchConfiguration('robot_config_file').perform(context)
 
-    # If config_file is just a filename (no path separators), look in franka_bringup/config/
-    if not os.path.isabs(robot_config_file) and os.path.sep not in robot_config_file:
-        robot_config_file = os.path.join(package_share, 'config', robot_config_file)
+def generate_robot_nodes(context):
+    robot_config_file = LaunchConfiguration(
+        'robot_config_file').perform(context)
+
+    # If config_file is just a filename (no path separators), look in
+    # franka_bringup/config/
+    if not os.path.isabs(
+            robot_config_file) and os.path.sep not in robot_config_file:
+        robot_config_file = os.path.join(
+            package_share, 'config', robot_config_file)
 
     # Load configuration from file
     configs = load_yaml(robot_config_file)
@@ -106,7 +112,8 @@ def generate_robot_nodes(context):
     # Validate it's a duo config
     if not is_duo_config(config):
         print(
-            f'Error: Configuration file {robot_config_file} does not contain a duo configuration.\n'
+            f'Error: Configuration file {
+                robot_config_file} does not contain a duo configuration.\n'
             f'Expected keys: robot_types, robot_ips, arm_prefixes\n'
             f'For single robot configurations, use example.launch.py instead.'
         )
@@ -124,13 +131,17 @@ def generate_robot_nodes(context):
     thread_priority_str = str(config.get('thread_priority', 50))
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
-    # Parse string list representations into actual Python lists for ros2_control_node
+    # Parse string list representations into actual Python lists for
+    # ros2_control_node
     robot_types_list = parse_string_list(robot_types_str)
     robot_ips_list = parse_string_list(robot_ips_str)
     arm_prefixes_list = parse_string_list(arm_prefixes_str)
 
     # Validate duo configuration
-    validate_duo_arrays_length(robot_types_list, robot_ips_list, arm_prefixes_list)
+    validate_duo_arrays_length(
+        robot_types_list,
+        robot_ips_list,
+        arm_prefixes_list)
     validate_arm_prefixes_unique(arm_prefixes_list)
 
     # Build URDF path based on the first robot type
@@ -228,7 +239,10 @@ def generate_robot_nodes(context):
                 package='controller_manager',
                 executable='spawner',
                 namespace=namespace,
-                arguments=[controller_name, '--controller-manager-timeout', '30'],
+                arguments=[
+                    controller_name,
+                    '--controller-manager-timeout',
+                    '30'],
                 parameters=[
                     PathJoinSubstitution(
                         [
@@ -266,13 +280,15 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'controllers_yaml',
             default_value=PathJoinSubstitution(
-                [FindPackageShare('franka_bringup'), 'config', 'controllers.yaml']
+                [FindPackageShare('franka_bringup'),
+                 'config', 'controllers.yaml']
             ),
             description='Override the default controllers.yaml file',
         ),
         DeclareLaunchArgument(
             'controller_name',
-            description='Controller name to spawn (required). Only one controller is supported for duo setups.',
+            description='Controller name to spawn (required). '
+                        'Only one controller is supported for duo setups.',
         ),
     ]
 

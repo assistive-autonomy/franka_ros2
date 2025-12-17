@@ -45,7 +45,6 @@ class JointImpedanceFr3DuoExampleController : public controller_interface::Contr
   std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
   std::string robot_description_;
-  bool is_gazebo{false};
   const int num_joints = 7;
 
   std::vector<Vector7d> q_;
