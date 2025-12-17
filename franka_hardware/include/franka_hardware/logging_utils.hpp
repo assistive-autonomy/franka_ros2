@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <string>
@@ -33,9 +34,9 @@ namespace franka_hardware {
  * @return Formatted string
  */
 inline std::string formatVariadicMessage(const char* text, va_list args) {
-  char buffer[1024];
-  vsnprintf(buffer, sizeof(buffer), text, args);
-  return std::string(buffer);
+  std::array<char, 1024> buffer;
+  vsnprintf(buffer.data(), buffer.size(), text, args);
+  return {buffer.data()};
 }
 
 /**

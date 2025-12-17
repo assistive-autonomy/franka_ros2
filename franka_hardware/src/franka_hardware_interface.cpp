@@ -31,8 +31,6 @@
 #include "franka_hardware/logging_utils.hpp"
 #include "franka_hardware/ros_libfranka_logger.hpp"
 
-using franka_hardware::logRclcppFatalRed;
-
 const std::string kVersionName = "version";
 const std::string kRobotIpName = "robot_ip";
 const std::string kArmIdName = "robot_type";

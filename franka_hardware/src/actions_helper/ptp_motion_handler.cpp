@@ -14,8 +14,6 @@
 
 #include "franka_hardware/actions_helper/ptp_motion_handler.hpp"
 
-constexpr double kNonSetGoalTolerance = -1.0;
-
 namespace franka_hardware {
 
 PTPMotionHandler::PTPMotionHandler(const std::shared_ptr<Robot>& robot)
@@ -28,8 +26,8 @@ PTPMotionHandler::~PTPMotionHandler() {
 auto PTPMotionHandler::startNewPTPMotion(
     const std::shared_ptr<franka::Robot>& robot,
     const std::shared_ptr<const franka_msgs::action::PTPMotion::Goal>& goal) -> CommandResult {
-  CommandResult command_result =
-      CommandResult{.result = std::make_shared<franka_msgs::action::PTPMotion::Result>()};
+  CommandResult command_result = CommandResult{
+      .motion_id = "", .result = std::make_shared<franka_msgs::action::PTPMotion::Result>()};
 
   // Don't construct a new position control handler if a motion is already ongoing - we will
   // overwrite the target
