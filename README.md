@@ -208,9 +208,9 @@ ros2 launch franka_bringup example.launch.py controller_names:="cartesian_elbow_
 ```
 If less controllers than the number of robots are specified, only the first controller would be used for all the robots. TMR controllers can also be used.
 
-### Run FR3 Duo (Dual-Arm Setup)
+### Run FR3 Duo
 
-For dual-arm FR3 setups, use the `fr3_duo.launch.py` launch file with the `fr3_duo.config.yaml` configuration:
+For FR3 Duo setups, use the `fr3_duo.launch.py` launch file with the `fr3_duo.config.yaml` configuration:
 
 ```bash
 ros2 launch franka_bringup fr3_duo.launch.py \

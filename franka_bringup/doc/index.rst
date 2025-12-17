@@ -90,10 +90,10 @@ Then, for example, to run the *move_to_start_example_controller*, use the follow
 
     ros2 launch franka_bringup example.launch.py controller_names:=move_to_start_example_controller
 
-FR3 Duo (Dual-Arm Setup)
+FR3 Duo
 ------------------------
 
-The ``franka_bringup`` package supports launching a dual-arm FR3 setup using the ``fr3_duo.launch.py``
+The ``franka_bringup`` package supports launching a FR3 Duo setup using the ``fr3_duo.launch.py``
 launch file with the ``fr3_duo.config.yaml`` configuration file.
 
 .. important::
