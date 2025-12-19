@@ -30,7 +30,7 @@ find_package(yaml_cpp_vendor REQUIRED)
 find_package(franka_hardware REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
-find_package(Franka 0.18.2 REQUIRED)
+find_package(Franka 0.19.0 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 
