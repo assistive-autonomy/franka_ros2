@@ -14,15 +14,18 @@
 
 ############################################################################
 # Parameters:
-# controller_name: Name of the controller to spawn (required, no default)
-# robot_config_file: Path to the robot configuration file to load
-#                   (default: franka.config.yaml in franka_bringup/config)
+# controller_names: Comma-separated list of controller names to spawn (required, no default)
+# robot_config_file: Configuration file name or path. If just a filename is
+#                   provided (e.g., 'franka.config.yaml'), it will be
+#                   looked up in franka_bringup/config/ directory.
+#                   (default: franka.config.yaml)
 #
 # The example.launch.py launch file provides a flexible and unified interface
-# for launching Franka Robotics example controllers via the 'controller_name'
-# parameter, such as 'elbow_example_controller'.
+# for launching Franka Robotics example controllers for single robot setups
+# via the 'controller_names' parameter, such as 'elbow_example_controller'.
+# For dual-arm (duo) setups, use fr3_duo.launch.py directly.
 # Example:
-# ros2 launch franka_bringup example.launch.py controller_name:=elbow_example_controller
+# ros2 launch franka_bringup example.launch.py controller_names:=elbow_example_controller
 #
 # This script "includes" franka.launch.py to declare core component nodes,
 # including: robot_state_publisher, ros2_control_node, joint_state_publisher,
@@ -40,8 +43,8 @@
 # specific use cases, example.launch.py enhances scalability and ease of use
 # for a wide range of Franka Robotics applications.
 #
-# Ensure the specified  controller_name matches a controller defined in
-#  controllers.yaml to avoid runtime errors.
+# Ensure the specified controller_names match controllers defined in
+# controllers.yaml to avoid runtime errors.
 ############################################################################
 
 import importlib.util
@@ -74,6 +77,8 @@ launch_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(launch_utils)
 
 load_yaml = launch_utils.load_yaml
+get_controller_for_config = launch_utils.get_controller_for_config
+
 
 # Iterates over the uncommented lines in file specified by the robot_config_file parameter.
 # 'Includes' franka.launch.py for each active (uncommented) Robot.
@@ -85,12 +90,19 @@ load_yaml = launch_utils.load_yaml
 
 def generate_robot_nodes(context):
     config_file = LaunchConfiguration('robot_config_file').perform(context)
+
+    # If config_file is just a filename (no path separators), look in franka_bringup/config/
+    if not os.path.isabs(config_file) and os.path.sep not in config_file:
+        config_file = os.path.join(package_share, 'config', config_file)
+
     controller_names = LaunchConfiguration('controller_names').perform(context)
-    controller_names_vector = controller_names.split(',')
     configs = load_yaml(config_file)
     nodes = []
+
     for index, (_, config) in enumerate(configs.items()):
-        namespace = config['namespace']
+        namespace = config.get('namespace', '')
+
+        # Single robot configuration: use franka.launch.py
         nodes.append(
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
@@ -114,16 +126,12 @@ def generate_robot_nodes(context):
                 }.items(),
             )
         )
-        if controller_names_vector:
-            if len(controller_names_vector) == len(configs):
-                controller_name = controller_names_vector[index]
-            else:
-                print(
-                    'Warning: Number of controller names does not match number of robot configs.'
-                    ' Using the first controller for all robots.'
-                )
-                controller_name = controller_names_vector[0]
-        else:
+
+        # Determine which controller to use for this config
+        controller_name = get_controller_for_config(
+            controller_names, num_configs=len(configs), config_index=index
+        )
+        if not controller_name:
             print(
                 'Error: No controller names provided. Please provide at least one controller name.'
             )
@@ -131,21 +139,21 @@ def generate_robot_nodes(context):
 
         if CONTROLLER_EXAMPLE in controller_name:
             # Spawn the example as ros2_control controller
-            controller_name = controller_names_vector[index]
             nodes.append(
                 Node(
                     package='controller_manager',
                     executable='spawner',
                     namespace=namespace,
                     arguments=[controller_name, '--controller-manager-timeout', '30'],
-                    parameters=[PathJoinSubstitution([
-                        FindPackageShare('franka_bringup'), 'config', 'controllers.yaml',
-                        [
-                            FindPackageShare('franka_bringup'),
-                            'config',
-                            'controllers.yaml',
-                        ]
-                    ])],
+                    parameters=[
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_bringup'),
+                                'config',
+                                'controllers.yaml',
+                            ]
+                        )
+                    ],
                     output='screen',
                 )
             )
@@ -197,10 +205,12 @@ def generate_launch_description():
         [
             DeclareLaunchArgument(
                 'robot_config_file',
-                default_value=PathJoinSubstitution(
-                    [FindPackageShare('franka_bringup'), 'config', 'franka.config.yaml']
-                ),
-                description='Path to the robot configuration file to load',
+                default_value='franka.config.yaml',
+                description='Config file name (looked up in franka_bringup/config/) or full path',
+            ),
+            DeclareLaunchArgument(
+                'controller_names',
+                description='Comma-separated list of controller names to spawn (required)',
             ),
             OpaqueFunction(function=generate_robot_nodes),
         ]

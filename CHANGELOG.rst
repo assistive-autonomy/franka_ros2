@@ -3,12 +3,17 @@ Changelog for package franka_ros2
 
 UNRELEASED
 ----------
-Requires libfranka >= 0.18.0 and franka_description >= 2.0.0 requires ROS 2 Jazzy
+Requires libfranka >= 0.19.0 and franka_description >= 2.3.0 requires ROS 2 Jazzy
 
 * Add: Added a joint-based point-to-point motion action with usage example
 * BREAKING CHANGE: arm_id replaced by robot_type and controller_name by controller_names
 * Feat: TMRv0.2 teleoperation example controller added
 * Feat: arm_id replaced by robot_type
+* chore: bump required ros2_control version from franka_description to 1.0.0 from franka_hardware_interface
+* feat: pass is_async argument to franka_arm.ros2_control.xacro
+* feat: support dual arm fr3 setup only with torque command interface using is_async from ros2_control
+* chore: removed the custom controller manager from franka_ros2 and using the ros2_control controller manager instead
+* chore: added custom hardware interface and realtime tools forked from the ros2_control repository with the passing the manage overrun feature
 
 v3.1.1 (2025-11-10)
 -------------------

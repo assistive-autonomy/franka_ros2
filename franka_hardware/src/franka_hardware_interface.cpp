@@ -28,6 +28,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "franka_hardware/franka_hardware_interface.hpp"
+#include "franka_hardware/logging_utils.hpp"
 #include "franka_hardware/ros_libfranka_logger.hpp"
 
 const std::string kVersionName = "version";
@@ -35,14 +36,6 @@ const std::string kRobotIpName = "robot_ip";
 const std::string kArmIdName = "robot_type";
 
 namespace {
-
-auto logRclcppFatalRed(const rclcpp::Logger& logger, const char* text, ...) {
-  va_list args;
-  va_start(args, text);
-  std::string formatted_text = fmt::format("\033[1;31m{}\033[0m", text);
-  RCLCPP_FATAL(logger, formatted_text.c_str(), args);
-  va_end(args);
-}
 
 auto parseVersion(const std::string& version_str) {
   std::vector<std::string> version_parts;
@@ -102,27 +95,28 @@ std::vector<StateInterface> FrankaHardwareInterface::export_state_interfaces() {
   }
 
   state_interfaces.emplace_back(StateInterface(
-      robot_type_, k_robot_state_interface_name,
+      prefix_ + robot_type_, k_robot_state_interface_name,
       reinterpret_cast<double*>(  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
           &hw_franka_robot_state_addr_)));
   state_interfaces.emplace_back(StateInterface(
-      robot_type_, k_robot_model_interface_name,
+      prefix_ + robot_type_, k_robot_model_interface_name,
       reinterpret_cast<double*>(  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
           &hw_franka_model_ptr_)));
 
   // cartesian pose state interface 16 element pose matrix
   for (auto i = 0U; i < 16; i++) {
-    state_interfaces.emplace_back(StateInterface(std::to_string(i), k_HW_IF_CARTESIAN_POSE_STATE,
-                                                 &cartesian_pose_state_.at(i)));
+    state_interfaces.emplace_back(StateInterface(
+        prefix_ + std::to_string(i), k_HW_IF_CARTESIAN_POSE_STATE, &cartesian_pose_state_.at(i)));
   }
 
   // elbow state interface
   for (auto i = 0U; i < elbow_state_names_.size(); i++) {
-    state_interfaces.emplace_back(
-        StateInterface(elbow_state_names_.at(i), k_HW_IF_ELBOW_STATE, &elbow_state_.at(i)));
+    state_interfaces.emplace_back(StateInterface(prefix_ + elbow_state_names_.at(i),
+                                                 k_HW_IF_ELBOW_STATE, &elbow_state_.at(i)));
   }
 
-  state_interfaces.emplace_back(StateInterface(robot_type_, "robot_time", &robot_time_state_));
+  state_interfaces.emplace_back(
+      StateInterface(prefix_ + robot_type_, "robot_time", &robot_time_state_));
 
   return state_interfaces;
 }
@@ -166,15 +160,12 @@ CallbackReturn FrankaHardwareInterface::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   read(rclcpp::Time(0),
        rclcpp::Duration(0, 0));  // makes sure that the robot state is properly initialized.
-  RCLCPP_INFO(getLogger(), "Started");
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn FrankaHardwareInterface::on_deactivate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  RCLCPP_INFO(getLogger(), "trying to Stop...");
   robot_->stopRobot();
-  RCLCPP_INFO(getLogger(), "Stopped");
   return CallbackReturn::SUCCESS;
 }
 
@@ -204,6 +195,7 @@ void FrankaHardwareInterface::initializePositionCommands(const franka::RobotStat
 
 hardware_interface::return_type FrankaHardwareInterface::read(const rclcpp::Time& /*time*/,
                                                               const rclcpp::Duration& /*period*/) {
+  std::lock_guard<std::mutex> lock(control_mutex_);
   if (hw_franka_model_ptr_ == nullptr) {
     hw_franka_model_ptr_ = robot_->getModel();
   }
@@ -322,6 +314,16 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
                 "https://github.com/frankarobotics/franka_description");
   }
 
+  try {
+    prefix_ = info_.hardware_parameters.at("prefix");
+    if (!prefix_.empty()) {
+      prefix_ += "_";  // Add underscore separator if prefix is not empty
+    }
+  } catch (const std::out_of_range& ex) {
+    RCLCPP_INFO(getLogger(), "Parameter 'prefix' is not set. Using empty prefix.");
+    prefix_ = "";
+  }
+
   if (!robot_) {
     try {
       RCLCPP_INFO(getLogger(), "Connecting to robot at \"%s\" ...", robot_ip.c_str());
@@ -351,6 +353,7 @@ rclcpp::Logger FrankaHardwareInterface::getLogger() {
 hardware_interface::return_type FrankaHardwareInterface::perform_command_mode_switch(
     const std::vector<std::string>& /*start_interfaces*/,
     const std::vector<std::string>& /*stop_interfaces*/) {
+  std::lock_guard<std::mutex> lock(control_mutex_);
   if (!effort_interface_running_ && effort_interface_claimed_) {
     std::fill(hw_effort_commands_.begin(), hw_effort_commands_.end(), 0);
     robot_->stopRobot();

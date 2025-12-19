@@ -55,6 +55,22 @@ joints while it is running.
 
     ros2 launch franka_bringup example.launch.py controller_names:=joint_impedance_example_controller
 
+Joint Impedance FR3 Duo Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This example is designed for the FR3 Duo (dual-arm) setup. It moves joints 4 and 5 on both arms
+in a periodic, compliant movement. Only the torque (effort) command interface is supported.
+
+.. code-block:: shell
+
+    ros2 launch franka_bringup fr3_duo.launch.py \
+        robot_config_file:=fr3_duo.config.yaml \
+        controller_name:=fr3_duo_joint_impedance_example_controller
+
+.. note::
+
+    Use ``controller_name`` (singular) for ``fr3_duo.launch.py``, not ``controller_names`` (plural).
+
 Joint Impedance With IK Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
