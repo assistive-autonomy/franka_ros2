@@ -94,3 +94,4 @@ TEST_F(LoggingUtilsTest, givenLogRclcppFatalRed_whenCalled_expectNoThrow) {
 
 
 
+
