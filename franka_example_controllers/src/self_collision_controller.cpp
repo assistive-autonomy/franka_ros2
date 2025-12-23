@@ -14,7 +14,6 @@
 
 #include <franka_example_controllers/self_collision_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
-#include "franka_msgs/srv/self_collision.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -32,8 +31,8 @@ SelfCollisionController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-  for (const auto& arm_id : arm_ids_) {
-    config.names.push_back(arm_id + "/collision_detected");
+  for (size_t robot_index = 0; robot_index < robot_types_.size(); robot_index++) {
+    config.names.push_back(arm_prefixes_[robot_index] + "_" + robot_types_[robot_index] + "/collision_detected");
   }
   return config;
 
@@ -44,9 +43,9 @@ SelfCollisionController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-  for (const auto& arm_id : arm_ids_) {
-    for (int i = 1; i <= num_joints; ++i) {
-      config.names.push_back(arm_id + "_joint" + std::to_string(i) + "/position");
+  for (size_t i = 0; i < robot_types_.size(); i++) {
+    for (int j = 1; j <= num_joints; ++j) {
+      config.names.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + "_joint" + std::to_string(j) + "/position");
     }
   }
 
@@ -57,19 +56,18 @@ controller_interface::return_type SelfCollisionController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
   
-  {
-    std::unique_lock<std::mutex> lock(data_mutex_, std::try_to_lock);
-    if (lock.owns_lock()) {
-      for (size_t i = 0; i < state_interfaces_.size(); ++i){
-        current_joint_positions_[i] = state_interfaces_[i].get_optional<double>().value();
-      }
-    }
+
+  for (size_t i = 0; i < state_interfaces_.size(); ++i){
+    current_joint_positions_[i] = state_interfaces_[i].get_optional<double>().value();
   }
 
-  double command_value = collision_detected_.load();
+  bool collision_found = collision_checker_->checkCollision(current_joint_positions_, print_collisions_);
 
-  for(auto& interface : command_interfaces_) {
-    if(!interface.set_value(command_value)){
+  double collision_detected = collision_found ? 1.0 : 0.0;
+  
+
+  for(size_t i = 0; i < command_interfaces_.size(); ++i) {
+    if(!command_interfaces_[i].set_value(collision_detected)){
       RCLCPP_FATAL(get_node()->get_logger(), "Failed to write collision command");
       return controller_interface::return_type::ERROR;
     }
@@ -80,7 +78,15 @@ controller_interface::return_type SelfCollisionController::update(
 
 CallbackReturn SelfCollisionController::on_init() {
   try {
-    auto_declare<std::vector<std::string>>("arm_ids", {"left_fr3v2", "right_fr3v2"});
+    auto_declare<std::vector<std::string>>("arm_prefixes", {});
+    auto_declare<std::vector<std::string>>("robot_types", {});
+
+    auto_declare<std::string>("urdf_path", "/ros2_ws/src/franka_selfcollision/urdfs/fr3_duo.urdf");
+    auto_declare<std::string>("srdf_path", "/ros2_ws/src/franka_selfcollision/urdfs/fr3_duo_arms.srdf");
+    auto_declare<double>("security_margin", 0.045);
+
+    auto_declare<bool>("print_collisions", false);
+
   } catch (const std::exception& e) {
     fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
     return CallbackReturn::ERROR;
@@ -90,64 +96,46 @@ CallbackReturn SelfCollisionController::on_init() {
 
 CallbackReturn SelfCollisionController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  arm_ids_ = get_node()->get_parameter("arm_ids").as_string_array();
+  arm_prefixes_ = get_node()->get_parameter("arm_prefixes").as_string_array();
+  robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
+  
+  std::string urdf_path = get_node()->get_parameter("urdf_path").as_string();
+  std::string srdf_path = get_node()->get_parameter("srdf_path").as_string();
+  double security_margin = get_node()->get_parameter("security_margin").as_double();
 
   joint_names_.clear();
-  for (const auto& arm_id : arm_ids_) {
-    for (int i = 1; i <= num_joints; ++i) {
-      joint_names_.push_back(arm_id + "_joint" + std::to_string(i));
+  for (size_t i = 0; i < robot_types_.size(); i++) {
+    for (int j = 1; j <= num_joints; ++j) {
+      joint_names_.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + std::to_string(j));
     }
   }
 
-  collision_client_ = get_node()->create_client<franka_msgs::srv::SelfCollision>("/check_self_collision");
+  try{
+    RCLCPP_INFO(get_node()->get_logger(), "Loading Pinocchio Model form %s", urdf_path.c_str());
+
+    collision_checker_ = std::make_shared<franka_selfcollision::SelfCollisionChecker>(
+      urdf_path,
+      srdf_path,
+      security_margin
+    );
+
+    // Verify dimensions
+    int model_dof = collision_checker_->getDoF();
+    if ((size_t)model_dof != joint_names_.size()) {
+      RCLCPP_WARN(get_node()->get_logger(), 
+        "Mismatch: Controller expects %zu joints, URDF model has %d. (Check if grippers are ignored correctly)", 
+        joint_names_.size(), model_dof);
+    }
+  } catch (const std::exception& e) {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to initialize Collision Checker: %s", e.what());
+      return CallbackReturn::ERROR;
+  }
   
   current_joint_positions_.resize(joint_names_.size(), 0.0);
 
   RCLCPP_INFO(get_node()->get_logger(), "Configured Self Collision for %zu joints.", joint_names_.size());
 
   return CallbackReturn::SUCCESS;
-}
-
-CallbackReturn SelfCollisionController::on_activate(
-    const rclcpp_lifecycle::State& /*previous_state*/) {
-  collision_detected_.store(0.0);
-  worker_running_ = true;
-  worker_thread_ = std::thread(&SelfCollisionController::workerLogic, this);
-  return CallbackReturn::SUCCESS;
-}
-
-CallbackReturn SelfCollisionController::on_deactivate(
-    const rclcpp_lifecycle::State& /*previous_state*/) {
-  worker_running_ = false;
-  if (worker_thread_.joinable()){
-    worker_thread_.join();
-  }
-  return CallbackReturn::SUCCESS;
-}
-
-void SelfCollisionController::workerLogic() {
- auto request = std::make_shared<franka_msgs::srv::SelfCollision::Request>();
-
- while (worker_running_ && rclcpp::ok()){
-    {
-      std::lock_guard<std::mutex> lock(data_mutex_);
-      size_t copy_size = std::min(current_joint_positions_.size(), request->joint_configuration.size());
-      std::copy(current_joint_positions_.begin(), 
-                current_joint_positions_.begin() + copy_size, 
-                request->joint_configuration.begin());
-    }
-    if (collision_client_->service_is_ready()){
-      auto future = collision_client_->async_send_request(request);
-      if (future.wait_for(std::chrono::milliseconds(2)) == std::future_status::ready) {
-        auto result = future.get();
-        double val = result->collision ? 1.0 : 0.0;
-        collision_detected_.store(val);
-      }
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
- }
 }
 
 }  // namespace franka_example_controllers

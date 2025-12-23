@@ -17,15 +17,12 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <thread>
 #include <atomic>
-#include <mutex>
 
 #include <Eigen/Eigen>
 #include <controller_interface/controller_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include "franka_semantic_components/franka_robot_state.hpp"
-#include "franka_msgs/srv/self_collision.hpp"
+#include "franka_selfcollision/self_collision_checker.hpp"
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -41,25 +38,17 @@ class SelfCollisionController : public controller_interface::ControllerInterface
                                            const rclcpp::Duration& period) override;
   CallbackReturn on_init() override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
-  CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::vector<std::string> arm_ids_;
+  std::vector<std::string> robot_types_;
+  std::vector<std::string> arm_prefixes_;
   std::vector<std::string> joint_names_;
   const int num_joints = 7;
-
-  //Threading
-  rclcpp::Client<franka_msgs::srv::SelfCollision>::SharedPtr collision_client_;
-  std::thread worker_thread_;
-  std::atomic<double> collision_detected_{0.0};
-  std::atomic<bool> worker_running_{false};
-  
-  //Shared Data
-  std::mutex data_mutex_;
+  std::shared_ptr<franka_selfcollision::SelfCollisionChecker> collision_checker_;
   std::vector<double> current_joint_positions_;
 
-  void workerLogic();
+  bool print_collisions_ = false;
+
 };
 
 }  // namespace franka_example_controllers
