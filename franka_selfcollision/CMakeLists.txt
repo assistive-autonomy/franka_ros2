@@ -47,6 +47,23 @@ target_link_libraries(${PROJECT_NAME}
     pinocchio::pinocchio
 )
 
+add_executable(self_collision_service 
+    src/self_collision_service.cpp
+)
+target_link_libraries(self_collision_service
+                    ${PROJECT_NAME} 
+                    pinocchio::pinocchio)
+
+target_include_directories(self_collision_service PRIVATE 
+  include
+)
+
+ament_target_dependencies(self_collision_service
+    rclcpp
+    franka_msgs
+    Franka
+)
+
 add_executable(self_collision_node 
     src/collision_checker_simple.cpp
 )
@@ -105,6 +122,7 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 install(TARGETS
+        self_collision_service
         self_collision_node
         self_collision_node_fast
         self_collision_node_bullet

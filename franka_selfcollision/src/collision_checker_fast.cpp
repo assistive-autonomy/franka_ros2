@@ -1,6 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include "franka_msgs/srv/self_collision.hpp" 
-#include "collision/collision_checker_impl.hpp" 
+#include "franka_selfcollision/collision_checker_impl.hpp" 
 
 class CollisionCheckerNode : public rclcpp::Node
 {
