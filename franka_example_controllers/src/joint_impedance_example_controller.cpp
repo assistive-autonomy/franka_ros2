@@ -33,7 +33,7 @@ JointImpedanceExampleController::command_interface_configuration() const {
     config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
 
-  config.names.push_back(arm_id_ + "/collision_detected");
+  config.names.push_back(robot_type_ + "/collision_detected");
 
   return config;
 }

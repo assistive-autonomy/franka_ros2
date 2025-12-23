@@ -265,7 +265,42 @@ def generate_robot_nodes(context):
                 output='screen',
             )
         )
-
+    nodes.append(
+        Node(
+            package='controller_manager',
+            executable='spawner',
+            namespace=namespace,
+            arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
+            parameters=[
+                PathJoinSubstitution(
+                    [
+                        FindPackageShare('franka_bringup'),
+                        'config',
+                        'controllers.yaml',
+                    ]
+                )
+            ],
+            output='screen',
+        )
+    )
+    nodes.append(
+            Node(
+                package='rviz2',
+                executable='rviz2',
+                name='rviz2',
+                arguments=[
+                    '--display-config',
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare('franka_description'),
+                            'rviz',
+                            'visualize_franka.rviz',
+                        ]
+                    ),
+                ],
+                output='screen',
+            )
+    )
     return nodes
 
 

@@ -152,10 +152,12 @@ std::vector<CommandInterface> FrankaHardwareInterface::export_command_interfaces
                   gpio.name.c_str(), command_interface.name.c_str(), vector_index);
     }
   }
-
+  //Register a command interface for the self_collision detection
+  RCLCPP_INFO(getLogger(), "Register collision command interfaces");
+  std::string prefix_type = prefix_.substr(0, prefix_.size() - 1) + robot_type_;
   command_interfaces.emplace_back(
-      CommandInterface(arm_id_, "collision_detected", &collision_detected_));
-  RCLCPP_INFO(getLogger(), "Registering command interface: collision_detected ");
+    CommandInterface(prefix_type, "collision_detected", &collision_detected_));
+  RCLCPP_INFO(getLogger(), "Registering command interface: %s/collision_detected", prefix_type.c_str());
 
   return command_interfaces;
 }

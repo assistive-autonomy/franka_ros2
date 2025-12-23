@@ -29,6 +29,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(franka_selfcollision REQUIRED)
 
 add_library(
         ${PROJECT_NAME}
@@ -69,6 +70,7 @@ ament_target_dependencies(
         rclcpp
         rclcpp_lifecycle
         std_srvs
+        franka_selfcollision
 )
 
 pluginlib_export_plugin_description_file(
