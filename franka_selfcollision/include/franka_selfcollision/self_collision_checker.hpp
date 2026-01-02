@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #ifndef PINOCCHIO_WITH_HPP_FCL
   #define PINOCCHIO_WITH_HPP_FCL
@@ -21,12 +22,12 @@ class SelfCollisionChecker
 public:
     /**
      * @brief Constructor loads the URDF/SRDF and builds the Pinocchio models.
-     * @param urdf_path Path to the robot URDF file.
-     * @param srdf_path Path to the robot SRDF file (for disabling allowable collisions).
+     * @param urdf_xml XML of the robots URDF file.
+     * @param srdf_xml XML of the robots SRDF file (for disabling allowable collisions).
      * @param security_margin Safety buffer in meters (default 0.045).
      */
-    SelfCollisionChecker(const std::string& urdf_path,
-                         const std::string& srdf_path,
+    SelfCollisionChecker(const std::string& urdf_xml,
+                         const std::string& srdf_xml,
                          double security_margin = 0.045);
 
     /**

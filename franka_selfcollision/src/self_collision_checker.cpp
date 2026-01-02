@@ -7,15 +7,18 @@
 namespace franka_selfcollision
 {
 
-SelfCollisionChecker::SelfCollisionChecker(const std::string& urdf_path,
-                                           const std::string& srdf_path,
+SelfCollisionChecker::SelfCollisionChecker(const std::string& urdf_xml,
+                                           const std::string& srdf_xml,
                                            double security_margin)
 {
-    pinocchio::urdf::buildModel(urdf_path, model_);
-    pinocchio::urdf::buildGeom(model_, urdf_path, pinocchio::COLLISION, geom_model_);
+
+    pinocchio::urdf::buildModelFromXML(urdf_xml, model_);
+
+    std::istringstream urdf_stream(urdf_xml);
+    pinocchio::urdf::buildGeom(model_, urdf_stream, pinocchio::COLLISION, geom_model_);
 
     geom_model_.addAllCollisionPairs();
-    pinocchio::srdf::removeCollisionPairs(model_, geom_model_, srdf_path);
+    pinocchio::srdf::removeCollisionPairsFromXML(model_, geom_model_, srdf_xml);
 
     //Create Reduced Model for finger joints if they are there
     std::vector<pinocchio::JointIndex> locked_joints;

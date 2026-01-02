@@ -81,8 +81,8 @@ CallbackReturn SelfCollisionController::on_init() {
     auto_declare<std::vector<std::string>>("arm_prefixes", {});
     auto_declare<std::vector<std::string>>("robot_types", {});
 
-    auto_declare<std::string>("urdf_path", "/ros2_ws/src/franka_selfcollision/urdfs/fr3_duo.urdf");
-    auto_declare<std::string>("srdf_path", "/ros2_ws/src/franka_selfcollision/urdfs/fr3_duo_arms.srdf");
+    auto_declare<std::string>("robot_description", "");
+    auto_declare<std::string>("robot_description_semantic", "");
     auto_declare<double>("security_margin", 0.045);
 
     auto_declare<bool>("print_collisions", false);
@@ -98,10 +98,25 @@ CallbackReturn SelfCollisionController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   arm_prefixes_ = get_node()->get_parameter("arm_prefixes").as_string_array();
   robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
-  
-  std::string urdf_path = get_node()->get_parameter("urdf_path").as_string();
-  std::string srdf_path = get_node()->get_parameter("srdf_path").as_string();
   double security_margin = get_node()->get_parameter("security_margin").as_double();
+
+  auto parameters_client =
+      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
+  parameters_client->wait_for_service();
+
+  std::string urdf_xml ;
+  auto future_urdf = parameters_client->get_parameters({"robot_description"});
+  auto result_urdf = future_urdf.get();
+  if (!result_urdf.empty()) {
+    urdf_xml = result_urdf[0].value_to_string();
+  } else {
+    RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
+    return CallbackReturn::ERROR;
+  }
+  
+  std::string srdf_xml ;
+  srdf_xml = get_node()->get_parameter("robot_description_semantic").as_string();
+  RCLCPP_INFO(get_node()->get_logger(), "Got SRDF file. Is it empty? %s", srdf_xml.empty() ? "Yes" : "No");
 
   joint_names_.clear();
   for (size_t i = 0; i < robot_types_.size(); i++) {
@@ -111,11 +126,11 @@ CallbackReturn SelfCollisionController::on_configure(
   }
 
   try{
-    RCLCPP_INFO(get_node()->get_logger(), "Loading Pinocchio Model form %s", urdf_path.c_str());
+    RCLCPP_INFO(get_node()->get_logger(), "Loading Pinocchio Model form remote parameters");
 
     collision_checker_ = std::make_shared<franka_selfcollision::SelfCollisionChecker>(
-      urdf_path,
-      srdf_path,
+      urdf_xml,
+      srdf_xml,
       security_margin
     );
 

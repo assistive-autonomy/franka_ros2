@@ -53,21 +53,21 @@
   <!-- dynamics: description of the dynamics that comes from a YAML file. Example definition: ${xacro.load_yaml('$(find franka_description)/robots/fr3/dynamics.yaml')} -->
   <link name="left_base">
       </link>
-  <joint name="left_fr3v2_left_base_joint" type="fixed">
+  <joint name="left_fr3_left_base_joint" type="fixed">
     <parent link="left_base"/>
-    <child link="left_fr3v2_link0"/>
+    <child link="left_fr3_link0"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link0">
-    <visual name="left_fr3v2_link0_visual">
+  <link name="left_fr3_link0">
+    <visual name="left_fr3_link0_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link0.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link0.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link0_collision">
+    <collision name="left_fr3_link0_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link0.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link0.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -76,30 +76,30 @@
       <inertia ixx="0.009" ixy="0.0" ixz="0.002" iyy="0.0115" iyz="0.0" izz="0.0085"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link0_accelerometer_top">
+  <link name="left_fr3_link0_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link0_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link0_accelerometer_top_joint" type="fixed">
     <origin rpy="3.14159 0 0" xyz="0 0 0.05"/>
-    <parent link="left_fr3v2_link0"/>
-    <child link="left_fr3v2_link0_accelerometer_top"/>
+    <parent link="left_fr3_link0"/>
+    <child link="left_fr3_link0_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link0_accelerometer_bottom">
+  <link name="left_fr3_link0_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link0_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link0_accelerometer_bottom_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.06"/>
-    <parent link="left_fr3v2_link0"/>
-    <child link="left_fr3v2_link0_accelerometer_bottom"/>
+    <parent link="left_fr3_link0"/>
+    <child link="left_fr3_link0_accelerometer_bottom"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link1">
-    <visual name="left_fr3v2_link1_visual">
+  <link name="left_fr3_link1">
+    <visual name="left_fr3_link1_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link1.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link1.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link1_collision">
+    <collision name="left_fr3_link1_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link1.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -108,24 +108,24 @@
       <inertia ixx="0.02324" ixy="0.000333" ixz="-0.000676" iyy="0.02146" iyz="0.003739" izz="0.0055"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link1_accelerometer_top">
+  <link name="left_fr3_link1_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link1_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link1_accelerometer_top_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 -0.1 0.0"/>
-    <parent link="left_fr3v2_link1"/>
-    <child link="left_fr3v2_link1_accelerometer_top"/>
+    <parent link="left_fr3_link1"/>
+    <child link="left_fr3_link1_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link1_accelerometer_bottom">
+  <link name="left_fr3_link1_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link1_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link1_accelerometer_bottom_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 -0.09 0.0"/>
-    <parent link="left_fr3v2_link1"/>
-    <child link="left_fr3v2_link1_accelerometer_bottom"/>
+    <parent link="left_fr3_link1"/>
+    <child link="left_fr3_link1_accelerometer_bottom"/>
   </joint>
-  <joint name="left_fr3v2_joint1" type="revolute">
+  <joint name="left_fr3_joint1" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0.333"/>
-    <parent link="left_fr3v2_link0"/>
-    <child link="left_fr3v2_link1"/>
+    <parent link="left_fr3_link0"/>
+    <child link="left_fr3_link1"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666"/>
@@ -133,15 +133,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link2">
-    <visual name="left_fr3v2_link2_visual">
+  <link name="left_fr3_link2">
+    <visual name="left_fr3_link2_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link2.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link2.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link2_collision">
+    <collision name="left_fr3_link2_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link2.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -150,24 +150,24 @@
       <inertia ixx="0.019026" ixy="0.001241" ixz="0.000499" iyy="0.00566" iyz="-0.001804" izz="0.017114"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link2_accelerometer_top">
+  <link name="left_fr3_link2_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link2_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link2_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 -0.13 0"/>
-    <parent link="left_fr3v2_link2"/>
-    <child link="left_fr3v2_link2_accelerometer_top"/>
+    <parent link="left_fr3_link2"/>
+    <child link="left_fr3_link2_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link2_accelerometer_bottom">
+  <link name="left_fr3_link2_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link2_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link2_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 -0.14 0"/>
-    <parent link="left_fr3v2_link2"/>
-    <child link="left_fr3v2_link2_accelerometer_bottom"/>
+    <parent link="left_fr3_link2"/>
+    <child link="left_fr3_link2_accelerometer_bottom"/>
   </joint>
-  <joint name="left_fr3v2_joint2" type="revolute">
+  <joint name="left_fr3_joint2" type="revolute">
     <origin rpy="-1.570796326794897 0 0" xyz="0 0 0"/>
-    <parent link="left_fr3v2_link1"/>
-    <child link="left_fr3v2_link2"/>
+    <parent link="left_fr3_link1"/>
+    <child link="left_fr3_link2"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667"/>
@@ -175,15 +175,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link3">
-    <visual name="left_fr3v2_link3_visual">
+  <link name="left_fr3_link3">
+    <visual name="left_fr3_link3_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link3.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link3.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link3_collision">
+    <collision name="left_fr3_link3_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link3.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link3.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -192,24 +192,24 @@
       <inertia ixx="0.010225" ixy="0.001144" ixz="0.003497" iyy="0.012398" iyz="0.002156" izz="0.006877"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link3_accelerometer_top">
+  <link name="left_fr3_link3_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link3_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link3_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0.0825 0.05 0"/>
-    <parent link="left_fr3v2_link3"/>
-    <child link="left_fr3v2_link3_accelerometer_top"/>
+    <parent link="left_fr3_link3"/>
+    <child link="left_fr3_link3_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link3_accelerometer_bottom">
+  <link name="left_fr3_link3_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link3_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link3_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0.0825 0.04 0"/>
-    <parent link="left_fr3v2_link3"/>
-    <child link="left_fr3v2_link3_accelerometer_bottom"/>
+    <parent link="left_fr3_link3"/>
+    <child link="left_fr3_link3_accelerometer_bottom"/>
   </joint>
-  <joint name="left_fr3v2_joint3" type="revolute">
+  <joint name="left_fr3_joint3" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0 -0.316 0"/>
-    <parent link="left_fr3v2_link2"/>
-    <child link="left_fr3v2_link3"/>
+    <parent link="left_fr3_link2"/>
+    <child link="left_fr3_link3"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666"/>
@@ -217,15 +217,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link4">
-    <visual name="left_fr3v2_link4_visual">
+  <link name="left_fr3_link4">
+    <visual name="left_fr3_link4_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link4.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link4.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link4_collision">
+    <collision name="left_fr3_link4_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link4.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link4.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -234,24 +234,24 @@
       <inertia ixx="0.008878" ixy="-0.003749" ixz="0.001139" iyy="0.007628" iyz="-0.00046" izz="0.010295"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link4_accelerometer_top">
+  <link name="left_fr3_link4_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link4_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link4_accelerometer_top_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="-0.0825 0.05 0"/>
-    <parent link="left_fr3v2_link4"/>
-    <child link="left_fr3v2_link4_accelerometer_top"/>
+    <parent link="left_fr3_link4"/>
+    <child link="left_fr3_link4_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link4_accelerometer_bottom">
+  <link name="left_fr3_link4_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link4_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link4_accelerometer_bottom_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="-0.0825 0.06 0"/>
-    <parent link="left_fr3v2_link4"/>
-    <child link="left_fr3v2_link4_accelerometer_bottom"/>
+    <parent link="left_fr3_link4"/>
+    <child link="left_fr3_link4_accelerometer_bottom"/>
   </joint>
-  <joint name="left_fr3v2_joint4" type="revolute">
+  <joint name="left_fr3_joint4" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0.0825 0 0"/>
-    <parent link="left_fr3v2_link3"/>
-    <child link="left_fr3v2_link4"/>
+    <parent link="left_fr3_link3"/>
+    <child link="left_fr3_link4"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333"/>
@@ -259,15 +259,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link5">
-    <visual name="left_fr3v2_link5_visual">
+  <link name="left_fr3_link5">
+    <visual name="left_fr3_link5_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link5.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link5.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link5_collision">
+    <collision name="left_fr3_link5_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link5.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link5.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -276,24 +276,24 @@
       <inertia ixx="0.031874" ixy="0.000134" ixz="-0.000265" iyy="0.029674" iyz="-0.004734" izz="0.004751"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_link5_accelerometer_top">
+  <link name="left_fr3_link5_accelerometer_top">
       </link>
-  <joint name="left_fr3v2_link5_accelerometer_top_joint" type="fixed">
+  <joint name="left_fr3_link5_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 0.11 0"/>
-    <parent link="left_fr3v2_link5"/>
-    <child link="left_fr3v2_link5_accelerometer_top"/>
+    <parent link="left_fr3_link5"/>
+    <child link="left_fr3_link5_accelerometer_top"/>
   </joint>
-  <link name="left_fr3v2_link5_accelerometer_bottom">
+  <link name="left_fr3_link5_accelerometer_bottom">
       </link>
-  <joint name="left_fr3v2_link5_accelerometer_bottom_joint" type="fixed">
+  <joint name="left_fr3_link5_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 0.1 0"/>
-    <parent link="left_fr3v2_link5"/>
-    <child link="left_fr3v2_link5_accelerometer_bottom"/>
+    <parent link="left_fr3_link5"/>
+    <child link="left_fr3_link5_accelerometer_bottom"/>
   </joint>
-  <joint name="left_fr3v2_joint5" type="revolute">
+  <joint name="left_fr3_joint5" type="revolute">
     <origin rpy="-1.570796326794897 0 0" xyz="-0.0825 0.384 0"/>
-    <parent link="left_fr3v2_link4"/>
-    <child link="left_fr3v2_link5"/>
+    <parent link="left_fr3_link4"/>
+    <child link="left_fr3_link5"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335"/>
@@ -301,15 +301,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link6">
-    <visual name="left_fr3v2_link6_visual">
+  <link name="left_fr3_link6">
+    <visual name="left_fr3_link6_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link6.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link6.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link6_collision">
+    <collision name="left_fr3_link6_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link6.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link6.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -318,10 +318,10 @@
       <inertia ixx="0.00286" ixy="-0.000553" ixz="-0.000638" iyy="0.00391" iyz="-0.00024" izz="0.00453"/>
     </inertial>
   </link>
-  <joint name="left_fr3v2_joint6" type="revolute">
+  <joint name="left_fr3_joint6" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0 0 0"/>
-    <parent link="left_fr3v2_link5"/>
-    <child link="left_fr3v2_link6"/>
+    <parent link="left_fr3_link5"/>
+    <child link="left_fr3_link6"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335"/>
@@ -329,15 +329,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_link7">
-    <visual name="left_fr3v2_link7_visual">
+  <link name="left_fr3_link7">
+    <visual name="left_fr3_link7_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link7.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link7.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_link7_collision">
+    <collision name="left_fr3_link7_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link7.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link7.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -346,35 +346,35 @@
       <inertia ixx="0.000899" ixy="0.0" ixz="-1.3e-05" iyy="0.001099" iyz="-2.2e-05" izz="0.000702"/>
     </inertial>
   </link>
-  <joint name="left_fr3v2_joint7" type="revolute">
+  <joint name="left_fr3_joint7" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0.088 0 0"/>
-    <parent link="left_fr3v2_link6"/>
-    <child link="left_fr3v2_link7"/>
+    <parent link="left_fr3_link6"/>
+    <child link="left_fr3_link7"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335"/>
     <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
-  <link name="left_fr3v2_link8"/>
-  <joint name="left_fr3v2_joint8" type="fixed">
+  <link name="left_fr3_link8"/>
+  <joint name="left_fr3_joint8" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.107"/>
-    <parent link="left_fr3v2_link7"/>
-    <child link="left_fr3v2_link8"/>
+    <parent link="left_fr3_link7"/>
+    <child link="left_fr3_link8"/>
   </joint>
-  <joint name="left_fr3v2_hand_joint" type="fixed">
-    <parent link="left_fr3v2_link8"/>
-    <child link="left_fr3v2_hand"/>
+  <joint name="left_fr3_hand_joint" type="fixed">
+    <parent link="left_fr3_link8"/>
+    <child link="left_fr3_hand"/>
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="left_fr3v2_hand">
-    <visual name="left_fr3v2_hand_visual">
+  <link name="left_fr3_hand">
+    <visual name="left_fr3_hand_visual">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/hand.dae"/>
       </geometry>
     </visual>
-    <collision name="left_fr3v2_hand_collision">
+    <collision name="left_fr3_hand_collision">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/collision/hand.stl"/>
       </geometry>
@@ -386,14 +386,14 @@
     </inertial>
   </link>
   <!-- Define the hand_tcp frame -->
-  <link name="left_fr3v2_hand_tcp"/>
-  <joint name="left_fr3v2_hand_tcp_joint" type="fixed">
+  <link name="left_fr3_hand_tcp"/>
+  <joint name="left_fr3_hand_tcp_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.1034"/>
-    <parent link="left_fr3v2_hand"/>
-    <child link="left_fr3v2_hand_tcp"/>
+    <parent link="left_fr3_hand"/>
+    <child link="left_fr3_hand_tcp"/>
   </joint>
-  <link name="left_fr3v2_leftfinger">
-    <visual name="left_fr3v2_leftfinger_visual">
+  <link name="left_fr3_leftfinger">
+    <visual name="left_fr3_leftfinger_visual">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/finger.dae"/>
       </geometry>
@@ -432,8 +432,8 @@
       <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06"/>
     </inertial>
   </link>
-  <link name="left_fr3v2_rightfinger">
-    <visual name="left_fr3v2_rightfinger_visual">
+  <link name="left_fr3_rightfinger">
+    <visual name="left_fr3_rightfinger_visual">
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/finger.dae"/>
@@ -473,21 +473,21 @@
       <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06"/>
     </inertial>
   </link>
-  <joint name="left_fr3v2_finger_joint1" type="prismatic">
-    <parent link="left_fr3v2_hand"/>
-    <child link="left_fr3v2_leftfinger"/>
+  <joint name="left_fr3_finger_joint1" type="prismatic">
+    <parent link="left_fr3_hand"/>
+    <child link="left_fr3_leftfinger"/>
     <origin rpy="0 0 0" xyz="0 0 0.0584"/>
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2"/>
     <dynamics damping="0.3"/>
   </joint>
-  <joint name="left_fr3v2_finger_joint2" type="prismatic">
-    <parent link="left_fr3v2_hand"/>
-    <child link="left_fr3v2_rightfinger"/>
+  <joint name="left_fr3_finger_joint2" type="prismatic">
+    <parent link="left_fr3_hand"/>
+    <child link="left_fr3_rightfinger"/>
     <origin rpy="0 0 3.141592653589793" xyz="0 0 0.0584"/>
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2"/>
-    <mimic joint="left_fr3v2_finger_joint1"/>
+    <mimic joint="left_fr3_finger_joint1"/>
     <dynamics damping="0.3"/>
   </joint>
   <joint name="right_base_joint" type="fixed">
@@ -503,21 +503,21 @@
   <!-- dynamics: description of the dynamics that comes from a YAML file. Example definition: ${xacro.load_yaml('$(find franka_description)/robots/fr3/dynamics.yaml')} -->
   <link name="right_base">
       </link>
-  <joint name="right_fr3v2_right_base_joint" type="fixed">
+  <joint name="right_fr3_right_base_joint" type="fixed">
     <parent link="right_base"/>
-    <child link="right_fr3v2_link0"/>
+    <child link="right_fr3_link0"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link0">
-    <visual name="right_fr3v2_link0_visual">
+  <link name="right_fr3_link0">
+    <visual name="right_fr3_link0_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link0.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link0.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link0_collision">
+    <collision name="right_fr3_link0_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link0.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link0.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -526,30 +526,30 @@
       <inertia ixx="0.009" ixy="0.0" ixz="0.002" iyy="0.0115" iyz="0.0" izz="0.0085"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link0_accelerometer_top">
+  <link name="right_fr3_link0_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link0_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link0_accelerometer_top_joint" type="fixed">
     <origin rpy="3.14159 0 0" xyz="0 0 0.05"/>
-    <parent link="right_fr3v2_link0"/>
-    <child link="right_fr3v2_link0_accelerometer_top"/>
+    <parent link="right_fr3_link0"/>
+    <child link="right_fr3_link0_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link0_accelerometer_bottom">
+  <link name="right_fr3_link0_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link0_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link0_accelerometer_bottom_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.06"/>
-    <parent link="right_fr3v2_link0"/>
-    <child link="right_fr3v2_link0_accelerometer_bottom"/>
+    <parent link="right_fr3_link0"/>
+    <child link="right_fr3_link0_accelerometer_bottom"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link1">
-    <visual name="right_fr3v2_link1_visual">
+  <link name="right_fr3_link1">
+    <visual name="right_fr3_link1_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link1.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link1.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link1_collision">
+    <collision name="right_fr3_link1_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link1.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link1.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -558,24 +558,24 @@
       <inertia ixx="0.02324" ixy="0.000333" ixz="-0.000676" iyy="0.02146" iyz="0.003739" izz="0.0055"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link1_accelerometer_top">
+  <link name="right_fr3_link1_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link1_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link1_accelerometer_top_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 -0.1 0.0"/>
-    <parent link="right_fr3v2_link1"/>
-    <child link="right_fr3v2_link1_accelerometer_top"/>
+    <parent link="right_fr3_link1"/>
+    <child link="right_fr3_link1_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link1_accelerometer_bottom">
+  <link name="right_fr3_link1_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link1_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link1_accelerometer_bottom_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 -0.09 0.0"/>
-    <parent link="right_fr3v2_link1"/>
-    <child link="right_fr3v2_link1_accelerometer_bottom"/>
+    <parent link="right_fr3_link1"/>
+    <child link="right_fr3_link1_accelerometer_bottom"/>
   </joint>
-  <joint name="right_fr3v2_joint1" type="revolute">
+  <joint name="right_fr3_joint1" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0.333"/>
-    <parent link="right_fr3v2_link0"/>
-    <child link="right_fr3v2_link1"/>
+    <parent link="right_fr3_link0"/>
+    <child link="right_fr3_link1"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666"/>
@@ -583,15 +583,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link2">
-    <visual name="right_fr3v2_link2_visual">
+  <link name="right_fr3_link2">
+    <visual name="right_fr3_link2_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link2.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link2.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link2_collision">
+    <collision name="right_fr3_link2_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link2.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link2.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -600,24 +600,24 @@
       <inertia ixx="0.019026" ixy="0.001241" ixz="0.000499" iyy="0.00566" iyz="-0.001804" izz="0.017114"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link2_accelerometer_top">
+  <link name="right_fr3_link2_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link2_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link2_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 -0.13 0"/>
-    <parent link="right_fr3v2_link2"/>
-    <child link="right_fr3v2_link2_accelerometer_top"/>
+    <parent link="right_fr3_link2"/>
+    <child link="right_fr3_link2_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link2_accelerometer_bottom">
+  <link name="right_fr3_link2_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link2_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link2_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 -0.14 0"/>
-    <parent link="right_fr3v2_link2"/>
-    <child link="right_fr3v2_link2_accelerometer_bottom"/>
+    <parent link="right_fr3_link2"/>
+    <child link="right_fr3_link2_accelerometer_bottom"/>
   </joint>
-  <joint name="right_fr3v2_joint2" type="revolute">
+  <joint name="right_fr3_joint2" type="revolute">
     <origin rpy="-1.570796326794897 0 0" xyz="0 0 0"/>
-    <parent link="right_fr3v2_link1"/>
-    <child link="right_fr3v2_link2"/>
+    <parent link="right_fr3_link1"/>
+    <child link="right_fr3_link2"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667"/>
@@ -625,15 +625,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link3">
-    <visual name="right_fr3v2_link3_visual">
+  <link name="right_fr3_link3">
+    <visual name="right_fr3_link3_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link3.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link3.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link3_collision">
+    <collision name="right_fr3_link3_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link3.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link3.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -642,24 +642,24 @@
       <inertia ixx="0.010225" ixy="0.001144" ixz="0.003497" iyy="0.012398" iyz="0.002156" izz="0.006877"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link3_accelerometer_top">
+  <link name="right_fr3_link3_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link3_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link3_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0.0825 0.05 0"/>
-    <parent link="right_fr3v2_link3"/>
-    <child link="right_fr3v2_link3_accelerometer_top"/>
+    <parent link="right_fr3_link3"/>
+    <child link="right_fr3_link3_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link3_accelerometer_bottom">
+  <link name="right_fr3_link3_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link3_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link3_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0.0825 0.04 0"/>
-    <parent link="right_fr3v2_link3"/>
-    <child link="right_fr3v2_link3_accelerometer_bottom"/>
+    <parent link="right_fr3_link3"/>
+    <child link="right_fr3_link3_accelerometer_bottom"/>
   </joint>
-  <joint name="right_fr3v2_joint3" type="revolute">
+  <joint name="right_fr3_joint3" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0 -0.316 0"/>
-    <parent link="right_fr3v2_link2"/>
-    <child link="right_fr3v2_link3"/>
+    <parent link="right_fr3_link2"/>
+    <child link="right_fr3_link3"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666"/>
@@ -667,15 +667,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link4">
-    <visual name="right_fr3v2_link4_visual">
+  <link name="right_fr3_link4">
+    <visual name="right_fr3_link4_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link4.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link4.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link4_collision">
+    <collision name="right_fr3_link4_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link4.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link4.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -684,24 +684,24 @@
       <inertia ixx="0.008878" ixy="-0.003749" ixz="0.001139" iyy="0.007628" iyz="-0.00046" izz="0.010295"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link4_accelerometer_top">
+  <link name="right_fr3_link4_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link4_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link4_accelerometer_top_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="-0.0825 0.05 0"/>
-    <parent link="right_fr3v2_link4"/>
-    <child link="right_fr3v2_link4_accelerometer_top"/>
+    <parent link="right_fr3_link4"/>
+    <child link="right_fr3_link4_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link4_accelerometer_bottom">
+  <link name="right_fr3_link4_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link4_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link4_accelerometer_bottom_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="-0.0825 0.06 0"/>
-    <parent link="right_fr3v2_link4"/>
-    <child link="right_fr3v2_link4_accelerometer_bottom"/>
+    <parent link="right_fr3_link4"/>
+    <child link="right_fr3_link4_accelerometer_bottom"/>
   </joint>
-  <joint name="right_fr3v2_joint4" type="revolute">
+  <joint name="right_fr3_joint4" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0.0825 0 0"/>
-    <parent link="right_fr3v2_link3"/>
-    <child link="right_fr3v2_link4"/>
+    <parent link="right_fr3_link3"/>
+    <child link="right_fr3_link4"/>
     <axis xyz="0 0 1"/>
     <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333"/>
@@ -709,15 +709,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link5">
-    <visual name="right_fr3v2_link5_visual">
+  <link name="right_fr3_link5">
+    <visual name="right_fr3_link5_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link5.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link5.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link5_collision">
+    <collision name="right_fr3_link5_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link5.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link5.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -726,24 +726,24 @@
       <inertia ixx="0.031874" ixy="0.000134" ixz="-0.000265" iyy="0.029674" iyz="-0.004734" izz="0.004751"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_link5_accelerometer_top">
+  <link name="right_fr3_link5_accelerometer_top">
       </link>
-  <joint name="right_fr3v2_link5_accelerometer_top_joint" type="fixed">
+  <joint name="right_fr3_link5_accelerometer_top_joint" type="fixed">
     <origin rpy="-1.5708 0 0" xyz="0 0.11 0"/>
-    <parent link="right_fr3v2_link5"/>
-    <child link="right_fr3v2_link5_accelerometer_top"/>
+    <parent link="right_fr3_link5"/>
+    <child link="right_fr3_link5_accelerometer_top"/>
   </joint>
-  <link name="right_fr3v2_link5_accelerometer_bottom">
+  <link name="right_fr3_link5_accelerometer_bottom">
       </link>
-  <joint name="right_fr3v2_link5_accelerometer_bottom_joint" type="fixed">
+  <joint name="right_fr3_link5_accelerometer_bottom_joint" type="fixed">
     <origin rpy="1.5708 0 0" xyz="0 0.1 0"/>
-    <parent link="right_fr3v2_link5"/>
-    <child link="right_fr3v2_link5_accelerometer_bottom"/>
+    <parent link="right_fr3_link5"/>
+    <child link="right_fr3_link5_accelerometer_bottom"/>
   </joint>
-  <joint name="right_fr3v2_joint5" type="revolute">
+  <joint name="right_fr3_joint5" type="revolute">
     <origin rpy="-1.570796326794897 0 0" xyz="-0.0825 0.384 0"/>
-    <parent link="right_fr3v2_link4"/>
-    <child link="right_fr3v2_link5"/>
+    <parent link="right_fr3_link4"/>
+    <child link="right_fr3_link5"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335"/>
@@ -751,15 +751,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link6">
-    <visual name="right_fr3v2_link6_visual">
+  <link name="right_fr3_link6">
+    <visual name="right_fr3_link6_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link6.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link6.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link6_collision">
+    <collision name="right_fr3_link6_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link6.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link6.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -768,10 +768,10 @@
       <inertia ixx="0.00286" ixy="-0.000553" ixz="-0.000638" iyy="0.00391" iyz="-0.00024" izz="0.00453"/>
     </inertial>
   </link>
-  <joint name="right_fr3v2_joint6" type="revolute">
+  <joint name="right_fr3_joint6" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0 0 0"/>
-    <parent link="right_fr3v2_link5"/>
-    <child link="right_fr3v2_link6"/>
+    <parent link="right_fr3_link5"/>
+    <child link="right_fr3_link6"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335"/>
@@ -779,15 +779,15 @@
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_link7">
-    <visual name="right_fr3v2_link7_visual">
+  <link name="right_fr3_link7">
+    <visual name="right_fr3_link7_visual">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/visual/link7.dae"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/visual/link7.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_link7_collision">
+    <collision name="right_fr3_link7_collision">
       <geometry>
-        <mesh filename="package://franka_description/meshes/robot_arms/fr3v2/collision/link7.stl"/>
+        <mesh filename="package://franka_description/meshes/robot_arms/fr3/collision/link7.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -796,35 +796,35 @@
       <inertia ixx="0.000899" ixy="0.0" ixz="-1.3e-05" iyy="0.001099" iyz="-2.2e-05" izz="0.000702"/>
     </inertial>
   </link>
-  <joint name="right_fr3v2_joint7" type="revolute">
+  <joint name="right_fr3_joint7" type="revolute">
     <origin rpy="1.570796326794897 0 0" xyz="0.088 0 0"/>
-    <parent link="right_fr3v2_link6"/>
-    <child link="right_fr3v2_link7"/>
+    <parent link="right_fr3_link6"/>
+    <child link="right_fr3_link7"/>
     <axis xyz="0 0 1"/>
     <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26"/>
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335"/>
     <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851"/>
     <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16"/>
   </joint>
-  <link name="right_fr3v2_link8"/>
-  <joint name="right_fr3v2_joint8" type="fixed">
+  <link name="right_fr3_link8"/>
+  <joint name="right_fr3_joint8" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.107"/>
-    <parent link="right_fr3v2_link7"/>
-    <child link="right_fr3v2_link8"/>
+    <parent link="right_fr3_link7"/>
+    <child link="right_fr3_link8"/>
   </joint>
-  <joint name="right_fr3v2_hand_joint" type="fixed">
-    <parent link="right_fr3v2_link8"/>
-    <child link="right_fr3v2_hand"/>
+  <joint name="right_fr3_hand_joint" type="fixed">
+    <parent link="right_fr3_link8"/>
+    <child link="right_fr3_hand"/>
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0"/>
   </joint>
   <!-- sub-link defining detailed meshes for collision with environment -->
-  <link name="right_fr3v2_hand">
-    <visual name="right_fr3v2_hand_visual">
+  <link name="right_fr3_hand">
+    <visual name="right_fr3_hand_visual">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/hand.dae"/>
       </geometry>
     </visual>
-    <collision name="right_fr3v2_hand_collision">
+    <collision name="right_fr3_hand_collision">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/collision/hand.stl"/>
       </geometry>
@@ -836,14 +836,14 @@
     </inertial>
   </link>
   <!-- Define the hand_tcp frame -->
-  <link name="right_fr3v2_hand_tcp"/>
-  <joint name="right_fr3v2_hand_tcp_joint" type="fixed">
+  <link name="right_fr3_hand_tcp"/>
+  <joint name="right_fr3_hand_tcp_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.1034"/>
-    <parent link="right_fr3v2_hand"/>
-    <child link="right_fr3v2_hand_tcp"/>
+    <parent link="right_fr3_hand"/>
+    <child link="right_fr3_hand_tcp"/>
   </joint>
-  <link name="right_fr3v2_leftfinger">
-    <visual name="right_fr3v2_leftfinger_visual">
+  <link name="right_fr3_leftfinger">
+    <visual name="right_fr3_leftfinger_visual">
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/finger.dae"/>
       </geometry>
@@ -882,8 +882,8 @@
       <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06"/>
     </inertial>
   </link>
-  <link name="right_fr3v2_rightfinger">
-    <visual name="right_fr3v2_rightfinger_visual">
+  <link name="right_fr3_rightfinger">
+    <visual name="right_fr3_rightfinger_visual">
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://franka_description/meshes/robot_ee/franka_hand_white/visual/finger.dae"/>
@@ -923,21 +923,21 @@
       <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06"/>
     </inertial>
   </link>
-  <joint name="right_fr3v2_finger_joint1" type="prismatic">
-    <parent link="right_fr3v2_hand"/>
-    <child link="right_fr3v2_leftfinger"/>
+  <joint name="right_fr3_finger_joint1" type="prismatic">
+    <parent link="right_fr3_hand"/>
+    <child link="right_fr3_leftfinger"/>
     <origin rpy="0 0 0" xyz="0 0 0.0584"/>
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2"/>
     <dynamics damping="0.3"/>
   </joint>
-  <joint name="right_fr3v2_finger_joint2" type="prismatic">
-    <parent link="right_fr3v2_hand"/>
-    <child link="right_fr3v2_rightfinger"/>
+  <joint name="right_fr3_finger_joint2" type="prismatic">
+    <parent link="right_fr3_hand"/>
+    <child link="right_fr3_rightfinger"/>
     <origin rpy="0 0 3.141592653589793" xyz="0 0 0.0584"/>
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2"/>
-    <mimic joint="right_fr3v2_finger_joint1"/>
+    <mimic joint="right_fr3_finger_joint1"/>
     <dynamics damping="0.3"/>
   </joint>
 </robot>

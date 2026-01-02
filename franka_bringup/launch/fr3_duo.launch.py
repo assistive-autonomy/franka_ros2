@@ -169,6 +169,29 @@ def generate_robot_nodes(context):
         },
     ).toprettyxml(indent='  ')
 
+    #Build SRDF path based on the first robot type
+    srdf_path = PathJoinSubstitution(
+        [
+            FindPackageShare('franka_description'),
+            'robots',
+            f'{base_robot_type}_duo',
+            f'{base_robot_type}_duo.srdf.xacro',
+        ]
+    ).perform(context)
+
+    robot_description_semantic = xacro.process_file(
+        srdf_path,
+        mappings={
+            'robot_types': robot_types_str,
+            'robot_ips': robot_ips_str,
+            'hand': load_gripper_str,
+            'use_fake_hardware': use_fake_hardware_str,
+            'fake_sensor_commands': fake_sensor_commands_str,
+            'is_async': 'true',
+            'thread_priority': thread_priority_str,
+        },
+    ).toprettyxml(indent='  ')
+
     joint_state_publisher_sources = [
         'franka/joint_states',
         'franka_gripper/joint_states',
@@ -181,7 +204,8 @@ def generate_robot_nodes(context):
             name='robot_state_publisher',
             namespace=namespace,
             output='screen',
-            parameters=[{'robot_description': robot_description}],
+            parameters=[{'robot_description': robot_description},
+                        {'robot_description_semantic': robot_description_semantic}],
         ),
         Node(
             package='controller_manager',
@@ -190,6 +214,7 @@ def generate_robot_nodes(context):
             parameters=[
                 controllers_yaml,
                 {'robot_description': robot_description},
+                {'robot_description_semantic': robot_description_semantic},
                 {'robot_types': robot_types_list},
                 {'arm_prefixes': arm_prefixes_list},
             ],

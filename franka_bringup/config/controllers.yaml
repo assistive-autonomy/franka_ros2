@@ -92,6 +92,7 @@
 
       mobile_cartesian_velocity_example_controller:
         type: franka_mobile_example_controllers/MobileCartesianVelocityExampleController
+
       self_collision_controller:
         type: franka_example_controllers/SelfCollisionController
 
@@ -264,3 +265,17 @@
       arm_prefixes:
         - "left"
         - "right"
+
+/**:
+  self_collision_controller:
+    ros__parameters:
+      is_async: true
+      robot_types:
+        - "fr3"
+        - "fr3"
+      arm_prefixes:
+        - "left"
+        - "right"
+      security_margin: 0.045
+      print_collisions: false
+

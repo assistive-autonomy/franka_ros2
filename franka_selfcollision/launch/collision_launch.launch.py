@@ -5,7 +5,7 @@ from launch.actions import ExecuteProcess
 
 def generate_launch_description():
     
-    urdf_file_path = "/ros2_ws/src/franka_description/urdfs/fr3_duo.urdf"
+    urdf_file_path = "/ros2_ws/src/franka_selfcollision/urdfs/fr3_duo.urdf"
     rviz_config_path = "/ros2_ws/src/franka_selfcollision/config/visualize_franka.rviz"
     monitor_script_path = "/ros2_ws/src/franka_selfcollision/scripts/monitor_collision.py"
 
