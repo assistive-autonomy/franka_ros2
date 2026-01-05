@@ -38,12 +38,14 @@ class SelfCollisionController : public controller_interface::ControllerInterface
                                            const rclcpp::Duration& period) override;
   CallbackReturn on_init() override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+  CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
   std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
   std::vector<std::string> joint_names_;
   const int num_joints = 7;
+  std::vector<size_t> state_interface_map_;
   std::shared_ptr<franka_selfcollision::SelfCollisionChecker> collision_checker_;
   std::vector<double> current_joint_positions_;
 

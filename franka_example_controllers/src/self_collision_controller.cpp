@@ -57,7 +57,8 @@ controller_interface::return_type SelfCollisionController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
   for (size_t i = 0; i < state_interfaces_.size(); ++i) {
-    current_joint_positions_[i] = state_interfaces_[i].get_optional<double>().value();
+    size_t data_index = state_interface_map_[i];
+    current_joint_positions_[data_index] = state_interfaces_[i].get_optional<double>().value();
   }
 
   bool collision_found =
@@ -100,20 +101,6 @@ CallbackReturn SelfCollisionController::on_configure(
   double security_margin = get_node()->get_parameter("security_margin").as_double();
   print_collisions_ = get_node()->get_parameter("print_collisions").as_bool();
 
-  /*auto parameters_client =
-      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
-  parameters_client->wait_for_service();
-
-  std::string urdf_xml ;
-  auto future_urdf = parameters_client->get_parameters({"robot_description"});
-  auto result_urdf = future_urdf.get();
-  if (!result_urdf.empty()) {
-    urdf_xml = result_urdf[0].value_to_string();
-  } else {
-    RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
-    return CallbackReturn::ERROR;
-  }*/
-
   std::string urdf_xml;
   urdf_xml = get_node()->get_parameter("robot_description").as_string();
   RCLCPP_INFO(get_node()->get_logger(), "Got URDF file. Is it empty? %s",
@@ -127,7 +114,8 @@ CallbackReturn SelfCollisionController::on_configure(
   joint_names_.clear();
   for (size_t i = 0; i < robot_types_.size(); i++) {
     for (int j = 1; j <= num_joints; ++j) {
-      joint_names_.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + std::to_string(j));
+      joint_names_.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + "_joint" +
+                             std::to_string(j));
     }
   }
 
@@ -155,6 +143,27 @@ CallbackReturn SelfCollisionController::on_configure(
   RCLCPP_INFO(get_node()->get_logger(), "Configured Self Collision for %zu joints.",
               joint_names_.size());
 
+  return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn SelfCollisionController::on_activate(
+    const rclcpp_lifecycle::State& /*previous_state*/) {
+  state_interface_map_.clear();
+  state_interface_map_.resize(state_interfaces_.size());
+
+  for (size_t i = 0; i < state_interfaces_.size(); ++i) {
+    std::string full_name = state_interfaces_[i].get_name();
+    std::string base_name = full_name.substr(0, full_name.find("/position"));
+
+    auto it = std::find(joint_names_.begin(), joint_names_.end(), base_name);
+    if (it != joint_names_.end()) {
+      state_interface_map_[i] = std::distance(joint_names_.begin(), it);
+    } else {
+      RCLCPP_ERROR(get_node()->get_logger(), "Could not find match for joint: %s",
+                   base_name.c_str());
+      return CallbackReturn::ERROR;
+    }
+  }
   return CallbackReturn::SUCCESS;
 }
 
