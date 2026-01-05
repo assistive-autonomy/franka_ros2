@@ -25,7 +25,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
 find_package(urdf_parser_plugin REQUIRED)
 find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
@@ -43,71 +42,24 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
     pinocchio::pinocchio
 )
 
-add_executable(self_collision_service 
+add_executable(self_collision_service
     src/self_collision_service.cpp
 )
 target_link_libraries(self_collision_service
-                    ${PROJECT_NAME} 
+                    ${PROJECT_NAME}
                     pinocchio::pinocchio)
 
-target_include_directories(self_collision_service PRIVATE 
+target_include_directories(self_collision_service PRIVATE
   include
 )
 
 ament_target_dependencies(self_collision_service
     rclcpp
     franka_msgs
-    Franka
-)
-
-add_executable(self_collision_node 
-    src/collision_checker_simple.cpp
-)
-target_link_libraries(self_collision_node pinocchio::pinocchio)
-ament_target_dependencies(self_collision_node
-    rclcpp
-    franka_msgs
-    sensor_msgs
-    control_msgs
-    std_srvs
-    Franka
-)
-
-add_executable(self_collision_node_fast
-    src/collision_checker_fast.cpp    
-    src/collision_checker_impl.cpp 
-)
-target_include_directories(self_collision_node_fast PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-target_link_libraries(self_collision_node_fast pinocchio::pinocchio)
-ament_target_dependencies(self_collision_node_fast
-    rclcpp
-    franka_msgs
-    sensor_msgs
-    control_msgs
-    std_srvs
-    Franka
-)
-
-add_executable(self_collision_node_bullet
-    src/collision_checker_bullet.cpp
-)
-
-ament_target_dependencies(self_collision_node_bullet
-    rclcpp
-    moveit_core
-    franka_msgs
-    sensor_msgs
-    std_srvs
-    control_msgs
-    urdf
-    srdfdom
     Franka
 )
 
@@ -123,9 +75,6 @@ install(TARGETS ${PROJECT_NAME}
 
 install(TARGETS
         self_collision_service
-        self_collision_node
-        self_collision_node_fast
-        self_collision_node_bullet
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
@@ -145,6 +94,7 @@ if(BUILD_TESTING)
     find_package(ament_cmake_lint_cmake REQUIRED)
     find_package(ament_cmake_pep257 REQUIRED)
     find_package(ament_cmake_xmllint REQUIRED)
+    find_package(ros2_control_test_assets REQUIRED)
 
     set(CPP_DIRECTORIES src include)
     ament_clang_format(CONFIG_FILE ../.clang-format ${CPP_DIRECTORIES})
@@ -154,6 +104,20 @@ if(BUILD_TESTING)
     ament_flake8()
     ament_pep257()
     ament_xmllint()
+
+    find_package(ament_cmake_gmock REQUIRED)
+    ament_add_gmock(${PROJECT_NAME}_test
+        test/test_self_collision_checker.cpp
+    )
+    target_link_libraries(franka_selfcollision_test
+        ${PROJECT_NAME}
+        pinocchio::pinocchio
+    )
+
+    target_include_directories(franka_selfcollision_test PRIVATE
+        include
+        ${pinocchio_INCLUDE_DIRS}
+    )
 endif()
 
 

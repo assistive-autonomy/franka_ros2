@@ -166,10 +166,11 @@ def generate_robot_nodes(context):
             'fake_sensor_commands': fake_sensor_commands_str,
             'is_async': 'true',
             'thread_priority': thread_priority_str,
+            'arm_prefixes': arm_prefixes_str,
         },
     ).toprettyxml(indent='  ')
 
-    #Build SRDF path based on the first robot type
+    # Build SRDF path based on the first robot type
     srdf_path = PathJoinSubstitution(
         [
             FindPackageShare('franka_description'),
@@ -183,13 +184,9 @@ def generate_robot_nodes(context):
         srdf_path,
         mappings={
             'robot_types': robot_types_str,
-            'robot_ips': robot_ips_str,
+            'arm_prefixes': arm_prefixes_str,
             'hand': load_gripper_str,
-            'use_fake_hardware': use_fake_hardware_str,
-            'fake_sensor_commands': fake_sensor_commands_str,
-            'is_async': 'true',
-            'thread_priority': thread_priority_str,
-        },
+        }
     ).toprettyxml(indent='  ')
 
     joint_state_publisher_sources = [
@@ -204,8 +201,7 @@ def generate_robot_nodes(context):
             name='robot_state_publisher',
             namespace=namespace,
             output='screen',
-            parameters=[{'robot_description': robot_description},
-                        {'robot_description_semantic': robot_description_semantic}],
+            parameters=[{'robot_description': robot_description}],
         ),
         Node(
             package='controller_manager',

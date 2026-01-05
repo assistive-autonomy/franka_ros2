@@ -14,10 +14,10 @@
 
 #pragma once
 
+#include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <atomic>
 
 #include <Eigen/Eigen>
 #include <controller_interface/controller_interface.hpp>
@@ -48,7 +48,6 @@ class SelfCollisionController : public controller_interface::ControllerInterface
   std::vector<double> current_joint_positions_;
 
   bool print_collisions_ = false;
-
 };
 
 }  // namespace franka_example_controllers

@@ -1,21 +1,39 @@
+#  Copyright (c) 2025 Franka Robotics GmbH
+#
+#  Licensed under the Apache License, Version 2.0 (the 'License');
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an 'AS IS' BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from functools import partial
+import time
+
+from franka_msgs.srv import SelfCollision
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from franka_msgs.srv import SelfCollision
+
 from visualization_msgs.msg import Marker
-import time
-from functools import partial
+
 
 class CollisionMonitor(Node):
     def __init__(self):
         super().__init__('collision_monitor')
         self.target_joint_order = [
-            #left arm
-            "left_fr3v2_joint1", "left_fr3v2_joint2", "left_fr3v2_joint3","left_fr3v2_joint4",
-            "left_fr3v2_joint5","left_fr3v2_joint6", "left_fr3v2_joint7",
-            #right arm
-            "right_fr3v2_joint1","right_fr3v2_joint2","right_fr3v2_joint3","right_fr3v2_joint4",
-            "right_fr3v2_joint5","right_fr3v2_joint6","right_fr3v2_joint7"
+            # left arm
+            'left_fr3_joint1', 'left_fr3_joint2', 'left_fr3_joint3', 'left_fr3_joint4',
+            'left_fr3_joint5', 'left_fr3_joint6', 'left_fr3_joint7',
+            # right arm
+            'right_fr3_joint1', 'right_fr3_joint2', 'right_fr3_joint3', 'right_fr3_joint4',
+            'right_fr3_joint5', 'right_fr3_joint6', 'right_fr3_joint7'
         ]
         self.sub = self.create_subscription(JointState, '/joint_states', self.joint_callback, 10)
 
@@ -26,7 +44,7 @@ class CollisionMonitor(Node):
         self.was_colliding = False
 
         self.publish_marker(True)
-        
+
         self.create_timer(0.033, self.timer_callback)
 
         self.cli = self.create_client(SelfCollision, '/check_self_collision')
@@ -46,12 +64,12 @@ class CollisionMonitor(Node):
             self.latest_positions = current_positions
 
         except KeyError as e:
-            pass
+            self.get_logger().info(e.what())
 
     def timer_callback(self):
         if self.latest_positions is not None:
             self.send_check_request(self.latest_positions)
-    
+
     def send_check_request(self, positions):
         req = SelfCollision.Request()
         req.joint_configuration = positions
@@ -60,7 +78,7 @@ class CollisionMonitor(Node):
 
         future = self.cli.call_async(req)
         future.add_done_callback(partial(self.response_callback, start_time))
-    
+
     def response_callback(self, start_time, future):
         try:
             elapsed_time = time.time() - start_time
@@ -72,19 +90,18 @@ class CollisionMonitor(Node):
             print_time = False
 
             if print_time:
-                self.get_logger().info(f"Check finished in {elapsed_time*1000:.2f} ms")
-
+                self.get_logger().info(f'Check finished in {elapsed_time*1000:.2f} ms')
 
             if is_colliding and not self.was_colliding:
-                self.get_logger().error("⚠️  COLLISION DETECTED!")
+                self.get_logger().error('⚠️  COLLISION DETECTED!')
                 self.was_colliding = True
 
             elif not is_colliding and self.was_colliding:
-                self.get_logger().info("✅ Collision Cleared:)")
+                self.get_logger().info('✅ Collision Cleared:)')
                 self.was_colliding = False
 
         except Exception as e:
-            self.get_logger().error(f"Service failed : {e}")
+            self.get_logger().error(f'Service failed : {e}')
 
     def publish_marker(self, is_colliding):
         marker = Marker()
@@ -106,18 +123,19 @@ class CollisionMonitor(Node):
         marker.color.a = 1.0
 
         if is_colliding:
-            marker.text = " COLLISION! "
+            marker.text = ' COLLISION! '
             marker.color.r = 1.0
             marker.color.g = 0.0
             marker.color.b = 0.0
-        
+
         else:
-            marker.text = "SYSTEM SAFE"
+            marker.text = ' NO COLLISION '
             marker.color.r = 0.2
             marker.color.g = 1.0
             marker.color.b = 0.2
 
         self.marker_pub.publish(marker)
+
 
 def main():
     rclpy.init()
@@ -125,6 +143,7 @@ def main():
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

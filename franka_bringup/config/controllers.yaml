@@ -263,8 +263,8 @@
         - "fr3"
         - "fr3"
       arm_prefixes:
-        - "left"
-        - "right"
+        - "top"
+        - "bottom"
 
 /**:
   self_collision_controller:
@@ -274,8 +274,8 @@
         - "fr3"
         - "fr3"
       arm_prefixes:
-        - "left"
-        - "right"
+        - "top"
+        - "bottom"
       security_margin: 0.045
       print_collisions: false
 
