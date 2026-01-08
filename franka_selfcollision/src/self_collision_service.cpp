@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/parameter_client.hpp>
 #include <rclcpp/rclcpp.hpp>
+
 #include "franka_msgs/srv/self_collision.hpp"
 #include "franka_selfcollision/self_collision_checker.hpp"
 
@@ -20,20 +23,22 @@ using namespace std::chrono_literals;
 
 class CollisionCheckerNode : public rclcpp::Node {
  public:
-  CollisionCheckerNode() : Node("self_collision_service") {
-    this->declare_parameter("robot_description", "");
-    this->declare_parameter("robot_description_semantic", "");
+  explicit CollisionCheckerNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
+      : Node("self_collision_service", options) {
     this->declare_parameter("security_margin", 0.045);
     this->declare_parameter("print_collisions", false);
+  }
 
-    auto urdf_xml = this->get_parameter("robot_description").as_string();
-    auto srdf_xml = this->get_parameter("robot_description_semantic").as_string();
+  void setup_collision_checker(const std::string& urdf_xml, const std::string& srdf_xml) {
+    urdf_xml_ = urdf_xml;
+    srdf_xml_ = srdf_xml;
+
     double security_margin = this->get_parameter("security_margin").as_double();
     print_collisions = this->get_parameter("print_collisions").as_bool();
 
     if (urdf_xml.empty() || srdf_xml.empty()) {
       RCLCPP_ERROR(this->get_logger(),
-                   "Parameters 'robot_description' (URDF) or 'robot_description_semantic' (SRDF) "
+                   "Parameters 'robot_description' (URDF) or 'robot_description_semantic' (SRDF)"
                    "are empty.");
       throw std::runtime_error("Missing XML descriptions");
     }
@@ -70,6 +75,8 @@ class CollisionCheckerNode : public rclcpp::Node {
   }
 
  private:
+  std::string urdf_xml_;
+  std::string srdf_xml_;
   bool print_collisions = false;
   std::shared_ptr<franka_selfcollision::SelfCollisionChecker> collision_checker_;
   rclcpp::Service<franka_msgs::srv::SelfCollision>::SharedPtr service_;
@@ -77,7 +84,29 @@ class CollisionCheckerNode : public rclcpp::Node {
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<CollisionCheckerNode>();
+
+  std::string package_share = ament_index_cpp::get_package_share_directory("franka_selfcollision");
+  std::string params_file = package_share + "/config/self_collision_service.yaml";
+  rclcpp::NodeOptions options;
+  options.arguments({"--ros-args", "--params-file", params_file});
+
+  auto node = std::make_shared<CollisionCheckerNode>(options);
+
+  auto param_client = std::make_shared<rclcpp::AsyncParametersClient>(node, "/controller_manager");
+  param_client->wait_for_service();
+  auto future = param_client->get_parameters({"robot_description", "robot_description_semantic"});
+
+  if (rclcpp::spin_until_future_complete(node, future) == rclcpp::FutureReturnCode::SUCCESS) {
+    auto results = future.get();
+    std::string urdf = results[0].as_string();
+    std::string srdf = results[1].as_string();
+
+    node->setup_collision_checker(urdf, srdf);
+  } else {
+    RCLCPP_ERROR(node->get_logger(), "Failed to fetch parameters");
+    return 1;
+  }
+
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

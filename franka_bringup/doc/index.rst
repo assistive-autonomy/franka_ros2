@@ -109,6 +109,7 @@ The dual-arm configuration is defined in ``franka_bringup/config/fr3_duo.config.
 * ``robot_types``: Types of the robot arms as a string list (e.g., ``"['fr3','fr3']"``)
 * ``arm_prefixes``: Unique prefixes for each arm (e.g., ``"['right','left']"``)
 * ``robot_ips``: IP addresses of the robots as a string list (e.g., ``"['172.16.0.3','172.16.0.5']"``)
+* ``check_selfcollision``:  Enables the self-collision controller (e.g., ``"true"``)
 
 .. note::
 
@@ -169,6 +170,7 @@ Service message descriptions are given below.
  * ``franka_msgs::srv::SetFullCollisionBehavior`` sets thresholds for external forces on Cartesian
    and joint level to configure the collision reflex.
  * ``franka_msgs::srv::SetLoad`` sets an external load to compensate (e.g. of a grasped object).
+ * ``franka_msgs::srv::SelfCollision`` checks for a self-collision of a given joint configuration.
 
 Launch franka_bringup/franka.launch.py file to initialize robot hardware::
 

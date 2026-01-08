@@ -33,6 +33,8 @@
 # is_async: Use async hardware interface (default: 'true')
 # joint_state_rate: Rate for joint state publishing in Hz (default: '30')
 # namespace: Namespace for the robot (default: '')
+# use_rviz: Launch RViz for the robot (default: 'true')
+# check_selfcollision: Launch self_collision_controller for the robot (default: 'true')
 # thread_priority: Thread priority for the hardware interface (default: '50')
 #
 # The fr3_duo.launch.py launch file provides a robust interface for launching
@@ -286,42 +288,50 @@ def generate_robot_nodes(context):
                 output='screen',
             )
         )
-    nodes.append(
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            namespace=namespace,
-            arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
-            parameters=[
-                PathJoinSubstitution(
-                    [
-                        FindPackageShare('franka_bringup'),
-                        'config',
-                        'controllers.yaml',
-                    ]
+    if any(
+        str(config.get('use_rviz', 'false')).lower() == 'true'
+        for config in configs.values()
+    ):
+        nodes.append(
+                Node(
+                    package='rviz2',
+                    executable='rviz2',
+                    name='rviz2',
+                    arguments=[
+                        '--display-config',
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_description'),
+                                'rviz',
+                                'visualize_franka.rviz',
+                            ]
+                        ),
+                    ],
+                    output='screen',
                 )
-            ],
-            output='screen',
         )
-    )
-    nodes.append(
+    if any(
+        str(config.get('check_selfcollision', 'false')).lower() == 'true'
+        for config in configs.values()
+    ):
+        nodes.append(
             Node(
-                package='rviz2',
-                executable='rviz2',
-                name='rviz2',
-                arguments=[
-                    '--display-config',
+                package='controller_manager',
+                executable='spawner',
+                namespace=namespace,
+                arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
+                parameters=[
                     PathJoinSubstitution(
                         [
-                            FindPackageShare('franka_description'),
-                            'rviz',
-                            'visualize_franka.rviz',
+                            FindPackageShare('franka_bringup'),
+                            'config',
+                            'controllers.yaml',
                         ]
-                    ),
+                    )
                 ],
                 output='screen',
             )
-    )
+        )
     return nodes
 
 

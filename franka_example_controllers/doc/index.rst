@@ -148,6 +148,21 @@ This example uses the CartesianElbow interface to send periodic elbow commands t
 
     ros2 launch franka_bringup example.launch.py controller_names:=elbow_example_controller
 
+SelfCollision FR3-Duo Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This example is designed for the FR3 Duo (dual-arm) setup. It uses the self-collision package
+to check whether the current joint configuration of both arms results in a collision.
+
+.. code-block:: shell
+
+    ros2 llaunch franka_bringup fr3_duo.launch.py \
+        robot_config_file:=fr3_duo.config.yaml \
+        controller_name:=self_collision_controller
+
+.. note::
+
+    The controller can also be activated using the ``check_selfcollision`` parameter in the ``fr3_duo.config.yaml``
+
 Writing Custom Controllers
 ---------------------------
 

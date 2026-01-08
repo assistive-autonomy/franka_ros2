@@ -28,6 +28,11 @@ The hardware plugin provides for each joint:
 * a  ``position command interface`` that contains the desired joint position.
 * a  ``velocity command interface`` that contains the desired joint velocity.
 
+The hardware plugin provides for each arm:
+
+* a  ``collision detected command interface`` that stops the robot when a self-collision is detected.
+
+
 Additional State Interfaces
 ---------------------------
 

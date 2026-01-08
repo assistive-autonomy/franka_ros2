@@ -28,6 +28,7 @@ find_package(moveit_core REQUIRED)
 find_package(urdf_parser_plugin REQUIRED)
 find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 find_package(Franka 0.13.2 REQUIRED)
 
@@ -49,6 +50,7 @@ target_link_libraries(${PROJECT_NAME}
 add_executable(self_collision_service
     src/self_collision_service.cpp
 )
+
 target_link_libraries(self_collision_service
                     ${PROJECT_NAME}
                     pinocchio::pinocchio)
@@ -61,6 +63,7 @@ ament_target_dependencies(self_collision_service
     rclcpp
     franka_msgs
     Franka
+    ament_index_cpp
 )
 
 install(DIRECTORY include/ DESTINATION include)
@@ -78,7 +81,7 @@ install(TARGETS
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
-        launch config
+        config
         DESTINATION share/${PROJECT_NAME}/)
 
 ament_python_install_package(${PROJECT_NAME})

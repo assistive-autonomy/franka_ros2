@@ -31,6 +31,8 @@ find_package(std_srvs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(franka_selfcollision REQUIRED)
 
+add_compile_definitions(PINOCCHIO_WITH_HPP_FCL)
+
 add_library(
         ${PROJECT_NAME}
         SHARED

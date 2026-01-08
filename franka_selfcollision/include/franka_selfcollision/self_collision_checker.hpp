@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef FRANKA_SELFCOLLISION__SELF_COLLISION_CHECKER_HPP_
-#define FRANKA_SELFCOLLISION__SELF_COLLISION_CHECKER_HPP_
+#pragma once
 
 #include <sstream>
 #include <string>
 #include <vector>
-
-#ifndef PINOCCHIO_WITH_HPP_FCL
-#define PINOCCHIO_WITH_HPP_FCL
-#endif
 
 // Pinocchio header
 #include <pinocchio/algorithm/geometry.hpp>
@@ -52,7 +47,7 @@ class SelfCollisionChecker {
                       bool print_collisions = false);
 
   /**
-   * @brief Eigen overload for faster checking (zero-copy).
+   * @brief Eigen function for faster checking.
    */
   bool checkCollisions(const Eigen::VectorXd& q, bool print_collisions = false);
 
@@ -66,5 +61,3 @@ class SelfCollisionChecker {
 };
 
 }  // namespace franka_selfcollision
-
-#endif  // FRANKA_SELFCOLLISION__SELF_COLLISION_CHECKER_HPP_
