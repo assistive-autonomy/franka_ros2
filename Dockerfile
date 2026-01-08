@@ -24,7 +24,6 @@ RUN apt-get update && \
         python3-colcon-common-extensions \
         sudo \
         vim \
-        wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -62,9 +61,7 @@ RUN sudo apt-get update \
         ros-jazzy-moveit-kinematics \
         ros-jazzy-moveit-planners-ompl \
         ros-jazzy-moveit-ros-visualization \
-        ros-jazzy-moveit \
         ros-jazzy-joint-trajectory-controller \
-        ros-jazzy-position-controllers \
         ros-jazzy-moveit-simple-controller-manager \
         ros-jazzy-rviz2 \
         ros-jazzy-xacro \
@@ -84,7 +81,6 @@ RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
     && sudo apt-get update \
     && rosdep update \
     && rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y \
-       --skip-keys "moveit_collision_detection_bullet olv_module_descriptions" \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* \
     && rm -rf /home/$USERNAME/.ros \
@@ -92,10 +88,6 @@ RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
     && mkdir -p src
 
 COPY ./franka_entrypoint.sh /franka_entrypoint.sh
-
-RUN wget http://snapshots.ros.org/jazzy/2025-05-23/ubuntu/pool/main/r/ros-jazzy-rviz-common/ros-jazzy-rviz-common_14.1.11-1noble.20250520.201719_amd64.deb \
-    && sudo dpkg -i ros-jazzy-rviz-common_14.1.11-1noble.20250520.201719_amd64.deb 
-
 RUN sudo chmod +x /franka_entrypoint.sh
 
 # Set the default shell to bash and the workdir to the source directory
