@@ -32,7 +32,6 @@ The hardware plugin provides for each arm:
 
 * a  ``collision detected command interface`` that stops the robot when a self-collision is detected.
 
-
 Additional State Interfaces
 ---------------------------
 

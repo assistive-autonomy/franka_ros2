@@ -11,8 +11,8 @@ This package contains the library and the service for the FR3_duo self-collision
 Functionality
 -------------
 
-This controller node is spawned by fr3_duo.launch.py in the franka_bringup if `check_selfcollision` is enabled.
-The service node provides a ROS 2 service (`/check_self_collision`) that checks joint configurations for self-collisions between FR3_duo-robot links.
+This controller node is spawned by fr3_duo.launch.py in the franka_bringup if `check_selfcollision` is enabled in the config.
+The service node (`/check_self_collision`) checks joint configurations for self-collisions between FR3_duo-robot links.
 
 Configuration
 -------------
@@ -25,11 +25,13 @@ Parameters are defined in the config files:
 Usage
 -----
 
-The self-collision controller is automatically started when you launch the robot using:
+The self-collision controller is automatically started when you launch the robot if `check_selfcollision` is enabled:
 
 .. code-block:: shell
 
-    ros2 launch franka_bringup fr3_duo.launch.py check_selfcollision:=true
+    ros2 launch franka_bringup fr3_duo.launch.py \
+        robot_config_file:=fr3_duo.config.yaml \
+        controller_name:=<controller_name>
 
 The self-collision service can be started standalone once the robot is started:
 
