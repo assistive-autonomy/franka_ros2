@@ -74,7 +74,8 @@ controller_interface::return_type JointImpedanceFr3DuoExampleController::update(
                                 d_gains_.cwiseProduct(-dq_filtered_[robot_index]);
 
     for (int i = 0; i < num_joints; ++i) {
-      if (!command_interfaces_[i * robot_types_.size() + robot_index].set_value(0.0)) {
+      if (!command_interfaces_[i * robot_types_.size() + robot_index].set_value(
+              tau_d_calculated(i))) {
         RCLCPP_WARN(get_node()->get_logger(), "Failed to set command interface value");
       }
     }
