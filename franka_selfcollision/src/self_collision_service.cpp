@@ -15,6 +15,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/parameter_client.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <sstream>
 
 #include "franka_msgs/srv/self_collision.hpp"
 #include "franka_selfcollision/self_collision_checker.hpp"
@@ -53,6 +54,16 @@ class CollisionCheckerNode : public rclcpp::Node {
       RCLCPP_ERROR(this->get_logger(), "Failed to load models: %s", e.what());
       throw;
     }
+
+    std::vector<std::string> joint_order = collision_checker_->getModelJointNames();
+
+    std::stringstream order_stream;
+    order_stream << "Service expects lexicographically sorted Joint Order: [";
+    for (size_t i = 1; i < joint_order.size(); ++i) {
+      order_stream << joint_order[i] << (i < joint_order.size() - 1 ? ", " : "");
+    }
+    order_stream << "]";
+    RCLCPP_INFO(this->get_logger(), "%s", order_stream.str().c_str());
 
     service_ = this->create_service<franka_msgs::srv::SelfCollision>(
         "check_self_collision",

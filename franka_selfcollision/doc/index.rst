@@ -38,3 +38,6 @@ The self-collision service can be started standalone once the robot is started:
 .. code-block:: shell
 
     ros2 run franka_selfcollision self_collision_service
+
+.. note::
+    Make sure to use the displayed (alphabetical) sorting of the joints.

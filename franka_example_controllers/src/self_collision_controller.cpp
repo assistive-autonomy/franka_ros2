@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -111,19 +111,19 @@ CallbackReturn SelfCollisionController::on_configure(
   RCLCPP_INFO(get_node()->get_logger(), "Got SRDF file. Is it empty? %s",
               srdf_xml.empty() ? "Yes" : "No");
 
-  joint_names_.clear();
-  for (size_t i = 0; i < robot_types_.size(); i++) {
-    for (int j = 1; j <= num_joints; ++j) {
-      joint_names_.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + "_joint" +
-                             std::to_string(j));
-    }
-  }
-
   try {
     RCLCPP_INFO(get_node()->get_logger(), "Loading Pinocchio Model form remote parameters");
 
     collision_checker_ = std::make_shared<franka_selfcollision::SelfCollisionChecker>(
         urdf_xml, srdf_xml, security_margin);
+
+    std::vector<std::string> pinocchio_names = collision_checker_->getModelJointNames();
+    joint_names_.clear();
+    for (const auto& name : pinocchio_names) {
+      if (name == "universe")
+        continue;
+      joint_names_.push_back(name);
+    }
 
     // Verify dimensions
     int model_dof = collision_checker_->getDoF();

@@ -49,9 +49,11 @@ class SelfCollisionChecker {
   /**
    * @brief Eigen function for faster checking.
    */
-  bool checkCollisions(const Eigen::VectorXd& q, bool print_collisions = false);
+  bool checkCollisions(const Eigen::Ref<const Eigen::VectorXd>& q, bool print_collisions = false);
 
   int getDoF() const { return model_.nq; }
+
+  const std::vector<std::string>& getModelJointNames() const { return model_.names; }
 
  private:
   pinocchio::Model model_;

@@ -74,7 +74,8 @@ bool SelfCollisionChecker::checkCollision(const std::vector<double>& joint_confi
   return checkCollisions(q, print_collisions);
 }
 
-bool SelfCollisionChecker::checkCollisions(const Eigen::VectorXd& q, bool print_collisions) {
+bool SelfCollisionChecker::checkCollisions(const Eigen::Ref<const Eigen::VectorXd>& q,
+                                           bool print_collisions) {
   bool stop_at_first = !print_collisions;
 
   bool collision_found =

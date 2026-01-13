@@ -1,48 +1,43 @@
 #include <gtest/gtest.h>
 
-#include <array>
 #include <cstdio>
-#include <memory>
-#include <stdexcept>
+#include <fstream>
 #include <string>
 #include <vector>
 
 #include "franka_selfcollision/self_collision_checker.hpp"
 
-std::string execCommand(const char* cmd) {
-  std::array<char, 128> buffer;
-  std::string result;
-
-  auto pipe_deleter = [](FILE* f) {
-    if (f)
-      pclose(f);
-  };
-  std::unique_ptr<FILE, decltype(pipe_deleter)> pipe(popen(cmd, "r"), pipe_deleter);
-
-  if (!pipe) {
-    throw std::runtime_error("popen failed!");
+std::string readFileToString(const std::string& filename) {
+  auto file = std::ifstream(filename);
+  if (!file.is_open()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+    return "";
   }
 
-  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-    result += buffer.data();
-  }
-  return result;
+  auto oss = std::ostringstream();
+  oss << file.rdbuf();
+  file.close();
+
+  return oss.str();
 }
 
 class SelfCollisionCheckerTest : public ::testing::Test {
  protected:
+  static constexpr double kSecurityMargin = 0.001;
+  static constexpr size_t kNumJoints = 14;
+
   void SetUp() override {
     try {
-      std::string cmd_urdf =
-          "xacro /ros2_ws/src/franka_description/robots/fr3_duo/fr3_duo.urdf.xacro";
-      std::string urdf_xml = execCommand(cmd_urdf.c_str());
+      std::string test_dir = TEST_DIR;
 
-      std::string cmd_srdf =
-          "xacro /ros2_ws/src/franka_description/robots/fr3_duo/fr3_duo.srdf.xacro";
-      std::string srdf_xml = execCommand(cmd_srdf.c_str());
+      std::string urdf_path = test_dir + "/fr3_duo.urdf";
+      std::string urdf_xml = readFileToString(urdf_path);
 
-      checker_ =
-          std::make_unique<franka_selfcollision::SelfCollisionChecker>(urdf_xml, srdf_xml, 0.001);
+      std::string srdf_path = test_dir + "/fr3_duo.srdf";
+      std::string srdf_xml = readFileToString(srdf_path);
+
+      checker_ = std::make_unique<franka_selfcollision::SelfCollisionChecker>(urdf_xml, srdf_xml,
+                                                                              kSecurityMargin);
     } catch (const std::exception& e) {
       FAIL() << "Setup failed" << e.what();
     }
@@ -52,8 +47,8 @@ class SelfCollisionCheckerTest : public ::testing::Test {
 };
 
 TEST_F(SelfCollisionCheckerTest, ThrowsOnIncorrectInputDimensions) {
-  std::vector<double> input_too_small(13, 0.0);
-  std::vector<double> input_too_big(15, 0.0);
+  std::vector<double> input_too_small(SelfCollisionCheckerTest::kNumJoints - 1, 0.0);
+  std::vector<double> input_too_big(SelfCollisionCheckerTest::kNumJoints + 1, 0.0);
 
   EXPECT_THROW({ checker_->checkCollision(input_too_small, false); }, std::exception);
 
@@ -61,8 +56,7 @@ TEST_F(SelfCollisionCheckerTest, ThrowsOnIncorrectInputDimensions) {
 }
 
 TEST_F(SelfCollisionCheckerTest, ReturnsFalseForSafeConfigurations) {
-  // Home Configuration
-  std::vector<double> home_config(14, 0.0);
+  std::vector<double> home_config(SelfCollisionCheckerTest::kNumJoints, 0.0);
 
   // Arms up Configuration
   std::vector<double> safe_config = {

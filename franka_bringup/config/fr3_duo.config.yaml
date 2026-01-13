@@ -10,10 +10,10 @@
 
 FR3_DUO:
   robot_types: "['fr3','fr3']"  # Types of the robot arms (e.g., fr3) Currently only fr3 is supported.
-  arm_prefixes: "['left','right']"  # Prefixes for the arms (used to identify each arm)
-  robot_ips: "['172.16.0.5','172.16.0.6']"  # IP addresses of the robots
-  load_gripper: "false"  # Enable Franka Gripper ("true" or "false") NOTE: Currently not supported.
-  use_fake_hardware: "false"  # Use simulated hardware ("true" or "false")
+  arm_prefixes: "['bottom','top']"  # Prefixes for the arms (used to identify each arm)
+  robot_ips: "['172.16.0.5','172.16.0.3']"  # IP addresses of the robots
+  load_gripper: "true"  # Enable Franka Gripper ("true" or "false") NOTE: Currently not supported.
+  use_fake_hardware: "true"  # Use simulated hardware ("true" or "false")
   fake_sensor_commands: "false"  # Enable fake sensor commands for simulation
   joint_state_rate: 30  # Publishing rate for joint states (Hz)
   namespace: ""  # Namespace for the robot (empty for no namespace)

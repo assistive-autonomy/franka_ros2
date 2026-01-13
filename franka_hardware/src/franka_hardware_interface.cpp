@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -152,20 +152,12 @@ std::vector<CommandInterface> FrankaHardwareInterface::export_command_interfaces
                   gpio.name.c_str(), command_interface.name.c_str(), vector_index);
     }
   }
-  // Register a command interface for the self_collision detection
-  RCLCPP_INFO(getLogger(), "Register collision command interfaces");
-  std::string prefix_type = prefix_.substr(0, prefix_.size() - 1) + robot_type_;
-  command_interfaces.emplace_back(
-      CommandInterface(prefix_type, "collision_detected", &collision_detected_));
-  RCLCPP_INFO(getLogger(), "Registering command interface: %s/collision_detected",
-              prefix_type.c_str());
 
   return command_interfaces;
 }
 
 CallbackReturn FrankaHardwareInterface::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  collision_detected_ = 0.0;
   read(rclcpp::Time(0),
        rclcpp::Duration(0, 0));  // makes sure that the robot state is properly initialized.
   return CallbackReturn::SUCCESS;
@@ -228,17 +220,6 @@ bool hasInfinite(const CommandType& commands) {
 
 hardware_interface::return_type FrankaHardwareInterface::write(const rclcpp::Time& /*time*/,
                                                                const rclcpp::Duration& /*period*/) {
-  if (collision_detected_ > 0.5) {
-    logRclcppFatalRed(getLogger(),
-                      "EXTERNAL COLLISION DETECTED VIA ROS2! Stopping robot immediately.");
-    try {
-      robot_->stopRobot();
-    } catch (const franka::Exception& e) {
-      RCLCPP_ERROR(getLogger(), "Exception while stopping robot %s", e.what());
-    }
-    return hardware_interface::return_type::ERROR;
-  }
-
   if (hasInfinite(hw_position_commands_) || hasInfinite(hw_effort_commands_) ||
       hasInfinite(hw_velocity_commands_) || hasInfinite(hw_cartesian_velocities_) ||
       hasInfinite(hw_elbow_command_) || hasInfinite(hw_cartesian_pose_commands_)) {

@@ -14,25 +14,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(control_msgs REQUIRED)
 find_package(pinocchio REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(urdf_parser_plugin REQUIRED)
 find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
-find_package(ament_index_cpp REQUIRED)
-
-find_package(Franka 0.13.2 REQUIRED)
-
-add_compile_definitions(PINOCCHIO_WITH_HPP_FCL)
+find_package(Franka 0.19.0 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
     src/self_collision_checker.cpp
@@ -84,11 +72,6 @@ install(DIRECTORY
         config
         DESTINATION share/${PROJECT_NAME}/)
 
-ament_python_install_package(${PROJECT_NAME})
-
-install(PROGRAMS
-        DESTINATION lib/${PROJECT_NAME})
-
 if(BUILD_TESTING)
     find_package(ament_cmake_clang_format REQUIRED)
     find_package(ament_cmake_copyright REQUIRED)
@@ -112,6 +95,10 @@ if(BUILD_TESTING)
     ament_add_gmock(${PROJECT_NAME}_test
         test/test_self_collision_checker.cpp
     )
+
+    target_compile_definitions(${PROJECT_NAME}_test PRIVATE
+        "TEST_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/test\"")
+
     target_link_libraries(franka_selfcollision_test
         ${PROJECT_NAME}
         pinocchio::pinocchio

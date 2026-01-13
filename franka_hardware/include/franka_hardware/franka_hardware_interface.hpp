@@ -174,9 +174,6 @@ class FrankaHardwareInterface : public hardware_interface::SystemInterface {
   bool elbow_command_interface_claimed_ = false;
   bool elbow_command_interface_running_ = false;
 
-  // for the collision_checker command_interface
-  double collision_detected_{0.0};
-
   static rclcpp::Logger getLogger();
 
   std::string robot_type_{"fr3"};

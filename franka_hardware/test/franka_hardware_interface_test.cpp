@@ -135,10 +135,9 @@ TEST_F(FrankaHardwareInterfaceTest, givenFR3CommandInterfaces_thenNumberIsSetupC
   const auto command_interfaces = default_franka_hardware_interface.export_command_interfaces();
 
   const auto number_of_fr3_command_interfaces = 7 + 7 + 7  // for joint command interfaces
-                                                + 6   // for cartesian velocity command interfaces
-                                                + 2   // for elbow command interfaces
-                                                + 16  // for cartesian pose command interfaces
-                                                + 1;  // for collision detection command interface
+                                                + 6    // for cartesian velocity command interfaces
+                                                + 2    // for elbow command interfaces
+                                                + 16;  // for cartesian pose command interfaces
 
   ASSERT_EQ(command_interfaces.size(), number_of_fr3_command_interfaces);
 }
