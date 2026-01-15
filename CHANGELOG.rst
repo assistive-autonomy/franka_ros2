@@ -1,7 +1,7 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-UNRELEASED
+v3.2.0 (2026-01-15)
 ----------
 Requires libfranka >= 0.19.0 and franka_description >= 2.3.0 requires ROS 2 Jazzy
 
