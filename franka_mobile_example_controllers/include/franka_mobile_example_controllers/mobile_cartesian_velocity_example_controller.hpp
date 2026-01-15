@@ -56,8 +56,8 @@ class MobileCartesianVelocityExampleController : public controller_interface::Co
   double prev_linear_acceleration_y_ = 0.0;
   double prev_angular_acceleration_z_ = 0.0;
 
-  double max_acceleration_linear_ = 5.0;
-  double max_acceleration_angular_ = 10.0;
+  double max_acceleration_linear_ = 2.5;
+  double max_acceleration_angular_ = 7.5;
   double max_jerk_linear_ = 3000.0;
   double max_jerk_angular_ = 5000.0;
 

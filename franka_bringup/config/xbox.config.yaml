@@ -19,8 +19,8 @@
         yaw: 3.0
 
       scale_linear_turbo:
-        x: 3.0
-        y: 3.0
+        x: 10.0
+        y: 10.0
 
       scale_angular_turbo:
         yaw: 4.0
