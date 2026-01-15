@@ -1,12 +1,13 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-UNRELEASED
+v3.2.0 (2026-01-15)
 ----------
 Requires libfranka >= 0.19.0 and franka_description >= 2.3.0 requires ROS 2 Jazzy
 
 * Add: Added a joint-based point-to-point motion action with usage example
 * BREAKING CHANGE: arm_id replaced by robot_type and controller_name by controller_names
+* Remove: `olvx_description_module` dependency removed
 * Feat: TMRv0.2 teleoperation example controller added
 * Feat: arm_id replaced by robot_type
 * chore: bump required ros2_control version from franka_description to 1.0.0 from franka_hardware_interface
