@@ -1,0 +1,6 @@
+---
+bool success
+string message
+---
+bool is_colliding
+string[] collision_pairs

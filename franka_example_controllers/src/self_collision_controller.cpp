@@ -28,29 +28,14 @@ namespace franka_example_controllers {
 
 controller_interface::InterfaceConfiguration
 SelfCollisionController::command_interface_configuration() const {
-  controller_interface::InterfaceConfiguration config;
-  config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-
-  for (size_t robot_index = 0; robot_index < robot_types_.size(); robot_index++) {
-    config.names.push_back(arm_prefixes_[robot_index] + "_" + robot_types_[robot_index] +
-                           "/collision_detected");
-  }
-  return config;
+  return controller_interface::InterfaceConfiguration{
+      controller_interface::interface_configuration_type::NONE};
 }
 
 controller_interface::InterfaceConfiguration
 SelfCollisionController::state_interface_configuration() const {
-  controller_interface::InterfaceConfiguration config;
-  config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-
-  for (size_t i = 0; i < robot_types_.size(); i++) {
-    for (int j = 1; j <= num_joints; ++j) {
-      config.names.push_back(arm_prefixes_[i] + "_" + robot_types_[i] + "_joint" +
-                             std::to_string(j) + "/position");
-    }
-  }
-
-  return config;
+  return controller_interface::InterfaceConfiguration{
+      controller_interface::interface_configuration_type::NONE};
 }
 
 controller_interface::return_type SelfCollisionController::update(
@@ -64,13 +49,8 @@ controller_interface::return_type SelfCollisionController::update(
   bool collision_found =
       collision_checker_->checkCollision(current_joint_positions_, print_collisions_);
 
-  double collision_detected = collision_found ? 1.0 : 0.0;
-
-  for (size_t i = 0; i < command_interfaces_.size(); ++i) {
-    if (!command_interfaces_[i].set_value(collision_detected)) {
-      RCLCPP_FATAL(get_node()->get_logger(), "Failed to write collision command");
-      return controller_interface::return_type::ERROR;
-    }
+  if (collision_found) {
+    RCLCPP_FATAL(get_node()->get_logger(), "EXTERNAL COLLISION DETECTED VIA ROS2!");
   }
 
   return controller_interface::return_type::OK;

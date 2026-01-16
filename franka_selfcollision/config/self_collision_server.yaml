@@ -1,0 +1,4 @@
+self_collision_server:
+  ros__parameters:
+    security_margin: 0.045
+    print_collisions: false

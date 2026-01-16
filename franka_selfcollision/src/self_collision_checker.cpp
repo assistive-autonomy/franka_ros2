@@ -31,27 +31,6 @@ SelfCollisionChecker::SelfCollisionChecker(const std::string& urdf_xml,
   geom_model_.addAllCollisionPairs();
   pinocchio::srdf::removeCollisionPairsFromXML(model_, geom_model_, srdf_xml);
 
-  // Create Reduced Model for finger joints if they are there
-  std::vector<pinocchio::JointIndex> locked_joints;
-  for (pinocchio::JointIndex i = 1; i < model_.joints.size(); ++i) {
-    std::string joint_name = model_.names[i];
-    if (joint_name.find("finger") != std::string::npos) {
-      locked_joints.push_back(i);
-    }
-  }
-
-  if (!locked_joints.empty()) {
-    Eigen::VectorXd q_ref = pinocchio::neutral(model_);
-    pinocchio::Model reduced_model;
-    pinocchio::GeometryModel reduced_geom_model;
-
-    pinocchio::buildReducedModel(model_, geom_model_, locked_joints, q_ref, reduced_model,
-                                 reduced_geom_model);
-
-    model_ = reduced_model;
-    geom_model_ = reduced_geom_model;
-  }
-
   data_ = std::make_shared<pinocchio::Data>(model_);
   geom_data_ = std::make_shared<pinocchio::GeometryData>(geom_model_);
 

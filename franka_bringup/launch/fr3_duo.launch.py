@@ -236,6 +236,18 @@ def generate_robot_nodes(context):
             ],
         ),
         Node(
+            package='franka_selfcollision',
+            executable='self_collision_node',
+            name='self_collision_node',
+            namespace=namespace,
+            parameters=[
+                {
+                    'robot_description': robot_description,
+                    'robot_description_semantic': robot_description_semantic,
+                }
+            ],
+        ),
+        Node(
             package='controller_manager',
             executable='spawner',
             namespace=namespace,
@@ -310,28 +322,28 @@ def generate_robot_nodes(context):
                     output='screen',
                 )
         )
-    if any(
-        str(config.get('check_selfcollision', 'false')).lower() == 'true'
-        for config in configs.values()
-    ):
-        nodes.append(
-            Node(
-                package='controller_manager',
-                executable='spawner',
-                namespace=namespace,
-                arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
-                parameters=[
-                    PathJoinSubstitution(
-                        [
-                            FindPackageShare('franka_bringup'),
-                            'config',
-                            'controllers.yaml',
-                        ]
-                    )
-                ],
-                output='screen',
-            )
-        )
+    # if any(
+    #     str(config.get('check_selfcollision', 'false')).lower() == 'true'
+    #     for config in configs.values()
+    # ):
+    #     nodes.append(
+    #         Node(
+    #             package='controller_manager',
+    #             executable='spawner',
+    #             namespace=namespace,
+    #             arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
+    #             parameters=[
+    #                 PathJoinSubstitution(
+    #                     [
+    #                         FindPackageShare('franka_bringup'),
+    #                         'config',
+    #                         'controllers.yaml',
+    #                     ]
+    #                 )
+    #             ],
+    #             output='screen',
+    #         )
+    #     )
     return nodes
 
 

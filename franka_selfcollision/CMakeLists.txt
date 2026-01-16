@@ -17,9 +17,11 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(Franka 0.19.0 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -54,6 +56,46 @@ ament_target_dependencies(self_collision_service
     ament_index_cpp
 )
 
+# node 
+add_executable(self_collision_node 
+        src/self_collision_node.cpp)
+
+target_include_directories(self_collision_node PRIVATE
+  include
+)
+
+target_link_libraries(self_collision_node
+                    ${PROJECT_NAME}
+                    pinocchio::pinocchio)
+
+ament_target_dependencies(self_collision_node
+  rclcpp
+  sensor_msgs
+  std_msgs
+  franka_msgs
+  ament_index_cpp       
+)
+
+# server 
+add_executable(self_collision_server 
+        src/self_collision_server.cpp)
+
+target_include_directories(self_collision_server PRIVATE
+  include
+)
+
+target_link_libraries(self_collision_server
+                    ${PROJECT_NAME}
+                    pinocchio::pinocchio)
+
+ament_target_dependencies(self_collision_server
+  rclcpp
+  rclcpp_action
+  sensor_msgs
+  franka_msgs
+  ament_index_cpp       
+)
+
 install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${PROJECT_NAME}
@@ -66,6 +108,8 @@ install(TARGETS ${PROJECT_NAME}
 
 install(TARGETS
         self_collision_service
+        self_collision_server
+        self_collision_node
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
