@@ -57,7 +57,7 @@ class SelfCollisionChecker {
    * @param print_collisions If true, the names of colliding link pairs are printed.
    * @return true if a collision is detected, false otherwise.
    */
-  bool checkCollisions(const Eigen::Ref<const Eigen::VectorXd>& q, bool print_collisions = false);
+  bool checkCollisions(const Eigen::VectorXd& q, bool print_collisions = false);
 
   /**
    * @brief Gets the number of Degrees of Freedom (DoF) of the loaded model.

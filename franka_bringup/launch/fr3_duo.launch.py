@@ -1,4 +1,4 @@
-#  Copyright (c) 2025 Franka Robotics GmbH
+#  Copyright (c) 2026 Franka Robotics GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -129,6 +129,8 @@ def generate_robot_nodes(context):
     load_gripper_str = str(config.get('load_gripper', 'false'))
     namespace = str(config.get('namespace', ''))
     joint_state_rate = int(config.get('joint_state_rate', 30))
+    use_rviz = str(config.get('use_rviz', 'true')).lower() == 'true'
+    check_selfcollision = str(config.get('check_selfcollision', 'false')).lower() == 'true'
     thread_priority_str = str(config.get('thread_priority', 50))
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
@@ -286,10 +288,7 @@ def generate_robot_nodes(context):
                 output='screen',
             )
         )
-    if any(
-        str(config.get('use_rviz', 'false')).lower() == 'true'
-        for config in configs.values()
-    ):
+    if use_rviz:
         nodes.append(
                 Node(
                     package='rviz2',
@@ -308,10 +307,7 @@ def generate_robot_nodes(context):
                     output='screen',
                 )
         )
-    if any(
-        str(config.get('check_selfcollision', 'false')).lower() == 'true'
-        for config in configs.values()
-    ):
+    if check_selfcollision:
         nodes.append(
             Node(
                 package='franka_selfcollision',
