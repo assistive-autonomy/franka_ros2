@@ -22,7 +22,10 @@ namespace franka_selfcollision {
 
 SelfCollisionChecker::SelfCollisionChecker(const std::string& urdf_xml,
                                            const std::string& srdf_xml,
-                                           double security_margin) {
+                                           double security_margin,
+                                           rclcpp::Logger logger,
+                                           rclcpp::Clock::SharedPtr clock)
+    : logger_(logger), clock_(clock) {
   pinocchio::urdf::buildModelFromXML(urdf_xml, model_);
 
   std::istringstream urdf_stream(urdf_xml);
@@ -44,11 +47,10 @@ SelfCollisionChecker::SelfCollisionChecker(const std::string& urdf_xml,
 bool SelfCollisionChecker::checkCollision(const std::vector<double>& joint_configuration,
                                           bool print_collisions) {
   if (joint_configuration.size() != (size_t)model_.nq) {
-    throw std::invalid_argument("[SelfCollisionChecker] Dimension mismatch...");
+    RCLCPP_FATAL(logger_, "Dimension mismatch...");
+    throw std::invalid_argument("Joint configuration dimension mismatch");
   }
-
-  Eigen::VectorXd q =
-      Eigen::Map<const Eigen::VectorXd>(joint_configuration.data(), joint_configuration.size());
+  Eigen::Map<const Eigen::VectorXd> q(joint_configuration.data(), joint_configuration.size());
 
   return checkCollisions(q, print_collisions);
 }
@@ -69,8 +71,8 @@ bool SelfCollisionChecker::checkCollisions(const Eigen::Ref<const Eigen::VectorX
         const std::string& name1 = geom_model_.geometryObjects[cp.first].name;
         const std::string& name2 = geom_model_.geometryObjects[cp.second].name;
 
-        std::cout << "[SelfCollisionChecker] Collision: " << name1 << " <--> " << name2
-                  << std::endl;
+        RCLCPP_WARN_THROTTLE(logger_, *clock_, 500, "COLLISION:  %s <--> %s", name1.c_str(),
+                             name2.c_str());
       }
     }
   }

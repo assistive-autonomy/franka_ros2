@@ -11,33 +11,21 @@ This package contains the library and the service for the FR3_duo self-collision
 Functionality
 -------------
 
-This controller node is spawned by fr3_duo.launch.py in the franka_bringup if `check_selfcollision` is enabled in the config.
-The service node (`/check_self_collision`) checks joint configurations for self-collisions between FR3_duo-robot links.
+The monitoring node is spawned by ``fr3_duo.launch.py`` in ``franka_bringup``.
+The node continuously monitors the robot's joint states to check for self-collisions between the FR3_duo links. It performs two main actions upon detecting a collision (or violation of the security margin):
+
+1. **Publishes Status:** Sends a boolean ``true`` to the topic ``/fr3_duo_self_collision_node/collision_detected``.
+2. **Logs Warning:** Prints the specific colliding link pairs to the console (throttled to 1Hz to prevent spam).
 
 Configuration
 -------------
 
-Parameters are defined in the config files:
+Parameters are defined in ``config/self_collision_node.yaml``:
 
-* ``security_margin``: Safety margin around the robot links in meters for collision checking
-* ``print_collisions``: Enable collision pair logging
+* ``security_margin``: Safety buffer around the robot links in meters (default: ``0.045``).
+* ``print_collisions``: If ``true``, logs the names of the colliding links to the console.
 
 Usage
 -----
 
-The self-collision controller is automatically started when you launch the robot if `check_selfcollision` is enabled:
-
-.. code-block:: shell
-
-    ros2 launch franka_bringup fr3_duo.launch.py \
-        robot_config_file:=fr3_duo.config.yaml \
-        controller_name:=<controller_name>
-
-The self-collision service can be started standalone once the robot is started:
-
-.. code-block:: shell
-
-    ros2 run franka_selfcollision self_collision_service
-
-.. note::
-    Make sure to use the displayed (alphabetical) sorting of the joints.
+The self-collision node is automatically started when you launch the robot.

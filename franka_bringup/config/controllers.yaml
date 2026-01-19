@@ -93,9 +93,6 @@
       mobile_cartesian_velocity_example_controller:
         type: franka_mobile_example_controllers/MobileCartesianVelocityExampleController
 
-      # self_collision_controller:
-      #   type: franka_example_controllers/SelfCollisionController
-
       fr3_duo_self_collision_example_controller:
         type: franka_example_controllers/Fr3DuoSelfCollisionExampleController
 
@@ -266,30 +263,20 @@
 /**:
   fr3_duo_self_collision_example_controller:
     ros__parameters:
-      update_rate: 30
+      update_rate: 1000
       k_gains:
-        - 24.0
-        - 24.0
-        - 24.0
-        - 24.0
-        - 10.0
-        - 6.0
-        - 2.0
+        - 600.0
+        - 600.0
+        - 600.0
+        - 600.0
+        - 250.0
+        - 150.0
+        - 50.0
       d_gains:
-        - 2.0
-        - 2.0
-        - 2.0
-        - 1.0
-        - 1.0
-        - 1.0
-        - 0.5
-#       security_margin: 0.045
-#       print_collisions: false
-
-# /**:
-#   self_collision_controller:
-#     ros__parameters:
-#       is_async: true
-#       security_margin: 0.045
-#       print_collisions: false
-
+        - 30.0
+        - 30.0
+        - 30.0
+        - 30.0
+        - 10.0
+        - 10.0
+        - 5.0

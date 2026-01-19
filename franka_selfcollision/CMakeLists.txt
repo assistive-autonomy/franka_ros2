@@ -15,14 +15,14 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(Franka 0.19.0 REQUIRED)
 find_package(franka_msgs REQUIRED)
+find_package(pinocchio REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(pinocchio REQUIRED)
-find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(Franka 0.19.0 REQUIRED)
+find_package(urdf REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
     src/self_collision_checker.cpp
@@ -35,29 +35,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME}
     pinocchio::pinocchio
+    rclcpp::rclcpp
 )
 
-add_executable(self_collision_service
-    src/self_collision_service.cpp
-)
-
-target_link_libraries(self_collision_service
-                    ${PROJECT_NAME}
-                    pinocchio::pinocchio)
-
-target_include_directories(self_collision_service PRIVATE
-  include
-)
-
-ament_target_dependencies(self_collision_service
-    rclcpp
-    franka_msgs
-    Franka
-    ament_index_cpp
-)
-
-# node 
-add_executable(self_collision_node 
+add_executable(self_collision_node
         src/self_collision_node.cpp)
 
 target_include_directories(self_collision_node PRIVATE
@@ -69,31 +50,11 @@ target_link_libraries(self_collision_node
                     pinocchio::pinocchio)
 
 ament_target_dependencies(self_collision_node
-  rclcpp
-  sensor_msgs
-  std_msgs
-  franka_msgs
-  ament_index_cpp       
-)
-
-# server 
-add_executable(self_collision_server 
-        src/self_collision_server.cpp)
-
-target_include_directories(self_collision_server PRIVATE
-  include
-)
-
-target_link_libraries(self_collision_server
-                    ${PROJECT_NAME}
-                    pinocchio::pinocchio)
-
-ament_target_dependencies(self_collision_server
-  rclcpp
-  rclcpp_action
-  sensor_msgs
-  franka_msgs
-  ament_index_cpp       
+    ament_index_cpp
+    franka_msgs
+    rclcpp
+    sensor_msgs
+    std_msgs
 )
 
 install(DIRECTORY include/ DESTINATION include)
@@ -107,13 +68,12 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 install(TARGETS
-        self_collision_service
-        self_collision_server
         self_collision_node
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
         config
+        launch
         DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)

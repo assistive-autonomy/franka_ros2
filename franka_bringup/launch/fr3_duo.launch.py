@@ -18,7 +18,7 @@
 #                   provided (e.g., 'fr3_duo.config.yaml'), it will be
 #                   looked up in franka_bringup/config/ directory.
 #                   If provided, robot_ips, robot_types, and arm_prefixes
-#                   will be read from this file. (default: '')
+#                   will be read from this file. (default: 'fr3_duo.config.yaml')
 # controller_name: Controller name to spawn (required). Only one controller is
 #                 supported for duo setups.
 # robot_types: Types of the robot arms as a string list (e.g., "['fr3','fr3']")
@@ -34,7 +34,7 @@
 # joint_state_rate: Rate for joint state publishing in Hz (default: '30')
 # namespace: Namespace for the robot (default: '')
 # use_rviz: Launch RViz for the robot (default: 'true')
-# check_selfcollision: Launch self_collision_controller for the robot (default: 'true')
+# check_selfcollision: Launch self_collision_node for the robot (default: 'false')
 # thread_priority: Thread priority for the hardware interface (default: '50')
 #
 # The fr3_duo.launch.py launch file provides a robust interface for launching
@@ -44,7 +44,6 @@
 # Usage examples:
 # 1. Launch with config file and controller:
 #    ros2 launch franka_bringup fr3_duo.launch.py \
-#      robot_config_file:=fr3_duo.config.yaml \
 #      controller_name:=fr3_duo_joint_impedance_example_controller
 #
 # 2. Launch with parameters:
@@ -212,7 +211,6 @@ def generate_robot_nodes(context):
             parameters=[
                 controllers_yaml,
                 {'robot_description': robot_description},
-                {'robot_description_semantic': robot_description_semantic},
                 {'robot_types': robot_types_list},
                 {'arm_prefixes': arm_prefixes_list},
             ],
@@ -232,18 +230,6 @@ def generate_robot_nodes(context):
                 {
                     'source_list': joint_state_publisher_sources,
                     'rate': joint_state_rate,
-                }
-            ],
-        ),
-        Node(
-            package='franka_selfcollision',
-            executable='self_collision_node',
-            name='self_collision_node',
-            namespace=namespace,
-            parameters=[
-                {
-                    'robot_description': robot_description,
-                    'robot_description_semantic': robot_description_semantic,
                 }
             ],
         ),
@@ -322,28 +308,23 @@ def generate_robot_nodes(context):
                     output='screen',
                 )
         )
-    # if any(
-    #     str(config.get('check_selfcollision', 'false')).lower() == 'true'
-    #     for config in configs.values()
-    # ):
-    #     nodes.append(
-    #         Node(
-    #             package='controller_manager',
-    #             executable='spawner',
-    #             namespace=namespace,
-    #             arguments=['self_collision_controller', '--controller-manager-timeout', '30'],
-    #             parameters=[
-    #                 PathJoinSubstitution(
-    #                     [
-    #                         FindPackageShare('franka_bringup'),
-    #                         'config',
-    #                         'controllers.yaml',
-    #                     ]
-    #                 )
-    #             ],
-    #             output='screen',
-    #         )
-    #     )
+    if any(
+        str(config.get('check_selfcollision', 'false')).lower() == 'true'
+        for config in configs.values()
+    ):
+        nodes.append(
+            Node(
+                package='franka_selfcollision',
+                executable='self_collision_node',
+                name='self_collision_node',
+                namespace=namespace,
+                parameters=[
+                    {
+                        'robot_description_semantic': robot_description_semantic,
+                    }
+                ],
+            )
+        )
     return nodes
 
 
@@ -351,7 +332,10 @@ def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument(
             'robot_config_file',
-            default_value='',
+            default_value=PathJoinSubstitution(
+                [FindPackageShare('franka_bringup'),
+                 'config', 'fr3_duo.config.yaml']
+            ),
             description='Config file name (looked up in franka_bringup/config/) or full path. '
             'If provided, robot_ips, robot_types, and arm_prefixes will be read from this file.',
         ),

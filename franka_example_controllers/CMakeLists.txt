@@ -18,6 +18,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(franka_msgs REQUIRED)
+find_package(franka_selfcollision REQUIRED)
 find_package(franka_semantic_components REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(moveit_core REQUIRED)
@@ -29,7 +30,6 @@ find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(franka_selfcollision REQUIRED)
 
 add_compile_definitions(PINOCCHIO_WITH_HPP_FCL)
 
@@ -40,7 +40,6 @@ add_library(
         src/cartesian_orientation_example_controller.cpp
         src/cartesian_pose_example_controller.cpp
         src/cartesian_velocity_example_controller.cpp
-        # src/self_collision_controller.cpp
         src/elbow_example_controller.cpp
         src/fr3_duo_joint_impedance_example_controller.cpp
         src/fr3_duo_self_collision_example_controller.cpp
@@ -64,6 +63,7 @@ ament_target_dependencies(
         ${PROJECT_NAME}
         controller_interface
         franka_msgs
+        franka_selfcollision
         franka_semantic_components
         hardware_interface
         moveit_core
@@ -73,7 +73,6 @@ ament_target_dependencies(
         rclcpp
         rclcpp_lifecycle
         std_srvs
-        franka_selfcollision
 )
 
 pluginlib_export_plugin_description_file(

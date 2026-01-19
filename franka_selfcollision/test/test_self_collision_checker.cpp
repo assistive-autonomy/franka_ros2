@@ -36,53 +36,67 @@ class SelfCollisionCheckerTest : public ::testing::Test {
       std::string srdf_path = test_dir + "/fr3_duo.srdf";
       std::string srdf_xml = readFileToString(srdf_path);
 
-      checker_ = std::make_unique<franka_selfcollision::SelfCollisionChecker>(urdf_xml, srdf_xml,
-                                                                              kSecurityMargin);
+      auto clock = std::make_shared<rclcpp::Clock>();
+
+      checker_ = std::make_unique<franka_selfcollision::SelfCollisionChecker>(
+          urdf_xml, srdf_xml, kSecurityMargin, rclcpp::get_logger("test_logger"), clock);
+
+      auto dof = checker_->getDoF();
+      RCLCPP_INFO(rclcpp::get_logger("test_logger"), "System loaded with %u DoF", dof);
+
     } catch (const std::exception& e) {
-      FAIL() << "Setup failed" << e.what();
+      FAIL() << "Setup failed: " << e.what();
     }
   }
 
   std::unique_ptr<franka_selfcollision::SelfCollisionChecker> checker_;
 };
 
-TEST_F(SelfCollisionCheckerTest, ThrowsOnIncorrectInputDimensions) {
+TEST_F(SelfCollisionCheckerTest, givenInvalidInputDimensions_thenThrowInvalidArgument) {
   std::vector<double> input_too_small(SelfCollisionCheckerTest::kNumJoints - 1, 0.0);
   std::vector<double> input_too_big(SelfCollisionCheckerTest::kNumJoints + 1, 0.0);
 
-  EXPECT_THROW({ checker_->checkCollision(input_too_small, false); }, std::exception);
+  ASSERT_THROW({ checker_->checkCollision(input_too_small, false); }, std::invalid_argument);
 
-  EXPECT_THROW({ checker_->checkCollision(input_too_big, false); }, std::exception);
+  ASSERT_THROW({ checker_->checkCollision(input_too_big, false); }, std::invalid_argument);
 }
 
-TEST_F(SelfCollisionCheckerTest, ReturnsFalseForSafeConfigurations) {
+TEST_F(SelfCollisionCheckerTest, givenSafeConfiguration_thenReturnFalse) {
   std::vector<double> home_config(SelfCollisionCheckerTest::kNumJoints, 0.0);
 
-  // Arms up Configuration
-  std::vector<double> safe_config = {
-      0.0, -0.785, 0.0, -2.356, 0.0, 1.57, 0.785,  // Arm 1
-      0.0, -0.785, 0.0, -2.356, 0.0, 1.57, 0.785   // Arm 2
+  // Start Configuration
+  std::vector<double> start_config = {
+      0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,  // Arm 1
+      0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4   // Arm 2
   };
 
-  EXPECT_FALSE(checker_->checkCollision(home_config, true)) << "Home config should be safe";
-  EXPECT_FALSE(checker_->checkCollision(safe_config, true)) << "Arms up should be safe";
+  ASSERT_FALSE(checker_->checkCollision(home_config, true)) << "Home config should be safe";
+  ASSERT_FALSE(checker_->checkCollision(start_config, true)) << "Start config should be safe";
 }
 
-TEST_F(SelfCollisionCheckerTest, ReturnsTrueForCollidingConfigurations) {
+TEST_F(SelfCollisionCheckerTest, givenCollidingConfiguration_thenReturnTrue) {
   // Left arm in bottom plate
   std::vector<double> mount_collision = {
-      0.0, 1.0, 0.0, -2.6, 0.0, 2.5, 0.0,  // Arm 1
-      0.0, 0.0, 0.0, -1.6, 0.0, 2.5, 0.0,  // Arm 2
+      0.0, M_PI_2,  0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,  // Arm 1
+      0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4   // Arm 2
   };
 
   // Arms into another Configuration
   std::vector<double> dual_collision = {
-      -0.45, 0.77, 0.12, -1.38, 0.0,   2.4,  0.52,  // Arm 1
-      0.26,  0.57, 0.03, -1.44, -0.38, 2.62, 1.34   // Arm 2
+      0.0, 0.2, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,  // Arm 1
+      0.0, 0.2, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4   // Arm 2
   };
 
-  EXPECT_TRUE(checker_->checkCollision(mount_collision, true))
+  ASSERT_TRUE(checker_->checkCollision(mount_collision, true))
       << "Left arm should collide into the mount";
-  EXPECT_TRUE(checker_->checkCollision(dual_collision, true))
+  ASSERT_TRUE(checker_->checkCollision(dual_collision, true))
       << "Arms should collide with each other";
+}
+
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return result;
 }

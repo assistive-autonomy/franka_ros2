@@ -27,18 +27,17 @@ CollisionMonitorNode::CollisionMonitorNode(const rclcpp::NodeOptions& options)
     : Node("self_collision_monitor", options) {
   this->declare_parameter("security_margin", 0.045);
   this->declare_parameter("print_collisions", false);
+  this->declare_parameter("robot_description_semantic", "");
 
   collision_pub_ = this->create_publisher<std_msgs::msg::Bool>(
-      "fr3_duo_self_collision_node/collision_detected", 10);
+      "fr3_duo_self_collision_node/collision_detected", 1);
 }
 
-void CollisionMonitorNode::setup_collision_monitor(const std::string& urdf_xml,
-                                                   const std::string& srdf_xml) {
-  urdf_xml_ = urdf_xml;
-  srdf_xml_ = srdf_xml;
-
+void CollisionMonitorNode::setup_collision_monitor(const std::string& robot_description) {
   double security_margin = this->get_parameter("security_margin").as_double();
   print_collisions_ = this->get_parameter("print_collisions").as_bool();
+  std::string srdf_xml = this->get_parameter("robot_description_semantic").as_string();
+  std::string urdf_xml = robot_description;
 
   if (urdf_xml.empty() || srdf_xml.empty()) {
     RCLCPP_ERROR(this->get_logger(),
@@ -53,7 +52,7 @@ void CollisionMonitorNode::setup_collision_monitor(const std::string& urdf_xml,
   // Initialize Collision checker
   try {
     collision_checker_ = std::make_shared<franka_selfcollision::SelfCollisionChecker>(
-        urdf_xml, srdf_xml, security_margin);
+        urdf_xml, srdf_xml, security_margin, this->get_logger(), this->get_clock());
   } catch (const std::exception& e) {
     RCLCPP_ERROR(this->get_logger(), "Failed to load models: %s", e.what());
     throw;
@@ -62,17 +61,17 @@ void CollisionMonitorNode::setup_collision_monitor(const std::string& urdf_xml,
   const std::vector<std::string>& model_joint_names = collision_checker_->getModelJointNames();
   joint_map_.clear();
   size_t index_counter = 0;
-  std::stringstream order_stream;
-  order_stream << "Model Joint Order: [";
+  // std::stringstream order_stream;
+  // order_stream << "Model Joint Order: [";
   for (const auto& name : model_joint_names) {
     if (name == "universe")
       continue;
     joint_map_[name] = index_counter;
-    order_stream << name << (index_counter < model_joint_names.size() - 2 ? ", " : "");
+    // order_stream << name << (index_counter < model_joint_names.size() - 2 ? ", " : "");
     index_counter++;
   }
-  order_stream << "]";
-  RCLCPP_INFO(this->get_logger(), "%s", order_stream.str().c_str());
+  // order_stream << "]";
+  // RCLCPP_INFO(this->get_logger(), "%s", order_stream.str().c_str());
 
   current_joint_positions_.resize(joint_map_.size(), 0.0);
   joint_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
@@ -102,7 +101,7 @@ void CollisionMonitorNode::joint_state_callback(const sensor_msgs::msg::JointSta
 
   if (collision) {
     RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                         "⚠️ COLLISION DETECTED! Robot is in self-collision! ⚠️");
+                         "COLLISION DETECTED! Robot is in self-collision!");
   }
 }
 
@@ -118,16 +117,16 @@ int main(int argc, char** argv) {
   options.arguments({"--ros-args", "--params-file", params_file});
   auto node = std::make_shared<franka_selfcollision::CollisionMonitorNode>(options);
 
-  auto param_client = std::make_shared<rclcpp::AsyncParametersClient>(node, "/controller_manager");
+  auto param_client =
+      std::make_shared<rclcpp::AsyncParametersClient>(node, "robot_state_publisher");
   param_client->wait_for_service();
-  auto future = param_client->get_parameters({"robot_description", "robot_description_semantic"});
+  auto future = param_client->get_parameters({"robot_description"});
   if (rclcpp::spin_until_future_complete(node, future) == rclcpp::FutureReturnCode::SUCCESS) {
     auto results = future.get();
-    std::string urdf = results[0].as_string();
-    std::string srdf = results[1].as_string();
-    node->setup_collision_monitor(urdf, srdf);
+    std::string robot_description = results[0].as_string();
+    node->setup_collision_monitor(robot_description);
   } else {
-    RCLCPP_ERROR(node->get_logger(), "Failed to fetch parameters");
+    RCLCPP_ERROR(node->get_logger(), "Failed to get robot_description parameter.");
     return 1;
   }
 

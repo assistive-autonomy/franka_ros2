@@ -53,28 +53,30 @@ SelfCollisionF3DuoExampleController::state_interface_configuration() const {
 }
 
 controller_interface::return_type SelfCollisionF3DuoExampleController::update(
-    const rclcpp::Time& time,
+    const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
-  if (start_time_.nanoseconds() == 0) {
-    start_time_ = time;
-  }
-
   updateJointStates();
 
-  auto trajectory_time = time - start_time_;
+  auto trajectory_time = this->get_node()->now() - start_time_;
+  auto time_since_last_collision_msg =
+      (this->get_node()->now() - last_collision_msg_time_).seconds();
   bool all_finished = true;
+
+  if (time_since_last_collision_msg > 0.5) {
+    RCLCPP_FATAL(get_node()->get_logger(), "Connection to collision node timed out!");
+    return controller_interface::return_type::ERROR;
+  }
 
   if (phase_ == ControlPhase::MOVE_TO_COLLISION) {
     if (collision_detected_) {
-      RCLCPP_WARN(get_node()->get_logger(), "Collision Detected! Retreating...");
+      RCLCPP_WARN(get_node()->get_logger(), "Retreating...");
 
       phase_ = ControlPhase::RETREAT;
-      start_time_ = time;
+      start_time_ = this->get_node()->now();
 
       for (size_t robot_index = 0; robot_index < robot_types_.size(); ++robot_index) {
-        motion_generators_[robot_index] =
-            std::make_unique<MotionGenerator>(0.2, q_[robot_index], q_home_[robot_index]);
-        dq_filtered_[robot_index].setZero();
+        motion_generators_[robot_index] = std::make_unique<MotionGenerator>(
+            kSpeedMotionGenerators, q_[robot_index], q_start_[robot_index]);
       }
       return controller_interface::return_type::OK;
     }
@@ -98,8 +100,7 @@ controller_interface::return_type SelfCollisionF3DuoExampleController::update(
 
       for (int i = 0; i < num_joints; ++i) {
         size_t cmd_idx = i * robot_types_.size() + robot_index;
-        if (!command_interfaces_[cmd_idx].set_value(
-                tau_d_calculated(i))) {  // tau_d_calculated(i), 0.0
+        if (!command_interfaces_[cmd_idx].set_value(tau_d_calculated(i))) {
           RCLCPP_FATAL(get_node()->get_logger(), "Failed to set command interface value");
           return controller_interface::return_type::ERROR;
         }
@@ -116,15 +117,14 @@ controller_interface::return_type SelfCollisionF3DuoExampleController::update(
   }
 
   if (all_finished) {
-    if (phase_ == ControlPhase::MOVE_TO_HOME) {
-      RCLCPP_INFO(get_node()->get_logger(), "Home Reached. Move to Collision Configuration.");
+    if (phase_ == ControlPhase::MOVE_TO_START) {
+      RCLCPP_INFO(get_node()->get_logger(), "Start Reached. Move to Collision Configuration.");
       phase_ = ControlPhase::MOVE_TO_COLLISION;
-      start_time_ = time;
+      start_time_ = this->get_node()->now();
 
       for (size_t robot_index = 0; robot_index < robot_types_.size(); ++robot_index) {
-        motion_generators_[robot_index] =
-            std::make_unique<MotionGenerator>(0.2, q_home_[robot_index], q_collision_[robot_index]);
-        dq_filtered_[robot_index].setZero();
+        motion_generators_[robot_index] = std::make_unique<MotionGenerator>(
+            kSpeedMotionGenerators, q_start_[robot_index], q_collision_[robot_index]);
       }
     } else if (phase_ == ControlPhase::RETREAT || phase_ == ControlPhase::MOVE_TO_COLLISION) {
       if (phase_ != ControlPhase::FINISHED) {
@@ -150,14 +150,13 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_init() {
         {0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,    // Robot 1
          0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4});  // Robot 2
 
-    auto_declare<std::vector<double>>("collision_joint_configuration",
-                                      {-0.45, 0.77, 0.12, -1.38, 0.0, 2.4, 0.52,     // Robot 1
-                                       0.26, 0.57, 0.0, -1.44, -0.38, 2.62, 1.34});  // Robot 2
+    auto_declare<std::vector<double>>(
+        "collision_joint_configuration",
+        {0.0, 0.2, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,    // Robot 1
+         0.0, 0.2, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4});  // Robot 2
 
-    // auto_declare<std::vector<double>>(
-    //     "collision_joint_configuration",
-    //     {0.0, 0.0, -M_PI_4, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4,  // Robot 1
-    //      0.26, 0.57, 0.0, -1.44, -0.38, 2.62, 1.34});            // Robot 2
+    auto_declare<std::string>("collision_topic", "/fr3_duo_self_collision_node/collision_detected");
+
   } catch (const std::exception& e) {
     fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
     return CallbackReturn::ERROR;
@@ -177,22 +176,26 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_configure(
   auto collision_joint_configuration_vector =
       get_node()->get_parameter("collision_joint_configuration").as_double_array();
 
-  q_home_.resize(robot_types_.size(), Vector7d::Zero());
+  q_start_.resize(robot_types_.size(), Vector7d::Zero());
   q_collision_.resize(robot_types_.size(), Vector7d::Zero());
   dq_filtered_.resize(robot_types_.size(), Vector7d::Zero());
 
   for (size_t robot_index = 0; robot_index < robot_types_.size(); robot_index++) {
     size_t offset = robot_index * num_joints;
-    q_home_[robot_index] =
+    q_start_[robot_index] =
         Eigen::Map<const Vector7d>(start_joint_configuration_vector.data() + offset);
 
     q_collision_[robot_index] =
         Eigen::Map<const Vector7d>(collision_joint_configuration_vector.data() + offset);
   }
 
+  collision_topic_ = get_node()->get_parameter("collision_topic").as_string();
+
   collision_sub_ = get_node()->create_subscription<std_msgs::msg::Bool>(
-      "/fr3_duo_self_collision_node/collision_detected", 10,
-      [this](const std_msgs::msg::Bool::SharedPtr msg) { this->collision_detected_ = msg->data; });
+      collision_topic_, 1, [this](const std_msgs::msg::Bool::SharedPtr msg) {
+        this->collision_detected_ = msg->data;
+        this->last_collision_msg_time_ = this->get_node()->now();
+      });
 
   if (k_gains.empty()) {
     RCLCPP_FATAL(get_node()->get_logger(), "k_gains parameter not set");
@@ -237,14 +240,21 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_activate(
   updateJointStates();
   motion_generators_.clear();
   for (size_t robot_index = 0; robot_index < robot_types_.size(); ++robot_index) {
-    motion_generators_.push_back(
-        std::make_unique<MotionGenerator>(0.2, q_[robot_index], q_home_[robot_index]));
+    motion_generators_.push_back(std::make_unique<MotionGenerator>(
+        kSpeedMotionGenerators, q_[robot_index], q_start_[robot_index]));
 
     dq_filtered_[robot_index].setZero();
   }
 
-  phase_ = ControlPhase::MOVE_TO_HOME;
-  start_time_ = rclcpp::Time(0);
+  if (get_node()->count_publishers(collision_topic_) == 0) {
+    RCLCPP_ERROR(get_node()->get_logger(), "Self Collision Node not detected on %s",
+                 collision_topic_.c_str());
+    return CallbackReturn::FAILURE;
+  }
+
+  phase_ = ControlPhase::MOVE_TO_START;
+  start_time_ = this->get_node()->now();
+  last_collision_msg_time_ = this->get_node()->now();
   collision_detected_ = false;
 
   return CallbackReturn::SUCCESS;

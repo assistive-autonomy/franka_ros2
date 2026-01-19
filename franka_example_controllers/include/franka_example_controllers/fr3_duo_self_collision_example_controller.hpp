@@ -28,7 +28,7 @@ using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface
 
 namespace franka_example_controllers {
 
-enum class ControlPhase { MOVE_TO_HOME, MOVE_TO_COLLISION, RETREAT, FINISHED };
+enum class ControlPhase { MOVE_TO_START, MOVE_TO_COLLISION, RETREAT, FINISHED };
 
 /// The move to start example controller moves the robot into default pose.
 class SelfCollisionF3DuoExampleController : public controller_interface::ControllerInterface {
@@ -53,7 +53,7 @@ class SelfCollisionF3DuoExampleController : public controller_interface::Control
   std::vector<Vector7d> dq_;
   std::vector<Vector7d> dq_filtered_;
 
-  std::vector<Vector7d> q_home_;
+  std::vector<Vector7d> q_start_;
   std::vector<Vector7d> q_collision_;
 
   Vector7d k_gains_;
@@ -63,8 +63,12 @@ class SelfCollisionF3DuoExampleController : public controller_interface::Control
   std::vector<std::unique_ptr<MotionGenerator>> motion_generators_;
 
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr collision_sub_;
+  rclcpp::Time last_collision_msg_time_;
   bool collision_detected_ = false;
-  ControlPhase phase_ = ControlPhase::MOVE_TO_HOME;
+  ControlPhase phase_ = ControlPhase::MOVE_TO_START;
+
+  const double kSpeedMotionGenerators = 0.2;
+  std::string collision_topic_;
 
   void updateJointStates();
 };

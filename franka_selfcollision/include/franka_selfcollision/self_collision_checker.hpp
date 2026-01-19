@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -35,7 +36,9 @@ class SelfCollisionChecker {
    */
   SelfCollisionChecker(const std::string& urdf_xml,
                        const std::string& srdf_xml,
-                       double security_margin = 0.045);
+                       double security_margin,
+                       rclcpp::Logger logger,
+                       rclcpp::Clock::SharedPtr clock);
 
   /**
    * @brief Checks if the given joint configuration results in a self-collision.
@@ -60,6 +63,9 @@ class SelfCollisionChecker {
   pinocchio::GeometryModel geom_model_;
   std::shared_ptr<pinocchio::Data> data_;
   std::shared_ptr<pinocchio::GeometryData> geom_data_;
+
+  rclcpp::Logger logger_;
+  rclcpp::Clock::SharedPtr clock_;
 };
 
 }  // namespace franka_selfcollision

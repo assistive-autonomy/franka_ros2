@@ -32,15 +32,13 @@ class CollisionMonitorNode : public rclcpp::Node {
   explicit CollisionMonitorNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
   /**
-   * Initializes the collision checker using provided URDF and SRDF strings.
+   * Initializes the collision checker using provided URDF.
    */
-  void setup_collision_monitor(const std::string& urdf_xml, const std::string& srdf_xml);
+  void setup_collision_monitor(const std::string& robot_description);
 
  private:
   void joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
 
-  std::string urdf_xml_;
-  std::string srdf_xml_;
   bool print_collisions_{false};
 
   std::shared_ptr<franka_selfcollision::SelfCollisionChecker> collision_checker_;

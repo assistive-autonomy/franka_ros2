@@ -64,7 +64,6 @@ in a periodic, compliant movement. Only the torque (effort) command interface is
 .. code-block:: shell
 
     ros2 launch franka_bringup fr3_duo.launch.py \
-        robot_config_file:=fr3_duo.config.yaml \
         controller_name:=fr3_duo_joint_impedance_example_controller
 
 .. note::
@@ -148,20 +147,19 @@ This example uses the CartesianElbow interface to send periodic elbow commands t
 
     ros2 launch franka_bringup example.launch.py controller_names:=elbow_example_controller
 
-SelfCollision FR3-Duo Example
+Self Collision FR3 Duo Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This example is designed for the FR3 Duo (dual-arm) setup. It uses the self-collision package
-to check whether the current joint configuration of both arms results in a collision.
+This example is designed for the FR3 Duo (dual-arm) setup. It moves the 2 arms through the following phases:
+
+1.  **Move to Start:** Both arms move to a initial configuration.
+2.  **Move to Collision:** The arms begin a trajectory towards a collision configuration.
+3.  **Reflex:** Immediately upon collision detection, the controller triggers a retreat trajectory to return the arms to the start position.
 
 .. code-block:: shell
 
-    ros2 llaunch franka_bringup fr3_duo.launch.py \
-        robot_config_file:=fr3_duo.config.yaml \
-        controller_name:=self_collision_controller
+    ros2 launch franka_bringup fr3_duo.launch.py \
+        controller_name:=fr3_duo_self_collision_example_controller
 
-.. note::
-
-    The controller can also be activated using the ``check_selfcollision`` parameter in the ``fr3_duo.config.yaml``
 
 Writing Custom Controllers
 ---------------------------

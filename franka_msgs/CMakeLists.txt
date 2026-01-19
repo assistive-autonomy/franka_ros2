@@ -17,7 +17,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Homing.action"
   "action/Move.action"
   "action/PTPMotion.action"
-  "action/SelfCollision.action"
 
   "msg/CollisionIndicators.msg"
   "msg/Elbow.msg"
@@ -33,7 +32,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetJointStiffness.srv"
   "srv/SetStiffnessFrame.srv"
   "srv/SetLoad.srv"
-  "srv/SelfCollision.srv"
   DEPENDENCIES std_msgs geometry_msgs sensor_msgs builtin_interfaces
 )
 
