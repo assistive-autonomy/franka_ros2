@@ -23,6 +23,7 @@
 #include <Eigen/Eigen>
 
 namespace franka_example_controllers {
+
 controller_interface::InterfaceConfiguration
 JointImpedanceExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
@@ -31,7 +32,6 @@ JointImpedanceExampleController::command_interface_configuration() const {
   for (int i = 1; i <= num_joints; ++i) {
     config.names.push_back(robot_type_ + "_joint" + std::to_string(i) + "/effort");
   }
-
   return config;
 }
 
