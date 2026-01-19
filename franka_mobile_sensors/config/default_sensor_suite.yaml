@@ -5,17 +5,17 @@ description: "Standard 4-camera - 2-lidar configuration for normal operations"
 cameras: 
   - name: "camera_front"
     namespace: "camera_front" 
-    usb_port: "2-2.1.1"
+    usb_port: "2-1.1.1"
     device_profile: "franka_mobile_d455"
 
   - name: "camera_rear"
     namespace: "camera_rear"
-    usb_port: "2-2.1.3"
+    usb_port: "2-1.1.3"
     device_profile: "franka_mobile_d455"
     
   - name: "camera_left"
     namespace: "camera_left"
-    usb_port: "2-2.1.2"
+    usb_port: "2-1.1.2"
     device_profile: "franka_mobile_d455"
     
   - name: "camera_right"
