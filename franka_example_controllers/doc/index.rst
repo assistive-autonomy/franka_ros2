@@ -149,11 +149,8 @@ This example uses the CartesianElbow interface to send periodic elbow commands t
 
 Self Collision FR3 Duo Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This example is designed for the FR3 Duo (dual-arm) setup. It moves the 2 arms through the following phases:
-
-1.  **Move to Start:** Both arms move to a initial configuration.
-2.  **Move to Collision:** The arms begin a trajectory towards a collision configuration.
-3.  **Reflex:** Immediately upon collision detection, the controller triggers a retreat trajectory to return the arms to the start position.
+This example is designed for the FR3 Duo (dual-arm) setup. First they move to a start configuration, then they move toward a collision configuration, 
+and if a collision is detected they immediately retreat back to the start position.
 
 .. code-block:: shell
 

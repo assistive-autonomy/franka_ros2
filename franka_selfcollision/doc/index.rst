@@ -5,17 +5,19 @@ This package contains the library and the service for the FR3_duo self-collision
 
 .. important::
 
-    Minimum necessary `franka_description` version is 2.3.0.
+    Minimum necessary `franka_description` version is 2.5.0.
     You can clone franka_description package from https://github.com/frankarobotics/franka_description.
 
 Functionality
 -------------
 
-The monitoring node is spawned by ``fr3_duo.launch.py`` in ``franka_bringup``.
-The node continuously monitors the robot's joint states to check for self-collisions between the FR3_duo links. It performs two main actions upon detecting a collision (or violation of the security margin):
+This monitoring node is spawned by ``fr3_duo.launch.py`` in ``franka_bringup`` if the ``check_selfcollision`` argument is enabled.
+
+The node continuously monitors the robot's joint states to check for self-collisions between the FR3_duo links.
+It performs two main actions upon detecting a collision (or violation of the security margin):
 
 1. **Publishes Status:** Sends a boolean ``true`` to the topic ``/fr3_duo_self_collision_node/collision_detected``.
-2. **Logs Warning:** Prints the specific colliding link pairs to the console (throttled to 1Hz to prevent spam).
+2. **Logs Warning:** Prints the specific colliding link pairs to the console if enabled (throttled to 1Hz to prevent spam).
 
 Configuration
 -------------
@@ -28,4 +30,4 @@ Parameters are defined in ``config/self_collision_node.yaml``:
 Usage
 -----
 
-The self-collision node is automatically started when you launch the robot.
+The self-collision node is automatically started when you launch the robot with ``check_selfcollision`` set to true. 

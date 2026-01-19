@@ -61,17 +61,12 @@ void CollisionMonitorNode::setup_collision_monitor(const std::string& robot_desc
   const std::vector<std::string>& model_joint_names = collision_checker_->getModelJointNames();
   joint_map_.clear();
   size_t index_counter = 0;
-  // std::stringstream order_stream;
-  // order_stream << "Model Joint Order: [";
   for (const auto& name : model_joint_names) {
     if (name == "universe")
       continue;
     joint_map_[name] = index_counter;
-    // order_stream << name << (index_counter < model_joint_names.size() - 2 ? ", " : "");
     index_counter++;
   }
-  // order_stream << "]";
-  // RCLCPP_INFO(this->get_logger(), "%s", order_stream.str().c_str());
 
   current_joint_positions_.resize(joint_map_.size(), 0.0);
   joint_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(

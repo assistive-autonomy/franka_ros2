@@ -32,11 +32,16 @@ class CollisionMonitorNode : public rclcpp::Node {
   explicit CollisionMonitorNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
   /**
-   * Initializes the collision checker using provided URDF.
+   * @brief Initializes the underlying collision checker.
+   * @param robot_description The XML string content of the robot's URDF.
    */
   void setup_collision_monitor(const std::string& robot_description);
 
  private:
+  /**
+   * @brief Uses incoming joint data to execute collision check and broadcasts collision status.
+   * @param msg The incoming joint state message containing names and positions.
+   */
   void joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   bool print_collisions_{false};

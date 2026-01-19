@@ -15,7 +15,7 @@ Requires libfranka >= 0.19.0 and franka_description >= 2.3.0 requires ROS 2 Jazz
 * feat: support dual arm fr3 setup only with torque command interface using is_async from ros2_control
 * chore: removed the custom controller manager from franka_ros2 and using the ros2_control controller manager instead
 * chore: added custom hardware interface and realtime tools forked from the ros2_control repository with the passing the manage overrun feature
-* feat: Added a selfcollision package and controller for the fr3_duo 
+* feat: Added a selfcollision package and example controller for the fr3_duo 
 
 v3.1.1 (2025-11-10)
 -------------------

@@ -33,6 +33,8 @@ class SelfCollisionChecker {
    * @param urdf_xml XML of the robots URDF file.
    * @param srdf_xml XML of the robots SRDF file (for disabling allowable collisions).
    * @param security_margin Safety buffer in meters (default 0.045).
+   * @param logger ROS logger for reporting.
+   * @param clock ROS clock for throttling logs if necessary.
    */
   SelfCollisionChecker(const std::string& urdf_xml,
                        const std::string& srdf_xml,
@@ -51,11 +53,22 @@ class SelfCollisionChecker {
 
   /**
    * @brief Eigen function for faster checking.
+   * @param q Eigen vector reference containing the joint positions.
+   * @param print_collisions If true, the names of colliding link pairs are printed.
+   * @return true if a collision is detected, false otherwise.
    */
   bool checkCollisions(const Eigen::Ref<const Eigen::VectorXd>& q, bool print_collisions = false);
 
+  /**
+   * @brief Gets the number of Degrees of Freedom (DoF) of the loaded model.
+   * @return Integer representing the number of joints.
+   */
   int getDoF() const { return model_.nq; }
 
+  /**
+   * @brief Retrieves the list of joint names from the loaded model.
+   * @return A vector of strings containing joint names in order.
+   */
   const std::vector<std::string>& getModelJointNames() const { return model_.names; }
 
  private:

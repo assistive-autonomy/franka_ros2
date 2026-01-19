@@ -64,8 +64,8 @@ class SelfCollisionF3DuoExampleController : public controller_interface::Control
 
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr collision_sub_;
   rclcpp::Time last_collision_msg_time_;
-  bool collision_detected_ = false;
-  ControlPhase phase_ = ControlPhase::MOVE_TO_START;
+  bool collision_detected_;
+  ControlPhase phase_;
 
   const double kSpeedMotionGenerators = 0.2;
   std::string collision_topic_;
