@@ -16,6 +16,11 @@ Compatibility Matrix for Jazzy:
      - Franka Description Version
      - Ubuntu Version
 
+   * - v3.2.0
+      - >= 0.19.0
+      - >= 2.3.0
+      - 24.04
+
    * - v3.1.1
      - >= 0.18.0
      - >= 2.0.0
@@ -48,6 +53,11 @@ Compatibility Matrix for Humble:
      - libfranka Version
      - Franka Description Version
      - Ubuntu Version
+
+   * - v2.2.0
+     - >= 0.19.0
+     - >= 1.3.0 < 2.0.0
+     - 22.04 
 
    * - v2.0.2
      - >= 0.15.0 < 0.18.0
