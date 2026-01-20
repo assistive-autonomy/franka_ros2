@@ -9,7 +9,7 @@
 # The franka_robot_state_broadcaster is disabled for duo setups as it's not supported.
 
 FR3_DUO:
-  robot_types: "['fr3','fr3']"  # Types of the robot arms (e.g., fr3) Currently only fr3 is supported.
+  robot_types: "['fr3v2','fr3v2']"  # Types of the robot arms (e.g., fr3) Currently only fr3 is supported.
   arm_prefixes: "['left','right']"  # Prefixes for the arms (used to identify each arm)
   robot_ips: "['172.16.0.6','172.16.0.5']"  # IP addresses of the robots
   load_gripper: "false"  # Enable Franka Gripper ("true" or "false") NOTE: Currently not supported.

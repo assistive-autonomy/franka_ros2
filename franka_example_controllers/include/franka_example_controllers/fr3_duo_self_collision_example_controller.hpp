@@ -31,7 +31,7 @@ namespace franka_example_controllers {
 enum class ControlPhase { MOVE_TO_START, MOVE_TO_COLLISION, RETREAT, FINISHED };
 
 /// The move to start example controller moves the robot into default pose.
-class SelfCollisionF3DuoExampleController : public controller_interface::ControllerInterface {
+class SelfCollisionFR3DuoExampleController : public controller_interface::ControllerInterface {
  public:
   using Vector7d = Eigen::Matrix<double, 7, 1>;
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()

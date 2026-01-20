@@ -84,7 +84,7 @@
         </description>
     </class>
     <class name="franka_example_controllers/Fr3DuoSelfCollisionExampleController"
-           type="franka_example_controllers::SelfCollisionF3DuoExampleController" base_class_type="controller_interface::ControllerInterface">
+           type="franka_example_controllers::SelfCollisionFR3DuoExampleController" base_class_type="controller_interface::ControllerInterface">
         <description>
             The self collision FR3 duo example controller moves the robot arms from a start position into a collision configuration and back.
         </description>

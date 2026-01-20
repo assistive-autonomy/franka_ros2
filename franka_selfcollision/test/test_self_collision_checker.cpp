@@ -41,9 +41,6 @@ class SelfCollisionCheckerTest : public ::testing::Test {
       checker_ = std::make_unique<franka_selfcollision::SelfCollisionChecker>(
           urdf_xml, srdf_xml, kSecurityMargin, rclcpp::get_logger("test_logger"), clock);
 
-      auto dof = checker_->getDoF();
-      RCLCPP_INFO(rclcpp::get_logger("test_logger"), "System loaded with %u DoF", dof);
-
     } catch (const std::exception& e) {
       FAIL() << "Setup failed: " << e.what();
     }

@@ -60,12 +60,6 @@ class SelfCollisionChecker {
   bool checkCollisions(const Eigen::VectorXd& q, bool print_collisions = false);
 
   /**
-   * @brief Gets the number of Degrees of Freedom (DoF) of the loaded model.
-   * @return Integer representing the number of joints.
-   */
-  int getDoF() const { return model_.nq; }
-
-  /**
    * @brief Retrieves the list of joint names from the loaded model.
    * @return A vector of strings containing joint names in order.
    */

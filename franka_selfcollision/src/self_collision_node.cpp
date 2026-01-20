@@ -62,7 +62,7 @@ void CollisionMonitorNode::setup_collision_monitor(const std::string& robot_desc
   joint_map_.clear();
   size_t index_counter = 0;
   for (const auto& name : model_joint_names) {
-    if (name == "universe")
+    if (name == kBaseLink)
       continue;
     joint_map_[name] = index_counter;
     index_counter++;

@@ -147,14 +147,13 @@ def generate_robot_nodes(context):
         arm_prefixes_list)
     validate_arm_prefixes_unique(arm_prefixes_list)
 
-    # Build URDF path based on the first robot type
-    base_robot_type = robot_types_list[0]
+    # Build URDF path
     urdf_path = PathJoinSubstitution(
         [
             FindPackageShare('franka_description'),
             'robots',
-            f'{base_robot_type}_duo',
-            f'{base_robot_type}_duo.urdf.xacro',
+            'fr3_duo',
+            'fr3_duo.urdf.xacro',
         ]
     ).perform(context)
 
@@ -173,13 +172,13 @@ def generate_robot_nodes(context):
         },
     ).toprettyxml(indent='  ')
 
-    # Build SRDF path based on the first robot type
+    # Build SRDF path
     srdf_path = PathJoinSubstitution(
         [
             FindPackageShare('franka_description'),
             'robots',
-            f'{base_robot_type}_duo',
-            f'{base_robot_type}_duo.srdf.xacro',
+            'fr3_duo',
+            'fr3_duo.srdf.xacro',
         ]
     ).perform(context)
 

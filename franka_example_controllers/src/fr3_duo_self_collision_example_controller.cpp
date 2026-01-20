@@ -24,7 +24,7 @@
 namespace franka_example_controllers {
 
 controller_interface::InterfaceConfiguration
-SelfCollisionF3DuoExampleController::command_interface_configuration() const {
+SelfCollisionFR3DuoExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
@@ -38,7 +38,7 @@ SelfCollisionF3DuoExampleController::command_interface_configuration() const {
 }
 
 controller_interface::InterfaceConfiguration
-SelfCollisionF3DuoExampleController::state_interface_configuration() const {
+SelfCollisionFR3DuoExampleController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   for (int i = 1; i <= num_joints; ++i) {
@@ -52,7 +52,7 @@ SelfCollisionF3DuoExampleController::state_interface_configuration() const {
   return config;
 }
 
-controller_interface::return_type SelfCollisionF3DuoExampleController::update(
+controller_interface::return_type SelfCollisionFR3DuoExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
   updateJointStates();
@@ -90,7 +90,7 @@ controller_interface::return_type SelfCollisionF3DuoExampleController::update(
 
     all_finished &= finished;
 
-    if (not finished) {
+    if (!finished) {
       const double kAlpha = 0.99;
       dq_filtered_[robot_index] =
           (1 - kAlpha) * dq_filtered_[robot_index] + kAlpha * dq_[robot_index];
@@ -138,7 +138,7 @@ controller_interface::return_type SelfCollisionF3DuoExampleController::update(
   return controller_interface::return_type::OK;
 }
 
-CallbackReturn SelfCollisionF3DuoExampleController::on_init() {
+CallbackReturn SelfCollisionFR3DuoExampleController::on_init() {
   try {
     auto_declare<bool>("process_finished", false);
     auto_declare<std::vector<std::string>>("robot_types", std::vector<std::string>{});
@@ -164,7 +164,7 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_init() {
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn SelfCollisionF3DuoExampleController::on_configure(
+CallbackReturn SelfCollisionFR3DuoExampleController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
   auto k_gains = get_node()->get_parameter("k_gains").as_double_array();
@@ -232,7 +232,7 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_configure(
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn SelfCollisionF3DuoExampleController::on_activate(
+CallbackReturn SelfCollisionFR3DuoExampleController::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   q_.resize(robot_types_.size(), Vector7d::Zero());
   dq_.resize(robot_types_.size(), Vector7d::Zero());
@@ -260,7 +260,7 @@ CallbackReturn SelfCollisionF3DuoExampleController::on_activate(
   return CallbackReturn::SUCCESS;
 }
 
-void SelfCollisionF3DuoExampleController::updateJointStates() {
+void SelfCollisionFR3DuoExampleController::updateJointStates() {
   for (size_t robot_index = 0; robot_index < robot_types_.size(); robot_index++) {
     for (auto i = 0; i < num_joints; ++i) {
       // Joint i, robot robot_index
@@ -292,5 +292,5 @@ void SelfCollisionF3DuoExampleController::updateJointStates() {
 }  // namespace franka_example_controllers
 #include "pluginlib/class_list_macros.hpp"
 // NOLINTNEXTLINE
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::SelfCollisionF3DuoExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::SelfCollisionFR3DuoExampleController,
                        controller_interface::ControllerInterface)

@@ -157,6 +157,10 @@ and if a collision is detected they immediately retreat back to the start positi
     ros2 launch franka_bringup fr3_duo.launch.py \
         controller_name:=fr3_duo_self_collision_example_controller
 
+.. important::
+
+    You must set ``check_selfcollision: true`` in ``fr3_duo.config.yaml`` before running this command.
+
 
 Writing Custom Controllers
 ---------------------------
