@@ -7,6 +7,7 @@ Requires libfranka >= 0.19.0 and franka_description >= 2.4.0 requires ROS 2 Jazz
 
 * feat: Added a selfcollision package and example controller for the fr3_duo 
 * feat: Updated `franka_description` dependency to 2.4.0
+* feat: integration_launch_testing: added smoke tests for the example controllers
 
 v3.2.0 (2026-01-15)
 -------------------
