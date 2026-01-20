@@ -15,7 +15,6 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(Franka 0.19.0 REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(rclcpp REQUIRED)
