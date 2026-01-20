@@ -148,7 +148,7 @@ This example uses the CartesianElbow interface to send periodic elbow commands t
     ros2 launch franka_bringup example.launch.py controller_names:=elbow_example_controller
 
 Self Collision FR3 Duo Example
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This example is designed for the FR3 Duo (dual-arm) setup. First they move to a start configuration, then they move toward a collision configuration, 
 and if a collision is detected they immediately retreat back to the start position.
 

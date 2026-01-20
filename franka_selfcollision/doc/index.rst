@@ -1,5 +1,5 @@
 franka_selfcollision
-==============
+====================
 
 This package contains the library and the service for the FR3_duo self-collision check.
 
