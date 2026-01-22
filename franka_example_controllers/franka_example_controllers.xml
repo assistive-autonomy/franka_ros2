@@ -17,6 +17,12 @@
             The joint impedance FR3 duo example controller moves joint 4 and 5 in a very compliant periodic movement for dual-arm setups.
         </description>
     </class>
+    <class name="franka_example_controllers/MobileFr3DuoJointImpedanceExampleController"
+           type="franka_example_controllers::MobileFr3DuoJointImpedanceExampleController" base_class_type="controller_interface::ControllerInterface">
+        <description>
+            The mobile FR3 duo joint impedance example controller combines dual-arm joint impedance control with mobile base cartesian velocity control.
+        </description>
+    </class>
     <class name="franka_example_controllers/JointVelocityExampleController"
            type="franka_example_controllers::JointVelocityExampleController" base_class_type="controller_interface::ControllerInterface">
         <description>

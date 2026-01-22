@@ -136,6 +136,79 @@ You can also specify just the config filename, and the launch file will automati
     The FR3 Duo setup supports only **one controller** at a time using the ``controller_name`` parameter (singular),
     unlike ``example.launch.py`` which supports multiple controllers with ``controller_names`` (plural).
 
+Mobile FR3 Duo
+------------------------
+
+The ``franka_bringup`` package supports launching a Mobile FR3 Duo setup (TMRv0.2 mobile base with dual FR3 arms)
+using the ``mobile_fr3_duo.launch.py`` launch file with the ``mobile_fr3_duo.config.yaml`` configuration file.
+
+.. important::
+
+    The Mobile FR3 Duo setup combines:
+    
+    * **Dual FR3 arms**: Controlled via joint impedance using the torque (effort) command interface
+    * **Mobile base**: Controlled via cartesian velocity using GPIO interfaces
+    
+    Like the FR3 Duo, this setup currently only supports the **torque (effort) command interface** for the arms.
+
+Configuration
+^^^^^^^^^^^^^
+
+The mobile dual-arm configuration is defined in ``franka_bringup/config/mobile_fr3_duo.config.yaml``. The key parameters are:
+
+* ``robot_types``: Types of all robot components as a string list (e.g., ``"['tmrv0_2','fr3','fr3']"``)
+  
+  * First entry: Mobile base type (``tmrv0_2``)
+  * Remaining entries: Arm types (``fr3``)
+
+* ``arm_prefixes``: Prefixes for all robot components (e.g., ``"['','left','right']"``)
+  
+  * First entry: Empty string ``''`` for mobile base (no prefix)
+  * Remaining entries: Unique prefixes for each arm
+
+* ``robot_ips``: IP addresses of all robots as a string list (e.g., ``"['172.16.0.1','172.16.0.5','172.16.0.6']"``)
+  
+  * First entry: Mobile base IP address
+  * Remaining entries: Arm IP addresses
+
+.. note::
+
+    All three arrays (``robot_types``, ``robot_ips``, ``arm_prefixes``) must have exactly **3 entries**
+    (mobile base + 2 arms), and arm prefixes must be unique.
+
+Launching the Mobile FR3 Duo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To launch the mobile dual-arm setup with the joint impedance controller using a config file:
+
+.. code-block:: shell
+
+    ros2 launch franka_bringup mobile_fr3_duo.launch.py \
+        robot_config_file:=mobile_fr3_duo.config.yaml \
+        controller_name:=mobile_fr3_duo_joint_impedance_example_controller
+
+You can also specify just the config filename, and the launch file will automatically look in the
+``franka_bringup/config/`` directory.
+
+The mobile base velocity control is integrated within the controller and can be enabled/disabled
+via the ``enable_mobile_base`` parameter in ``controllers.yaml``.
+
+.. note::
+
+    The Mobile FR3 Duo setup supports only **one controller** at a time using the ``controller_name`` parameter (singular).
+
+System Architecture
+^^^^^^^^^^^^^^^^^^^
+
+The mobile dual-arm system has the following kinematic structure:
+
+.. code-block:: text
+
+    base → base_link (TMRv0.2) → franka_spine → franka_spine_support (prismatic) 
+         → mount_link → left/right FR3 arms
+
+The Franka spine includes a **prismatic joint** for vertical adjustment (0-0.85m range).
+
 Non-realtime robot parameter setting
 ------------------------------------
 

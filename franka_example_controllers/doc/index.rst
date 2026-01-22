@@ -70,6 +70,46 @@ in a periodic, compliant movement. Only the torque (effort) command interface is
 
     Use ``controller_name`` (singular) for ``fr3_duo.launch.py``, not ``controller_names`` (plural).
 
+Joint Impedance Mobile FR3 Duo Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This example is designed for the Mobile FR3 Duo setup (TMRv0.2 mobile base with dual FR3 arms).
+It combines:
+
+* **Dual FR3 arms**: Joint impedance control moving joints 4 and 5 in periodic, compliant movement
+* **Mobile base**: Cartesian velocity control for periodic forward/backward motion
+
+The controller integrates both arm and mobile base control in a single unified controller.
+
+.. code-block:: shell
+
+    ros2 launch franka_bringup mobile_fr3_duo.launch.py \
+        robot_config_file:=mobile_fr3_duo.config.yaml \
+        controller_name:=mobile_fr3_duo_joint_impedance_example_controller
+
+**Configuration:**
+
+The mobile base velocity control can be enabled/disabled via the ``enable_mobile_base`` parameter 
+in ``controllers.yaml``:
+
+.. code-block:: yaml
+
+    mobile_fr3_duo_joint_impedance_example_controller:
+      ros__parameters:
+        enable_mobile_base: true  # Set to false to disable mobile base motion
+
+**System Architecture:**
+
+The Mobile FR3 Duo system consists of three hardware components:
+
+* TMRv0.2 mobile base (controlled via GPIO cartesian velocity interfaces: ``vx``, ``vy``, ``vz``, ``wx``, ``wy``, ``wz``)
+* Left FR3 arm (torque/effort interface)
+* Right FR3 arm (torque/effort interface)
+
+.. note::
+
+    Use ``controller_name`` (singular) for ``mobile_fr3_duo.launch.py``, not ``controller_names`` (plural).
+
 Joint Impedance With IK Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

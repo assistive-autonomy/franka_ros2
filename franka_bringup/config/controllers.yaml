@@ -208,3 +208,31 @@
         - 10.0
         - 10.0
         - 5.0
+
+/**:
+  mobile_fr3_duo_joint_impedance_example_controller:
+    ros__parameters:
+      update_rate: 1000
+      k_gains:
+        - 24.0
+        - 24.0
+        - 24.0
+        - 24.0
+        - 10.0
+        - 6.0
+        - 2.0
+      d_gains:
+        - 2.0
+        - 2.0
+        - 2.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 0.5
+      robot_types:  # Only arm types (fr3), not mobile base
+        - "fr3"
+        - "fr3"
+      arm_prefixes:  # Only arm prefixes (left, right), not mobile base
+        - "left"
+        - "right"
+      enable_mobile_base: true

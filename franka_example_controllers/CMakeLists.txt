@@ -47,6 +47,7 @@ add_library(
         src/joint_impedance_with_ik_example_controller.cpp
         src/joint_position_example_controller.cpp
         src/joint_velocity_example_controller.cpp
+        src/mobile_fr3_duo_joint_impedance_example_controller.cpp
         src/model_example_controller.cpp
         src/motion_generator.cpp
         src/move_to_start_example_controller.cpp
