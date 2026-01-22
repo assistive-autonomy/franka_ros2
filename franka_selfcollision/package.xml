@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>franka_selfcollision</name>
-  <version>3.1.0</version>
+  <version>3.2.0</version>
   <description>This package implements the self collision checking for FR3 Duo in ROS2</description>
   <maintainer email="support@franka.de">Franka Robotics GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -19,10 +19,10 @@
   <test_depend>ament_cmake_copyright</test_depend>
   <test_depend>ament_cmake_cppcheck</test_depend>
   <test_depend>ament_cmake_flake8</test_depend>
+  <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ament_cmake_lint_cmake</test_depend>
   <test_depend>ament_cmake_pep257</test_depend>
   <test_depend>ament_cmake_xmllint</test_depend>
-  <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ros2_control_test_assets</test_depend>
 
   <export>
