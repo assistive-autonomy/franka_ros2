@@ -1,4 +1,4 @@
-#  Copyright (c) 2025 Franka Robotics GmbH
+#  Copyright (c) 2026 Franka Robotics GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #                   provided (e.g., 'fr3_duo.config.yaml'), it will be
 #                   looked up in franka_bringup/config/ directory.
 #                   If provided, robot_ips, robot_types, and arm_prefixes
-#                   will be read from this file. (default: '')
+#                   will be read from this file. (default: 'fr3_duo.config.yaml')
 # controller_name: Controller name to spawn (required). Only one controller is
 #                 supported for duo setups.
 # robot_types: Types of the robot arms as a string list (e.g., "['fr3','fr3']")
@@ -33,6 +33,8 @@
 # is_async: Use async hardware interface (default: 'true')
 # joint_state_rate: Rate for joint state publishing in Hz (default: '30')
 # namespace: Namespace for the robot (default: '')
+# use_rviz: Launch RViz for the robot (default: 'true')
+# check_selfcollision: Launch self_collision_node for the robot (default: 'false')
 # thread_priority: Thread priority for the hardware interface (default: '50')
 #
 # The fr3_duo.launch.py launch file provides a robust interface for launching
@@ -42,7 +44,6 @@
 # Usage examples:
 # 1. Launch with config file and controller:
 #    ros2 launch franka_bringup fr3_duo.launch.py \
-#      robot_config_file:=fr3_duo.config.yaml \
 #      controller_name:=fr3_duo_joint_impedance_example_controller
 #
 # 2. Launch with parameters:
@@ -128,6 +129,8 @@ def generate_robot_nodes(context):
     load_gripper_str = str(config.get('load_gripper', 'false'))
     namespace = str(config.get('namespace', ''))
     joint_state_rate = int(config.get('joint_state_rate', 30))
+    use_rviz = str(config.get('use_rviz', 'true')).lower() == 'true'
+    check_selfcollision = str(config.get('check_selfcollision', 'false')).lower() == 'true'
     thread_priority_str = str(config.get('thread_priority', 50))
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
@@ -144,14 +147,13 @@ def generate_robot_nodes(context):
         arm_prefixes_list)
     validate_arm_prefixes_unique(arm_prefixes_list)
 
-    # Build URDF path based on the first robot type
-    base_robot_type = robot_types_list[0]
+    # Build URDF path
     urdf_path = PathJoinSubstitution(
         [
             FindPackageShare('franka_description'),
             'robots',
-            f'{base_robot_type}_duo',
-            f'{base_robot_type}_duo.urdf.xacro',
+            'fr3_duo',
+            'fr3_duo.urdf.xacro',
         ]
     ).perform(context)
 
@@ -166,7 +168,27 @@ def generate_robot_nodes(context):
             'fake_sensor_commands': fake_sensor_commands_str,
             'is_async': 'true',
             'thread_priority': thread_priority_str,
+            'arm_prefixes': arm_prefixes_str,
         },
+    ).toprettyxml(indent='  ')
+
+    # Build SRDF path
+    srdf_path = PathJoinSubstitution(
+        [
+            FindPackageShare('franka_description'),
+            'robots',
+            'fr3_duo',
+            'fr3_duo.srdf.xacro',
+        ]
+    ).perform(context)
+
+    robot_description_semantic = xacro.process_file(
+        srdf_path,
+        mappings={
+            'robot_types': robot_types_str,
+            'arm_prefixes': arm_prefixes_str,
+            'hand': load_gripper_str,
+        }
     ).toprettyxml(indent='  ')
 
     joint_state_publisher_sources = [
@@ -265,7 +287,39 @@ def generate_robot_nodes(context):
                 output='screen',
             )
         )
-
+    if use_rviz:
+        nodes.append(
+                Node(
+                    package='rviz2',
+                    executable='rviz2',
+                    name='rviz2',
+                    arguments=[
+                        '--display-config',
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_description'),
+                                'rviz',
+                                'visualize_franka.rviz',
+                            ]
+                        ),
+                    ],
+                    output='screen',
+                )
+        )
+    if check_selfcollision:
+        nodes.append(
+            Node(
+                package='franka_selfcollision',
+                executable='self_collision_node',
+                name='self_collision_node',
+                namespace=namespace,
+                parameters=[
+                    {
+                        'robot_description_semantic': robot_description_semantic,
+                    }
+                ],
+            )
+        )
     return nodes
 
 
@@ -273,7 +327,10 @@ def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument(
             'robot_config_file',
-            default_value='',
+            default_value=PathJoinSubstitution(
+                [FindPackageShare('franka_bringup'),
+                 'config', 'fr3_duo.config.yaml']
+            ),
             description='Config file name (looked up in franka_bringup/config/) or full path. '
             'If provided, robot_ips, robot_types, and arm_prefixes will be read from this file.',
         ),

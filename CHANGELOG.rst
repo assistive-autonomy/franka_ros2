@@ -1,8 +1,14 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-v3.2.0 (2026-01-15)
+UNRELEASED
 ----------
+Requires libfranka >= 0.19.0 and franka_description >= 2.3.2 requires ROS 2 Jazzy
+
+* feat: Added a selfcollision package and example controller for the fr3_duo 
+
+v3.2.0 (2026-01-15)
+-------------------
 Requires libfranka >= 0.19.0 and franka_description >= 2.3.0 requires ROS 2 Jazzy
 
 * Add: Added a joint-based point-to-point motion action with usage example

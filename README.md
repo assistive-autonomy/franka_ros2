@@ -214,7 +214,6 @@ For FR3 Duo setups, use the `fr3_duo.launch.py` launch file with the `fr3_duo.co
 
 ```bash
 ros2 launch franka_bringup fr3_duo.launch.py \
-  robot_config_file:=fr3_duo.config.yaml \
   controller_name:=fr3_duo_joint_impedance_example_controller
 ```
 

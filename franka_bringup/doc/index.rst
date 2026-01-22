@@ -109,6 +109,7 @@ The dual-arm configuration is defined in ``franka_bringup/config/fr3_duo.config.
 * ``robot_types``: Types of the robot arms as a string list (e.g., ``"['fr3','fr3']"``)
 * ``arm_prefixes``: Unique prefixes for each arm (e.g., ``"['right','left']"``)
 * ``robot_ips``: IP addresses of the robots as a string list (e.g., ``"['172.16.0.3','172.16.0.5']"``)
+* ``check_selfcollision``:  Enables the self_collision_node (e.g., ``"true"``)
 
 .. note::
 

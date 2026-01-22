@@ -15,3 +15,4 @@ franka_ros2
    ../franka_gazebo/doc/index
    ../franka_msgs/doc/index
    ../franka_ros2/doc/compatibility_matrix
+   ../franka_selfcollision/doc/index
