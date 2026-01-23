@@ -89,7 +89,7 @@ pipeline {
         cleanWs()
         checkout scm
         script {
-          sh 'rm -rf libfranka franka_description olvx_descriptions_module'
+          sh 'rm -rf libfranka franka_description'
 
           // Read defaults from dependencies.repos so we can follow the versions defined there
           def repos = readYaml file: 'dependency.repos'
@@ -106,7 +106,6 @@ pipeline {
 
           def libfrankaCfg = getRepoConfig('libfranka', 'https://github.com/frankarobotics/libfranka.git')
           def frankaDescCfg = getRepoConfig('franka_description', 'https://github.com/frankarobotics/franka_description.git')
-          def olvxDescCfg = getRepoConfig('olvx_descriptions_module', 'https://github.com/olive-robotics/olvx_descriptions_module.git')
 
           // Clone libfranka
           cloneRepo(
@@ -130,18 +129,10 @@ pipeline {
             credentialId: params.sshCredentialId
           )
 
-          // Clone olvx_descriptions_module (public only, no private override)
-          cloneRepo(
-            repoName: 'olvx_descriptions_module',
-            publicUrl: olvxDescCfg.url,
-            publicVersion: olvxDescCfg.version,
-            credentialId: params.sshCredentialId
-          )
-
           // Stash cloned external dependencies so later stages (running in another agent/container)
           // can restore them even if the workspace is wiped or a different node is used.
           // useDefaultExcludes: false is required to include .git directories for version detection
-          stash name: 'external_deps', includes: 'libfranka/**,franka_description/**,olvx_descriptions_module/**', useDefaultExcludes: false
+          stash name: 'external_deps', includes: 'libfranka/**,franka_description/**', useDefaultExcludes: false
 
           sh 'echo "=== Workspace structure ===" && ls -la'
         }
@@ -156,7 +147,7 @@ pipeline {
       }
       steps {
         // Clean any existing files before unstashing to avoid permission conflicts
-        sh 'rm -rf libfranka franka_description olvx_descriptions_module'
+        sh 'rm -rf libfranka franka_description'
         // Restore external deps cloned in the Fetch Dependencies stage
         unstash 'external_deps'
         sh '''
@@ -177,7 +168,7 @@ pipeline {
         sh '''
           . /opt/ros/jazzy/setup.sh
           . install/setup.sh
-          colcon test --packages-ignore olv_module_descriptions hardware_interface realtime_tools libfranka controller_manager --event-handlers console_direct+
+          colcon test --packages-ignore hardware_interface realtime_tools libfranka controller_manager --event-handlers console_direct+
           colcon test-result --verbose
         '''
       }

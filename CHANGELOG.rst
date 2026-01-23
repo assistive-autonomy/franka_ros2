@@ -6,6 +6,7 @@ UNRELEASED
 Requires libfranka >= 0.19.0 and franka_description >= 2.3.2 requires ROS 2 Jazzy
 
 * feat: Added a selfcollision package and example controller for the fr3_duo 
+* feat: Updated `franka_description` dependency to 2.3.3
 
 v3.2.0 (2026-01-15)
 -------------------
