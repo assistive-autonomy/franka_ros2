@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #  Copyright (c) 2024 Franka Robotics GmbH
 #
 #  Licensed under the Apache License, Version 2.0 (the 'License');
@@ -31,25 +32,8 @@ import sensor_msgs.msg
 def generate_test_description():
     robot_ip_parameter_name = 'robot_ip'
     use_fake_hardware_parameter_name = 'use_fake_hardware'
-    arm_parameter_name = 'robot_type'
-    joint_names_parameter_name = 'joint_names'
+    namespace_parameter_name = 'namespace'
     robot_ip = LaunchConfiguration(robot_ip_parameter_name)
-    use_fake_hardware = LaunchConfiguration(use_fake_hardware_parameter_name)
-    robot_type = LaunchConfiguration(arm_parameter_name)
-    joint_names = LaunchConfiguration(joint_names_parameter_name)
-
-    default_joint_name_postfix = '_finger_joint'
-    arm_default_argument = [
-        '[',
-        robot_type,
-        default_joint_name_postfix,
-        '1',
-        ',',
-        robot_type,
-        default_joint_name_postfix,
-        '2',
-        ']',
-    ]
 
     franka_gripper_description = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -65,9 +49,8 @@ def generate_test_description():
         ),
         launch_arguments={
             robot_ip_parameter_name: robot_ip,
-            use_fake_hardware_parameter_name: use_fake_hardware,
-            arm_parameter_name: robot_type,
-            joint_names_parameter_name: joint_names,
+            namespace_parameter_name: 'test_namespace',
+            use_fake_hardware_parameter_name: 'false',
         }.items(),
     )
 
@@ -75,27 +58,9 @@ def generate_test_description():
         LaunchDescription(
             [
                 DeclareLaunchArgument(
-                    robot_ip_parameter_name, description='Hostname or IP address of the robot.'
-                ),
-                DeclareLaunchArgument(
-                    use_fake_hardware_parameter_name,
-                    default_value='false',
-                    description=(
-                        'Publish fake gripper joint states without connecting to a real gripper'
-                    ),
-                ),
-                DeclareLaunchArgument(
-                    arm_parameter_name,
-                    default_value='fr3',
-                    description=(
-                        'Name of the arm in the URDF file. This is used to generate the joint '
-                        'names of the gripper.'
-                    ),
-                ),
-                DeclareLaunchArgument(
-                    joint_names_parameter_name,
-                    default_value=arm_default_argument,
-                    description='Names of the gripper joints in the URDF',
+                    robot_ip_parameter_name,
+                    default_value='172.16.0.2',
+                    description='Hostname or IP address of the robot.',
                 ),
                 franka_gripper_description,
                 # Start test right away, no need to wait for anything
@@ -128,7 +93,9 @@ class TestStartJointPositions(unittest.TestCase):
     def tearDown(self):
         self.link_node.destroy_node()
 
-    def test_gripper_position(self, launch_service, franka_gripper, proc_output):
+    def test_gripper_position(
+        self, launch_service, franka_gripper, proc_output
+    ):
         # max gripper width 0.08m
         self.gripper_positions_goal = [0.02, 0.05, 0.08]
         self.gripper_position = None
@@ -138,30 +105,39 @@ class TestStartJointPositions(unittest.TestCase):
         ACCURACY = 2
 
         def _service_callback(msg):
-            gripper_left_position = msg.position[0]
-            gripper_right_position = msg.position[0]
-            self.gripper_position = gripper_left_position + gripper_right_position
+            if len(msg.position) >= 2:
+                gripper_left_position = msg.position[0]
+                gripper_right_position = msg.position[1]
+                self.gripper_position = (
+                    gripper_left_position + gripper_right_position
+                )
 
         sub = self.link_node.create_subscription(
             sensor_msgs.msg.JointState,
-            '/fr3_gripper/joint_states',
+            '/test_namespace/franka_gripper/joint_states',
             _service_callback,
             10,
         )
 
         action_client = ActionClient(
-            self.link_node, action_name='/fr3_gripper/move', action_type=Move
+            self.link_node,
+            action_name='/test_namespace/franka_gripper/move',
+            action_type=Move,
         )
 
         while not action_client.wait_for_server(timeout_sec=1.0):
-            self.link_node.get_logger().info('Action server not available, waiting...')
+            self.link_node.get_logger().info(
+                'Action server not available, waiting...'
+            )
 
         goal_msg = Move.Goal()
         goal_msg.speed = self.gripper_speed
 
         for position in self.gripper_positions_goal:
             print('\n')
-            self.link_node.get_logger().info(f'VALIDATING POSITION {position}:')
+            self.link_node.get_logger().info(
+                f'VALIDATING POSITION {position}:'
+            )
             goal_msg.width = position
             future = action_client.send_goal_async(goal_msg)
 
@@ -173,12 +149,34 @@ class TestStartJointPositions(unittest.TestCase):
             status 5 - aborted
             status 6 - canceled
             """
-            action_status = 0
-            while action_status < 3:
+            # Wait for goal to be accepted
+            goal_handle = None
+            while goal_handle is None:
                 if future.done():
-                    action_status = future.result().status  # type: ignore
-                rclpy.spin_once(self.link_node)
+                    goal_handle = future.result()
+                rclpy.spin_once(self.link_node, timeout_sec=0.1)
 
+            # Wait for action to complete (status 4 = success)
+            result_future = goal_handle.get_result_async()
+            action_status = 0
+            while action_status != 4:
+                if result_future.done():
+                    result = result_future.result()
+                    action_status = result.status
+                    if action_status == 5:  # aborted
+                        self.fail(f'Action aborted for position {position}')
+                    elif action_status == 6:  # canceled
+                        self.fail(f'Action canceled for position {position}')
+                rclpy.spin_once(self.link_node, timeout_sec=0.1)
+
+            # Give some time for the position to update via subscription
+            time.sleep(0.5)
+            # Spin a few times to ensure we get the latest position
+            for _ in range(10):
+                rclpy.spin_once(self.link_node, timeout_sec=0.1)
+
+            if self.gripper_position is None:
+                self.fail('Gripper position was not received')
             self.assertAlmostEqual(position, self.gripper_position, ACCURACY)  # type: ignore
             time.sleep(1)
 
