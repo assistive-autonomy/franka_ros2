@@ -106,6 +106,7 @@ def generate_test_description():
         launch_arguments={
             'robot_type': 'fr3',
             robot_ip_parameter_name: robot_ip,
+            'load_gripper': 'true',
         }.items(),
     )
 
