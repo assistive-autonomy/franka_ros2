@@ -54,6 +54,10 @@ CallbackReturn GripperExampleController::on_init() {
 
 CallbackReturn GripperExampleController::on_configure(const rclcpp_lifecycle::State&) {
   namespace_ = get_node()->get_namespace();
+  if (namespace_ == "/") {
+    namespace_ = "";  // avoid double backslashes in action names
+  }
+
   gripper_grasp_action_client_ = rclcpp_action::create_client<franka_msgs::action::Grasp>(
       get_node(), fmt::format("{}/franka_gripper/grasp", namespace_));
 
