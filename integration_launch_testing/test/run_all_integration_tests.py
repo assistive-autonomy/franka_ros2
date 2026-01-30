@@ -103,6 +103,11 @@ CONTROLLER_TESTS = [
         'description': 'Gravity compensation test',
         'needs_move_to_start': True,
     },
+    {
+        'name': 'gripper_example_controller',
+        'description': 'Gripper move and grasp test',
+        'needs_move_to_start': True,
+    },
 ]
 
 GRIPPER_TESTS = [
