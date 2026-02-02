@@ -5,7 +5,8 @@ FROM ros:humble-ros-base
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    ROS_DISTRO=humble
+    ROS_DISTRO=humble \
+    RCUTILS_COLORIZED_OUTPUT=1
 
 ARG USER_UID=1001
 ARG USER_GID=1001

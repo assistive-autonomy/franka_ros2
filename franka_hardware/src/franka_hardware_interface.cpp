@@ -36,14 +36,6 @@ const std::string kArmIdName = "robot_type";
 
 namespace {
 
-auto logRclcppFatalRed(const rclcpp::Logger& logger, const char* text, ...) {
-  va_list args;
-  va_start(args, text);
-  std::string formatted_text = fmt::format("\033[1;31m{}\033[0m", text);
-  RCLCPP_FATAL(logger, formatted_text.c_str(), args);
-  va_end(args);
-}
-
 auto parseVersion(const std::string& version_str) {
   std::vector<std::string> version_parts;
   std::stringstream ss(version_str);
@@ -287,19 +279,18 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
                 patch);
 
     if (kSupportedControlInterfaceMajor != major) {
-      logRclcppFatalRed(
-          getLogger(),
-          "Unsupported major version of the Franka ros2_control interface. Expected "
-          "major version %d, got %d. Please update your URDF (aka franka_description).",
-          kSupportedControlInterfaceMajor, major);
+      RCLCPP_FATAL(getLogger(),
+                   "Unsupported major version of the Franka ros2_control interface. Expected "
+                   "major version %d, got %d. Please update your URDF (aka franka_description).",
+                   kSupportedControlInterfaceMajor, major);
       return CallbackReturn::ERROR;
     }
   } catch (const std::out_of_range& ex) {
     std::cout << "Parameter 'version' is not set. Please update your URDF (aka franka_description)."
               << std::endl;
-    logRclcppFatalRed(
-        getLogger(), "Parameter '%s' is not set. Please update your URDF (aka franka_description).",
-        kVersionName.c_str());
+    RCLCPP_FATAL(getLogger(),
+                 "Parameter '%s' is not set. Please update your URDF (aka franka_description).",
+                 kVersionName.c_str());
     return CallbackReturn::ERROR;
   }
 
@@ -307,7 +298,7 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
   try {
     robot_ip = info_.hardware_parameters.at(kRobotIpName);
   } catch (const std::out_of_range& ex) {
-    logRclcppFatalRed(getLogger(), "Parameter '%s' is not set", kRobotIpName.c_str());
+    RCLCPP_FATAL(getLogger(), "Parameter '%s' is not set", kRobotIpName.c_str());
     return CallbackReturn::ERROR;
   }
 
@@ -327,8 +318,8 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
       RCLCPP_INFO(getLogger(), "Connecting to robot at \"%s\" ...", robot_ip.c_str());
       robot_ = std::make_shared<Robot>(robot_ip, getLogger());
     } catch (const franka::Exception& e) {
-      logRclcppFatalRed(getLogger(), "Could not connect to robot");
-      logRclcppFatalRed(getLogger(), fmt::format("{}", e.what()).c_str());
+      RCLCPP_FATAL(getLogger(), "Could not connect to robot");
+      RCLCPP_FATAL(getLogger(), "%s", fmt::format("{}", e.what()).c_str());
       return CallbackReturn::ERROR;
     }
     RCLCPP_INFO(getLogger(), "Successfully connected to robot");
