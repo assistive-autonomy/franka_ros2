@@ -142,7 +142,6 @@ def generate_robot_nodes(context):
                 {'robot_type': robot_type},
                 {'load_gripper': load_gripper},
             ],
-            remappings=[('joint_states', joint_state_publisher_sources[0])],
             output='screen',
             on_exit=Shutdown(),
         ),
@@ -164,7 +163,11 @@ def generate_robot_nodes(context):
             package='controller_manager',
             executable='spawner',
             namespace=namespace,
-            arguments=['joint_state_broadcaster'],
+            arguments=[
+                'joint_state_broadcaster',
+                '--controller-ros-args',
+                f'--remap joint_states:={joint_state_publisher_sources[0]}',
+                ],
             output='screen',
         ),
         Node(
