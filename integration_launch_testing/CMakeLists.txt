@@ -45,18 +45,33 @@ if(BUILD_TESTING)
       RENAME test_gripper_position
     )
 
+    find_package(ament_cmake_ros REQUIRED)
     find_package(ament_cmake_copyright REQUIRED)
     find_package(ament_cmake_flake8 REQUIRED)
     find_package(ament_cmake_lint_cmake REQUIRED)
     find_package(ament_cmake_pep257 REQUIRED)
     find_package(ament_cmake_xmllint REQUIRED)
-    find_package(launch_testing_ament_cmake)
+    find_package(launch_testing_ament_cmake REQUIRED)
 
     ament_copyright(package.xml)
     ament_lint_cmake(CMakeLists.txt)
     ament_flake8()
     ament_pep257()
     ament_xmllint()
+
+    function(add_ros_isolated_launch_test path)
+      set(RUNNER "${ament_cmake_ros_DIR}/run_test_isolated.py")
+      add_launch_test("${path}" RUNNER "${RUNNER}" ${ARGN} TIMEOUT 500)
+    endfunction()
+
+    add_ros_isolated_launch_test(test/test_example_controller.py)
+    add_ros_isolated_launch_test(test/test_franka_gripper_position.py)
+
+    install(
+      DIRECTORY config
+      DESTINATION share/${PROJECT_NAME}
+    )
+
 endif()
 
 ament_export_libraries(

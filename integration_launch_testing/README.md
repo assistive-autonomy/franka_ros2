@@ -11,6 +11,9 @@ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_T
 **Run all integration tests:**
 
 ```bash
+# make sure the IP in the franka.config.yaml is correct
+colcon test --packages-select integration_launch_testing
+colcon test-result --all --verbose
 ros2 run integration_launch_testing run_all_integration_tests --robot-ip <ROBOT_IP>
 ```
 
