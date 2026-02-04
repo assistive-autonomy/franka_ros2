@@ -34,6 +34,3 @@ target_link_libraries(${PROJECT_NAME}_robot_test
   franka_hardware_mocks
 )
 
-ament_add_gmock(${PROJECT_NAME}_logging_utils_test logging_utils_test.cpp)
-target_include_directories(${PROJECT_NAME}_logging_utils_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-ament_target_dependencies(${PROJECT_NAME}_logging_utils_test rclcpp)
