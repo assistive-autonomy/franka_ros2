@@ -14,4 +14,4 @@ mobile_fr3_duo_robot:
   namespace: ''
   joint_state_rate: 30
   thread_priority: 50
-  use_rviz: false
+  use_rviz: true

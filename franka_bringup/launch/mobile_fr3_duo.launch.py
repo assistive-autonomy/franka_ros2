@@ -134,6 +134,7 @@ def generate_robot_nodes(context):
     namespace = str(config.get('namespace', ''))
     joint_state_rate = int(config.get('joint_state_rate', 30))
     thread_priority_str = str(config.get('thread_priority', 50))
+    use_rviz = str(config.get('use_rviz', 'true')).lower() == 'true'
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
     # Parse string list representations into actual Python lists for
@@ -267,6 +268,25 @@ def generate_robot_nodes(context):
                 namespace=namespace,
                 output='screen',
             )
+        )
+    if use_rviz:
+        nodes.append(
+                Node(
+                    package='rviz2',
+                    executable='rviz2',
+                    name='rviz2',
+                    arguments=[
+                        '--display-config',
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_description'),
+                                'rviz',
+                                'visualize_franka.rviz',
+                            ]
+                        ),
+                    ],
+                    output='screen',
+                )
         )
 
     return nodes

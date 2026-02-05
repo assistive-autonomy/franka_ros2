@@ -95,6 +95,9 @@
 
       fr3_duo_self_collision_example_controller:
         type: franka_example_controllers/Fr3DuoSelfCollisionExampleController
+      
+      mobile_fr3_duo_joint_impedance_example_controller:
+        type: franka_example_controllers/MobileFr3DuoJointImpedanceExampleController
 
 
 /**:

@@ -54,12 +54,14 @@ class MobileFr3DuoJointImpedanceExampleController
   std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
   std::string robot_description_;
+  std::vector<int> num_joints_per_robot_;
   const int num_joints = 7;
 
   std::vector<Vector7d> q_;
   std::vector<Vector7d> initial_q_;
   std::vector<Vector7d> dq_;
   std::vector<Vector7d> dq_filtered_;
+
   Vector7d k_gains_;
   Vector7d d_gains_;
   double elapsed_time_{0.0};
