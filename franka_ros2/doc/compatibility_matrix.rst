@@ -17,9 +17,9 @@ Compatibility Matrix for Jazzy:
      - Ubuntu Version
 
    * - v3.2.0
-      - >= 0.19.0
-      - >= 2.3.0
-      - 24.04
+     - >= 0.19.0
+     - >= 2.3.0
+     - 24.04
 
    * - v3.1.1
      - >= 0.18.0
