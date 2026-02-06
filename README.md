@@ -225,7 +225,6 @@ For Mobile FR3 Duo setups (TMRv0.2 mobile base with dual FR3 arms), use the `mob
 
 ```bash
 ros2 launch franka_bringup mobile_fr3_duo.launch.py \
-  robot_config_file:=mobile_fr3_duo.config.yaml \
   controller_name:=mobile_fr3_duo_joint_impedance_example_controller
 ```
 

@@ -27,7 +27,7 @@ MobileFr3DuoJointImpedanceExampleController::command_interface_configuration() c
     if (prefix.empty()) {
       continue;  // Skip empty prefixes (e.g., for the mobile base)
     }
-    for (int i = 1; i <= 7; ++i) {
+    for (int i = 1; i <= num_arm_joints; ++i) {
       config.names.push_back(prefix + "_fr3_joint" + std::to_string(i) + "/effort");
     }
   }
@@ -41,21 +41,25 @@ MobileFr3DuoJointImpedanceExampleController::state_interface_configuration() con
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
   // base state
-  for (int i = 0; i < 4; ++i) {
-    config.names.push_back("tmrv0_2_joint_" + std::to_string(i) + "/position");
-    config.names.push_back("tmrv0_2_joint_" + std::to_string(i) + "/velocity");
+  for (int i = 0; i < num_base_joints; ++i) {
+    config.names.push_back(robot_types_[0] + "_joint_" + std::to_string(i) + "/position");
+    config.names.push_back(robot_types_[0] + "_joint_" + std::to_string(i) + "/velocity");
   }
 
   // left arm
-  for (int i = 1; i <= 7; ++i) {
-    config.names.push_back("left_fr3_joint" + std::to_string(i) + "/position");
-    config.names.push_back("left_fr3_joint" + std::to_string(i) + "/velocity");
+  for (int i = 1; i <= num_arm_joints; ++i) {
+    config.names.push_back(arm_prefixes_[1] + "_" + robot_types_[1] + "_joint" + std::to_string(i) +
+                           "/position");
+    config.names.push_back(arm_prefixes_[1] + "_" + robot_types_[1] + "_joint" + std::to_string(i) +
+                           "/velocity");
   }
 
   // right arm
-  for (int i = 1; i <= 7; ++i) {
-    config.names.push_back("right_fr3_joint" + std::to_string(i) + "/position");
-    config.names.push_back("right_fr3_joint" + std::to_string(i) + "/velocity");
+  for (int i = 1; i <= num_arm_joints; ++i) {
+    config.names.push_back(arm_prefixes_[2] + "_" + robot_types_[2] + "_joint" + std::to_string(i) +
+                           "/position");
+    config.names.push_back(arm_prefixes_[2] + "_" + robot_types_[2] + "_joint" + std::to_string(i) +
+                           "/velocity");
   }
 
   return config;
@@ -103,6 +107,7 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_init() {
     auto_declare<std::vector<double>>("k_gains", {});
     auto_declare<std::vector<double>>("d_gains", {});
     auto_declare<std::vector<std::string>>("arm_prefixes", {});
+    auto_declare<std::vector<std::string>>("robot_types", {});
     auto_declare<bool>("enable_mobile_base", true);
   } catch (...) {
     return CallbackReturn::ERROR;
@@ -116,13 +121,14 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_configure(
   auto d = get_node()->get_parameter("d_gains").as_double_array();
   arm_prefixes_ = get_node()->get_parameter("arm_prefixes").as_string_array();
   enable_mobile_base_ = get_node()->get_parameter("enable_mobile_base").as_bool();
+  robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
 
   if (k.size() != 7 || d.size() != 7) {
     RCLCPP_FATAL(get_node()->get_logger(), "k_gains and d_gains must be size 7");
     return CallbackReturn::FAILURE;
   }
 
-  for (size_t i = 0; i < 7; ++i) {
+  for (size_t i = 0; i < num_arm_joints; ++i) {
     k_gains_(i) = k[i];
     d_gains_(i) = d[i];
   }
@@ -151,19 +157,19 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_deactivate(
 
 void MobileFr3DuoJointImpedanceExampleController::updateJointStates() {
   for (size_t arm = 0; arm < 2; ++arm) {
-    for (size_t j = 0; j < 7; ++j) {
-      size_t pos = BASE_STATE_IFS + arm * ARM_STATE_IFS + j * 2;
+    for (auto i = 0; i < num_arm_joints; ++i) {
+      size_t pos = BASE_STATE_IFS + arm * ARM_STATE_IFS + i * 2;
       size_t vel = pos + 1;
 
       auto p = state_interfaces_[pos].get_optional();
       auto v = state_interfaces_[vel].get_optional();
 
       if (p && v) {
-        q_[arm](j) = *p;
-        dq_[arm](j) = *v;
+        q_[arm](i) = *p;
+        dq_[arm](i) = *v;
       } else {
         RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                             "Missing state for arm %zu joint %zu", arm, j);
+                             "Missing state for arm %zu joint %zu", arm, i);
       }
     }
   }

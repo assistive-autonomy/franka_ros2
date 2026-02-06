@@ -232,10 +232,4 @@
         - 1.0
         - 1.0
         - 0.5
-      robot_types:  # Only arm types (fr3), not mobile base
-        - "fr3"
-        - "fr3"
-      arm_prefixes:  # Only arm prefixes (left, right), not mobile base
-        - "left"
-        - "right"
       enable_mobile_base: true

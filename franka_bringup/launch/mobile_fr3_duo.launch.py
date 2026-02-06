@@ -296,7 +296,7 @@ def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument(
             'robot_config_file',
-            default_value='',
+            default_value='mobile_fr3_duo.config.yaml',
             description='Config file name (looked up in franka_bringup/config/) or full path. '
             'If provided, robot_ips, robot_types, and arm_prefixes will be read from this file.',
         ),

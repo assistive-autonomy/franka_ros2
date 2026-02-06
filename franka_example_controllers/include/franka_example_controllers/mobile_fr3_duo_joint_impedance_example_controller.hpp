@@ -55,7 +55,8 @@ class MobileFr3DuoJointImpedanceExampleController
   std::vector<std::string> arm_prefixes_;
   std::string robot_description_;
   std::vector<int> num_joints_per_robot_;
-  const int num_joints = 7;
+  const int num_arm_joints = 7;
+  const int num_base_joints = 4;
 
   std::vector<Vector7d> q_;
   std::vector<Vector7d> initial_q_;
