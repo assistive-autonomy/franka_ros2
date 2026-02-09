@@ -27,6 +27,10 @@ class FrankaActionServerTests
     default_franka_hardware_interface.on_init(default_hardware_info);
   }
 
+  auto TearDown() -> void override {
+    default_franka_hardware_interface.on_deactivate(rclcpp_lifecycle::State());
+  }
+
  protected:
   std::string robot_type{"fr3"};
   std::shared_ptr<MockRobot> default_mock_robot = std::make_shared<MockRobot>();

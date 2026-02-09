@@ -41,12 +41,12 @@ class ActionServer : public rclcpp::Node {
   ActionServer(const rclcpp::NodeOptions& options, std::shared_ptr<Robot> robot);
 
  private:
+  PTPMotionHandler ptp_motion_handler_;
   std::shared_ptr<Robot> robot_;
   rclcpp_action::Server<franka_msgs::action::ErrorRecovery>::SharedPtr
       error_recovery_action_server_;
   rclcpp_action::Server<franka_msgs::action::PTPMotion>::SharedPtr ptp_motion_action_server_;
 
-  PTPMotionHandler ptp_motion_handler_;
   std::mutex motion_id_mutex_;
 
   /**

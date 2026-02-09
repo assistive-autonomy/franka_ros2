@@ -101,7 +101,7 @@ class PTPMotionTests : public ::testing::Test {
     EXPECT_CALL(*mock_robot, getCurrentState())
         .WillRepeatedly(::testing::ReturnRef(default_robot_state));
 
-    auto counter = 0;
+    size_t counter = 0;
     while (counter < kMaxCounter) {
       auto target_feedback = ptp_motion_handler->getFeedback(current_motion_id);
       if (target_feedback.status == franka::TargetStatus::kExecuting) {
@@ -121,7 +121,7 @@ class PTPMotionTests : public ::testing::Test {
     EXPECT_CALL(*mock_robot, getCurrentState())
         .WillRepeatedly(::testing::ReturnRef(default_robot_state));
 
-    auto counter = 0;
+    size_t counter = 0;
     while (counter < kMaxCounter) {
       auto target_feedback = ptp_motion_handler->getFeedback(current_motion_id);
       if (target_feedback.status == franka::TargetStatus::kTargetReached) {
