@@ -153,7 +153,7 @@ pipeline {
         sh '''
           . /opt/ros/jazzy/setup.sh
           echo "=== Workspace structure ===" && ls -la
-          colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCHECK_TIDY=ON
+          colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCHECK_TIDY=ON -DBUILD_TESTS=OFF
         '''
       }
     }
