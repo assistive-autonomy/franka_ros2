@@ -58,13 +58,6 @@ class PTPMotionTests : public ::testing::Test {
     default_joint_positions.motion_finished = false;
   }
 
-  void TearDown() override {
-    ptp_motion_handler.reset();
-    mock_active_control.reset();
-    mock_robot.reset();
-    mock_libfranka_robot.reset();
-  }
-
   std::shared_ptr<MockRobot> mock_robot;
   std::shared_ptr<MockFrankaRobot> mock_libfranka_robot;
   std::unique_ptr<MockActiveControl> mock_active_control;
