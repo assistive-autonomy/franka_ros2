@@ -11,6 +11,7 @@ Requires libfranka >= 0.19.0 and franka_description >= 2.4.0 requires ROS 2 Jazz
 * fix: gravity_compensation_example_controller, move_to_start_example_controller, joint_impedance_example_controller work with parametrized robot_type
 * fix: joint_impedance_with_ik_example_controller checked for 'robot_id' instead of 'robot_type' argument
 * fix: added missing dependency to rclcpp_action in franka_hardware package.xml
+* fix: franka_hardware test fixed
 
 v2.2.0 (2026-01-14)
 ----------
