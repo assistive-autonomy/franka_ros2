@@ -51,19 +51,19 @@ pipeline {
 
   parameters {
     string(name: 'libfrankaRepoUrl',
-           defaultValue: '',
-           description: 'SSH URL to clone libfranka from internal repo. Leave empty to use public GitHub.')
+           defaultValue: 'ssh://git@bitbucket.fe.lan:7999/moctrl/libfranka.git',
+           description: 'SSH URL to clone libfranka from internal repo. Leave empty to use the github remote.')
 
     string(name: 'libfrankaBranch',
            defaultValue: 'main',
            description: 'Branch or tag to checkout for libfranka.')
 
     string(name: 'frankaDescriptionRepoUrl',
-           defaultValue: '',
-           description: 'SSH URL to clone franka_description from internal repo. Leave empty to use public GitHub.')
+           defaultValue: 'ssh://git@bitbucket.fe.lan:7999/moctrl/franka_description.git',
+           description: 'SSH URL to clone franka_description from internal repo. Leave empty to use the github remote.')
 
     string(name: 'frankaDescriptionBranch',
-           defaultValue: 'main',
+           defaultValue: 'jazzy',
            description: 'Branch or tag to checkout for franka_description.')
 
     string(name: 'sshCredentialId',
@@ -78,7 +78,7 @@ pipeline {
         checkout scm
         script {
           notifyBitbucket()
-          currentBuild.displayName = "[libfranka: ${params.libfrankaRepoUrl ? params.libfrankaBranch : 'public'}, franka_description: ${params.frankaDescriptionRepoUrl ? params.frankaDescriptionBranch : 'public'}]"
+          currentBuild.displayName = "[libfranka: ${params.libfrankaRepoUrl ? params.libfrankaBranch : 'private'}, franka_description: ${params.frankaDescriptionRepoUrl ? params.frankaDescriptionBranch : 'private'}]"
         }
         sh 'rm -rf build log install libfranka franka_description'
       }
@@ -86,8 +86,6 @@ pipeline {
 
     stage('Fetch Dependencies') {
       steps {
-        cleanWs()
-        checkout scm
         script {
           sh 'rm -rf libfranka franka_description'
 
@@ -151,7 +149,7 @@ pipeline {
         // Restore external deps cloned in the Fetch Dependencies stage
         unstash 'external_deps'
         sh '''
-          . /opt/ros/jazzy/setup.sh
+          . /opt/ros/$ROS_DISTRO/setup.sh
           echo "=== Workspace structure ===" && ls -la
           colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCHECK_TIDY=ON -DBUILD_TESTS=OFF
         '''
@@ -166,7 +164,7 @@ pipeline {
       }
       steps {
         sh '''
-          . /opt/ros/jazzy/setup.sh
+          . /opt/ros/$ROS_DISTRO/setup.sh
           . install/setup.sh
           colcon test --packages-ignore hardware_interface realtime_tools libfranka controller_manager --event-handlers console_direct+
           colcon test-result --verbose
