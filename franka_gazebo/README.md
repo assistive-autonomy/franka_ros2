@@ -79,6 +79,33 @@ ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.laun
 ```
 
 
+## Multi-Robot Joint Velocity Control Example with Gazebo
+
+For running multiple robots simultaneously in Gazebo, each in their own namespace with dedicated URDFs.
+
+First, configure the robots in `/ros2_ws/src/franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` for the desired number of robots (e.g., ROBOT1, ROBOT2, ROBOT3).
+
+Ensure `franka_example_controllers` and `franka_description` are built.
+
+```bash
+colcon build --packages-select franka_example_controllers
+```
+
+Then source your workspace.
+
+```bash
+source install/setup.sh
+```
+
+Then you can run the multi-robot velocity control example.
+
+```bash
+ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py franka_hand:='franka_hand'
+```
+
+This will launch Gazebo with the configured robots, each in their own namespace, with joint velocity controllers loaded.
+
+
 ## Throubleshooting
 
 If you experience that Gazebo can't find your model files, try to include the workspace. E.g.

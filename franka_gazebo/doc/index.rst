@@ -88,6 +88,33 @@ Then you can run the impedance control example.
     ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
 
 
+Multi-Robot Control Example with Gazebo
+-------------------------------------------------------
+
+For running multiple robots simultaneously in Gazebo, each in their own namespace with dedicated URDFs. The example is designed to be run with two `fr3v2` and one `tmrv0_2`.
+
+First, configure the robots in `/ros2_ws/src/franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` and `arm_prefix` for each robot you want to spawn. 
+Ensure `franka_example_controllers` and `franka_description` are built.
+
+.. code-block:: shell
+
+    colcon build --packages-select franka_example_controllers
+
+Then source your workspace.
+
+.. code-block:: shell
+
+    source install/setup.sh
+
+Then you can run the multi-robot control example.
+
+.. code-block:: shell
+
+    ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py 
+
+This will launch Gazebo with the configured robots, each in their own namespace.
+
+
 Troubleshooting
 ---------------
 

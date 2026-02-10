@@ -90,7 +90,7 @@ def generate_launch_description():
             description='Default value: franka_hand')
     robot_type_launch_argument = DeclareLaunchArgument(
             robot_type_name,
-            default_value='fr3',
+            default_value='fr3v2',
             description='Available values: fr3, fp3 and fer')
     namespace_launch_argument = DeclareLaunchArgument(
         namespace_name,

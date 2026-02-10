@@ -18,6 +18,7 @@ Requires libfranka >= 0.20.4 and franka_description >= 2.4.0 requires ROS 2 Jazz
 * fix: rclpy.parameter_client.AsyncParameterClient replaced with custom version because the package is missing in humble
 * feat: update to libfranka 0.20.4
 * chore: cleanup franka_bringup launch utils import
+* feat: multi robot example for gazebo
 
 v2.2.0 (2026-01-14)
 ----------

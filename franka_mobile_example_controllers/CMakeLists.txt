@@ -29,7 +29,8 @@ find_package(Eigen3 REQUIRED)
 add_library(
         ${PROJECT_NAME}
         SHARED
-        src/mobile_cartesian_velocity_example_controller.cpp)
+        src/mobile_cartesian_velocity_example_controller.cpp
+        src/mobile_cartesian_velocity_with_ik_example_controller.cpp)
 target_include_directories(
         ${PROJECT_NAME}
         PUBLIC

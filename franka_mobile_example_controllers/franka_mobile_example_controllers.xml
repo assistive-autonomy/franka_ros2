@@ -6,4 +6,11 @@
             The mobile cartesian velocity example controller fowards cartesian velocity commands to the mobile robot.
         </description>
     </class>
+    <class name="franka_mobile_example_controllers/MobileCartesianVelocityWithIkExampleController"
+        type="franka_mobile_example_controllers::MobileCartesianVelocityWithIkExampleController"
+        base_class_type="controller_interface::ControllerInterface">
+        <description>
+            The mobile cartesian velocity with IK example controller computes swerve drive commands from cartesian velocity commands and forwards them to the mobile robot.
+        </description>
+    </class>
 </library>
