@@ -83,7 +83,7 @@ class PTPMotionTests : public ::testing::Test {
     EXPECT_CALL(*mock_robot, getCurrentState()).WillRepeatedly(::testing::ReturnRef(robot_state));
     EXPECT_CALL(*mock_libfranka_robot,
                 startAsyncJointPositionControl(::testing::_, ::testing::Eq(expected_optional)))
-        .WillOnce(::testing::Return(std::move(mock_active_control)));
+        .WillOnce(::testing::Return(::testing::ByMove(std::move(mock_active_control))));
 
     auto command_result = ptp_motion_handler->startNewPTPMotion(
         mock_libfranka_robot, std::make_shared<franka_msgs::action::PTPMotion::Goal>(goal));
@@ -101,7 +101,7 @@ class PTPMotionTests : public ::testing::Test {
     EXPECT_CALL(*mock_robot, getCurrentState())
         .WillRepeatedly(::testing::ReturnRef(default_robot_state));
 
-    auto counter = 0;
+    size_t counter = 0;
     while (counter < kMaxCounter) {
       auto target_feedback = ptp_motion_handler->getFeedback(current_motion_id);
       if (target_feedback.status == franka::TargetStatus::kExecuting) {
@@ -121,7 +121,7 @@ class PTPMotionTests : public ::testing::Test {
     EXPECT_CALL(*mock_robot, getCurrentState())
         .WillRepeatedly(::testing::ReturnRef(default_robot_state));
 
-    auto counter = 0;
+    size_t counter = 0;
     while (counter < kMaxCounter) {
       auto target_feedback = ptp_motion_handler->getFeedback(current_motion_id);
       if (target_feedback.status == franka::TargetStatus::kTargetReached) {
@@ -147,7 +147,7 @@ TEST_F(PTPMotionTests, givenValidGoal_whenStartNewPTPMotion_thenMotionStartsSucc
   auto expected_optional = std::optional<std::vector<double>>(maximum_joint_velocities);
   EXPECT_CALL(*mock_libfranka_robot,
               startAsyncJointPositionControl(::testing::_, ::testing::Eq(expected_optional)))
-      .WillOnce(::testing::Return(std::move(mock_active_control)));
+      .WillOnce(::testing::Return(::testing::ByMove(std::move(mock_active_control))));
 
   auto command_result = ptp_motion_handler->startNewPTPMotion(
       mock_libfranka_robot, std::make_shared<franka_msgs::action::PTPMotion::Goal>(goal));

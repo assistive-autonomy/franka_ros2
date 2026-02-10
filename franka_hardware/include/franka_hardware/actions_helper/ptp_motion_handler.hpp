@@ -73,6 +73,7 @@ class PTPMotionHandler {
 
   std::shared_ptr<franka::AsyncPositionControlHandler> position_control_handler_;
   size_t motion_id_ = 0;
+  std::atomic<bool> running_ = true;
   std::map<std::string, std::future<franka::AsyncPositionControlHandler::TargetFeedback>>
       feedback_futures_;
 

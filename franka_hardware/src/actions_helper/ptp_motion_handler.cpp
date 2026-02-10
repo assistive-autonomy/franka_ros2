@@ -92,9 +92,10 @@ auto PTPMotionHandler::executeMotion(const std::vector<double>& goal_joint_confi
 
   auto new_motion_id = std::to_string(++motion_id_);
 
-  feedback_futures_[new_motion_id] =
-      std::async(std::launch::async, [this, target = std::move(target)]() {
-        auto command_result = position_control_handler_->setJointPositionTarget(target);
+  feedback_futures_[new_motion_id] = std::async(
+      std::launch::async, [this, robot_ptr = franka_hardware_robot_,
+                           handler_ptr = position_control_handler_, target = std::move(target)]() {
+        auto command_result = handler_ptr->setJointPositionTarget(target);
 
         if (!command_result.was_successful && command_result.error_message.has_value()) {
           franka::AsyncPositionControlHandler::TargetFeedback feedback{};
@@ -104,11 +105,10 @@ auto PTPMotionHandler::executeMotion(const std::vector<double>& goal_joint_confi
           return feedback;
         }
 
-        while (true) {
+        while (running_ && handler_ptr != nullptr) {
           std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-          auto target_feedback = position_control_handler_->getTargetFeedback(
-              franka_hardware_robot_->getCurrentState());
+          auto target_feedback = handler_ptr->getTargetFeedback(robot_ptr->getCurrentState());
 
           {
             std::lock_guard<std::mutex> lock(control_mutex_);
@@ -120,23 +120,28 @@ auto PTPMotionHandler::executeMotion(const std::vector<double>& goal_joint_confi
 
             switch (last_feedback_.status) {
               case franka::TargetStatus::kTargetReached:
-                position_control_handler_->stopControl();
+              case franka::TargetStatus::kAborted:
+                handler_ptr->stopControl();
                 return last_feedback_;
               default:
                 break;
             }
           }
         }
+
+        return last_feedback_;
       });
 
   return {new_motion_id, target_feedback};
 }
 
 auto PTPMotionHandler::cancelMotion() -> void {
-  if (position_control_handler_ != nullptr && !feedback_futures_.empty()) {
-    position_control_handler_->stopControl();
+  running_ = false;
 
-    feedback_futures_.clear();
+  feedback_futures_.clear();
+
+  if (position_control_handler_ != nullptr) {
+    position_control_handler_->stopControl();
     position_control_handler_.reset();
   }
 }
