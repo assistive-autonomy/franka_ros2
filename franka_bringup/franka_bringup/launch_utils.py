@@ -16,6 +16,8 @@ import ast
 import os
 import sys
 
+from typing import List, Sized
+
 import yaml
 
 
@@ -52,6 +54,21 @@ def is_duo_config(config):
     return duo_keys.issubset(config.keys())
 
 
+def _assert_same_length(*items: List[Sized]):
+    """
+    Assert that all provided lists have the same length.
+
+    @param items: Variable number of list arguments to compare.
+    @raise ValueError: If lists have different lengths.
+    """
+    if not items:
+        return  # No lists to compare, consider them as having the same length
+    length = len(items[0])
+    for lst in items[1:]:
+        if len(lst) != length:
+            raise ValueError('All lists must have the same length.')
+
+
 def validate_duo_arrays_length(
         robot_types_list, robot_ips_list, arm_prefixes_list):
     """
@@ -62,8 +79,9 @@ def validate_duo_arrays_length(
     @param arm_prefixes_list: List of arm prefixes.
     @raise SystemExit: If arrays have different lengths.
     """
-    if not (len(robot_types_list) == len(
-            robot_ips_list) == len(arm_prefixes_list)):
+    try:
+        _assert_same_length(robot_types_list, robot_ips_list, arm_prefixes_list)
+    except ValueError:
         print(
             f'Error: Duo configuration arrays must have the same length.\n'
             f'  robot_types:  {len(robot_types_list)} items: {

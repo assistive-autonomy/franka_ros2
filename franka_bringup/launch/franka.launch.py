@@ -69,8 +69,8 @@
 
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.actions import OpaqueFunction, Shutdown
+from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+                            OpaqueFunction, Shutdown)
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -167,7 +167,7 @@ def generate_robot_nodes(context):
                 'joint_state_broadcaster',
                 '--controller-ros-args',
                 f'--remap joint_states:={joint_state_publisher_sources[0]}',
-                ],
+            ],
             output='screen',
         ),
         Node(
