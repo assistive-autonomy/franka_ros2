@@ -56,36 +56,25 @@
 # is not supported for multi-arm configurations.
 ############################################################################
 
-import importlib.util
 import os
 import sys
 
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument,
-    OpaqueFunction,
-    Shutdown,
-)
 
+import franka_bringup.launch_utils as launch_utils
+
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, Shutdown
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+
 import xacro
+
+package_share = get_package_share_directory('franka_bringup')
 
 # constant for the controller name parameter
 CONTROLLER_EXAMPLE = 'controller'
-
-package_share = get_package_share_directory('franka_bringup')
-utils_path = os.path.abspath(
-    os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
-)
-launch_utils_path = os.path.join(utils_path, 'launch_utils.py')
-
-spec = importlib.util.spec_from_file_location(
-    'launch_utils', launch_utils_path)
-launch_utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(launch_utils)
 
 load_yaml = launch_utils.load_yaml
 parse_string_list = launch_utils.parse_string_list
@@ -289,11 +278,11 @@ def generate_robot_nodes(context):
         )
     if use_rviz:
         nodes.append(
-                Node(
-                    package='rviz2',
-                    executable='rviz2',
-                    name='rviz2',
-                    arguments=[
+            Node(
+                package='rviz2',
+                executable='rviz2',
+                name='rviz2',
+                arguments=[
                         '--display-config',
                         PathJoinSubstitution(
                             [
@@ -302,9 +291,9 @@ def generate_robot_nodes(context):
                                 'visualize_franka.rviz',
                             ]
                         ),
-                    ],
-                    output='screen',
-                )
+                ],
+                output='screen',
+            )
         )
     if check_selfcollision:
         nodes.append(
