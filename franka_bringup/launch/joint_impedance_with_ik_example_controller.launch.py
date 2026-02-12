@@ -12,25 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import importlib.util
-import os
-
-from ament_index_python.packages import get_package_share_directory
+import franka_bringup.launch_utils as launch_utils
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, OpaqueFunction
+from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+                            OpaqueFunction)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
-
-package_share = get_package_share_directory('franka_bringup')
-utils_path = os.path.abspath(
-    os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
-)
-launch_utils_path = os.path.join(utils_path, 'launch_utils.py')
-
-spec = importlib.util.spec_from_file_location('launch_utils', launch_utils_path)
-launch_utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(launch_utils)
 
 load_yaml = launch_utils.load_yaml
 
@@ -68,27 +56,27 @@ def generate_robot_nodes(context):
 
         # Define the additional nodes
         additional_nodes.append(
-          IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                [
-                    PathJoinSubstitution(
-                        [
-                            FindPackageShare('franka_fr3_moveit_config'),
-                            'launch',
-                            'move_group.launch.py',
-                        ]
-                    )
-                ]
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [
+                        PathJoinSubstitution(
+                            [
+                                FindPackageShare('franka_fr3_moveit_config'),
+                                'launch',
+                                'move_group.launch.py',
+                            ]
+                        )
+                    ]
+                ),
+                launch_arguments={
+                    'robot_ip': str(robot_ip),
+                    'namespace': str(namespace),
+                    'load_gripper': str(load_gripper),
+                    'use_fake_hardware': str(use_fake_hardware),
+                    'fake_sensor_commands': str(fake_sensor_commands),
+                    'use_rviz': str(use_rviz),
+                }.items(),
             ),
-            launch_arguments={
-                'robot_ip': str(robot_ip),
-                'namespace': str(namespace),
-                'load_gripper': str(load_gripper),
-                'use_fake_hardware': str(use_fake_hardware),
-                'fake_sensor_commands': str(fake_sensor_commands),
-                'use_rviz': str(use_rviz),
-            }.items(),
-          ),
         )
     return additional_nodes
 

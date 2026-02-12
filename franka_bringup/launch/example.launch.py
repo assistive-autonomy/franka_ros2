@@ -44,16 +44,13 @@
 #  controllers.yaml to avoid runtime errors.
 ############################################################################
 
-import importlib.util
-import os
 import sys
-from ament_index_python.packages import get_package_share_directory
+
+import franka_bringup.launch_utils as launch_utils
+
 from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument,
-    IncludeLaunchDescription,
-    OpaqueFunction,
-)
+from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+                            OpaqueFunction)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -62,15 +59,6 @@ from launch_ros.substitutions import FindPackageShare
 # constant for the controller name parameter
 CONTROLLER_EXAMPLE = 'controller'
 
-package_share = get_package_share_directory('franka_bringup')
-utils_path = os.path.abspath(
-    os.path.join(package_share, '..', '..', 'lib', 'franka_bringup', 'utils')
-)
-launch_utils_path = os.path.join(utils_path, 'launch_utils.py')
-
-spec = importlib.util.spec_from_file_location('launch_utils', launch_utils_path)
-launch_utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(launch_utils)
 
 load_yaml = launch_utils.load_yaml
 
