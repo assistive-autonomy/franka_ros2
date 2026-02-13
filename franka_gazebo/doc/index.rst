@@ -87,6 +87,27 @@ Then you can run the impedance control example.
 
     ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
 
+Mobile Duo Control Example with Gazebo
+---------------------------------------
+
+For running the mobile duo example with inverse kinematics. You must compile the `franka_mobile_duo_example_controllers` package.
+You can compile `franka_mobile_duo_example_controllers` with the following command.
+
+.. code-block:: shell
+
+    colcon build --packages-select franka_mobile_duo_example_controllers
+
+Then source your workspace.
+
+.. code-block:: shell
+
+    source install/setup.sh
+
+Then you can run the mobile duo control example.
+
+.. code-block:: shell
+
+    ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py
 
 Troubleshooting
 ---------------

@@ -78,6 +78,24 @@ Then you can run the impedance control example.
 ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
 ```
 
+## Mobile FR3 Duo Example with Gazebo
+
+Before starting, be sure to build `franka_mobile_duo_example_controllers`, `franka_gazebo`, `gz_ros2_control` and `franka_description` packages.
+
+```bash
+colcon build --packages-select franka_mobile_duo_example_controllers franka_gazebo franka_description gz_ros2_control
+source install/setup.bash
+```
+
+Now you can launch the mobile FR3 duo example with Gazebo:
+
+```bash
+ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py
+```
+
+This will spawn the mobile base and two FR3 arms, and start the joint impedance controller for both arms and cartesian velocity control for the mobile base. RViz will also launch for visualization. Select `base_link` to see the robot there.
+
+Note: On the real hardware, the mobile base only accepts cartseian velocitiy commands.
 
 ## Throubleshooting
 
