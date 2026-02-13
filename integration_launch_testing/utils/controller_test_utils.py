@@ -24,14 +24,33 @@ This module provides common functionality for testing ROS2 controllers:
 
 import time
 
+from rcl_interfaces.srv import GetParameters
 import rclpy
 from rclpy.node import Node as RclpyNode
-from rclpy.parameter_client import AsyncParameterClient
+from rclpy.task import Future
 
 from utils.controller_service_client import ControllerServiceClient
 
 # Controller name for moving robot to start position
 MOVE_TO_START_CONTROLLER = 'move_to_start_example_controller'
+
+
+class AsyncParameterClient:
+
+    def __init__(self, node: RclpyNode, controller_node_name: str):
+        self.node = node
+        self._get_parameter_client = self.node.create_client(
+            GetParameters, f'{controller_node_name}/get_parameters'
+        )
+
+    def get_parameters(self, names: list) -> Future:
+        request = GetParameters.Request()
+        request.names = names
+        future = self._get_parameter_client.call_async(request)
+        return future
+
+    def services_are_ready(self) -> bool:
+        return self._get_parameter_client.service_is_ready()
 
 
 def check_process_finished_parameter(
