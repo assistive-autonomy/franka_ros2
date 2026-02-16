@@ -55,8 +55,11 @@ from ament_index_python.packages import get_package_share_directory
 import franka_bringup.launch_utils as launch_utils
 
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-                            OpaqueFunction)
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -67,7 +70,7 @@ CONTROLLER_EXAMPLE = 'controller'
 
 
 load_yaml = launch_utils.load_yaml
-get_controller_for_config = launch_utils.get_controller_for_config
+get_parameter_for_config = launch_utils.get_parameter_for_config
 package_share = get_package_share_directory('franka_bringup')
 
 # Iterates over the uncommented lines in file specified by the robot_config_file parameter.
@@ -86,11 +89,19 @@ def generate_robot_nodes(context):
         config_file = os.path.join(package_share, 'config', config_file)
 
     controller_names = LaunchConfiguration('controller_names').perform(context)
+    robot_ips = LaunchConfiguration('robot_ips').perform(context)
     configs = load_yaml(config_file)
     nodes = []
 
     for index, (_, config) in enumerate(configs.items()):
         namespace = config.get('namespace', '')
+
+        if robot_ips:
+            robot_ip = get_parameter_for_config(
+                robot_ips, num_configs=len(configs), config_index=index
+            )
+        else:
+            robot_ip = str(config['robot_ip'])
 
         # Single robot configuration: use franka.launch.py
         nodes.append(
@@ -108,17 +119,19 @@ def generate_robot_nodes(context):
                     'robot_type': str(config['robot_type']),
                     'arm_prefix': str(config['arm_prefix']),
                     'namespace': str(namespace),
-                    'robot_ip': str(config['robot_ip']),
+                    'robot_ip': robot_ip,
                     'load_gripper': str(config['load_gripper']),
                     'use_fake_hardware': str(config['use_fake_hardware']),
-                    'fake_sensor_commands': str(config['fake_sensor_commands']),
+                    'fake_sensor_commands': str(
+                        config['fake_sensor_commands']
+                    ),
                     'joint_state_rate': str(config['joint_state_rate']),
                 }.items(),
             )
         )
 
         # Determine which controller to use for this config
-        controller_name = get_controller_for_config(
+        controller_name = get_parameter_for_config(
             controller_names, num_configs=len(configs), config_index=index
         )
         if not controller_name:
@@ -134,7 +147,11 @@ def generate_robot_nodes(context):
                     package='controller_manager',
                     executable='spawner',
                     namespace=namespace,
-                    arguments=[controller_name, '--controller-manager-timeout', '30'],
+                    arguments=[
+                        controller_name,
+                        '--controller-manager-timeout',
+                        '30',
+                    ],
                     parameters=[
                         PathJoinSubstitution(
                             [
@@ -201,6 +218,12 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 'controller_names',
                 description='Comma-separated list of controller names to spawn (required)',
+            ),
+            DeclareLaunchArgument(
+                'robot_ips',
+                default_value='',
+                description='Comma-separated list of IP adresses (optional).'
+                ' If provided, these will override the robot_ip values in the config file.',
             ),
             OpaqueFunction(function=generate_robot_nodes),
         ]
