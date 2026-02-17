@@ -87,15 +87,19 @@ colcon build --packages-select franka_mobile_duo_example_controllers franka_gaze
 source install/setup.bash
 ```
 
-Now you can launch the mobile FR3 duo example with Gazebo:
+Now you can launch the mobile FR3 duo example with Gazebo, and optionally select whether to use sensor-enhanced model:
 
 ```bash
-ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py
+ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py \
+	with_sensors:=false \
 ```
+
+**Argument:**
+- `with_sensors`: If set to `true`, uses the sensor-enhanced description package (`franka_mobile_sensors`). Defaults to `false`.
 
 This will spawn the mobile base and two FR3 arms, and start the joint impedance controller for both arms and cartesian velocity control for the mobile base. RViz will also launch for visualization. Select `base_link` to see the robot there.
 
-Note: On the real hardware, the mobile base only accepts cartseian velocitiy commands.
+Note: On the real hardware, the mobile base only accepts cartesian velocity commands.
 
 ## Throubleshooting
 

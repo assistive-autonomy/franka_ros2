@@ -1,0 +1,273 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_fr3_duo_v0_2_with_sensors">
+
+  <xacro:include filename="$(find franka_description)/robots/mobile_fr3_duo_v0_2/mobile_fr3_duo_v0_2.xacro"/>
+  <xacro:include filename="$(find realsense2_description)/urdf/_d455.urdf.xacro" />
+  <xacro:include filename="$(find olv_module_descriptions)/urdf/olv-imu01.urdf.xacro" />
+  <xacro:include filename="$(find franka_mobile_sensors)/robots/nanoscan3/nanoscan3.xacro" />
+  
+  <!-- Define arguments -->
+  <!-- The IDs of the robot models to be used -->
+  <xacro:arg name="robot_types" default="['tmrv0_2','fr3v2','fr3v2']" />
+  <xacro:property name="robot_types_list" value="${$(arg robot_types)}" />
+  
+  <!-- Don't print a prefix for joints, visuals, and links? -->
+  <xacro:arg name="no_prefix" default="false"/>
+
+  <!-- Should an end-effector be mounted at the flange?" -->
+  <xacro:arg name="hand" default="true" />
+
+  <!-- Which end-effector would be mounted at the flange?" -->
+  <xacro:arg name="ee_id" default="franka_hand" />
+
+  <!-- Where is the end-effector connected to, if different from the robot flange?  -->
+  <xacro:arg name="special_connection" default="" />
+
+  <!-- Position offset between ee and parent frame -->
+  <xacro:arg name="xyz_ee" default="0 0 0" />
+
+  <!-- Rotation offset between ee and parent frame -->
+  <xacro:arg name="rpy_ee" default= "0 0 ${-pi/4}" />
+
+  <!-- Position offset between ee frame and tcp frame -->
+  <xacro:arg name="tcp_xyz" default="0 0 0.1034" />
+
+  <!-- Rotation offset between ee frame and tcp frame -->
+  <xacro:arg name="tcp_rpy" default="0 0 0" />
+
+  <!-- Safety distance for the collision capsules -->
+  <xacro:arg name="safety_distance" default="0.03" />
+
+  <!-- Should self-collision be enabled? -->
+  <xacro:arg name="with_sc" default="false" />
+
+  <!-- Is the robot being controlled with ros2_control?" -->
+  <xacro:arg name="ros2_control" default="false" />
+
+  <!-- IP address or hostname of the robot" -->
+  <xacro:arg name="robot_ips" default="['172.16.0.1','172.16.0.2','172.16.0.3']" />
+  <xacro:property name="robot_ips_list" value="${$(arg robot_ips)}" />
+
+  <!-- Should a fake hardware be used? -->
+  <xacro:arg name="use_fake_hardware" default="false" />
+
+  <!-- Should fake sensors be used? -->
+  <xacro:arg name="fake_sensor_commands" default="false" />
+
+  <!-- Should the robot be spawned in Gazebo?" -->
+  <xacro:arg name="gazebo" default="false" />
+
+  <!-- Should the robot be spawned in Gazebo with effort interfaces?" -->
+  <xacro:arg name="gazebo_effort" default="false" />
+
+  <!-- Name of the description package -->
+  <xacro:arg name="description_pkg" default="franka_description" />
+
+  <!-- The name of the frame to which the robot is connected. -->
+  <xacro:arg name="connected_to" default="base" />
+
+  <!-- Should the reduced tmr kinematic version (without caster wheels) be used? -->
+  <xacro:arg name="reduced_version" default="false" />
+
+  <!-- Should the arms be used? -->
+  <xacro:arg name="use_arms" default="true" />
+
+  <xacro:unless value="$(arg gazebo)">
+    <link name="base"/>
+    <joint name="base_joint" type="fixed">
+      <parent link="${fixed_link_name}"/>
+      <child link="base_link"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+  </xacro:unless>
+
+  <xacro:mobile_fr3_duo_v0_2
+        robot_types="$(arg robot_types)"
+        hand="$(arg hand)"
+        ros2_control="$(arg ros2_control)"
+        gazebo="$(arg gazebo)"
+        gazebo_effort="$(arg gazebo_effort)"
+        use_fake_hardware="$(arg use_fake_hardware)"
+        fake_sensor_commands="$(arg fake_sensor_commands)"
+        reduced_version="$(arg reduced_version)"
+        robot_ips="$(arg robot_ips)"
+        description_pkg="$(arg description_pkg)"
+        connected_to="$(arg connected_to)"
+        use_arms="$(arg use_arms)"
+        no_prefix="$(arg no_prefix)"
+        ee_id="$(arg ee_id)"
+        special_connection="$(arg special_connection)"
+        xyz_ee="$(arg xyz_ee)"
+        rpy_ee="$(arg rpy_ee)"
+        tcp_xyz="$(arg tcp_xyz)"
+        tcp_rpy="$(arg tcp_rpy)"
+        safety_distance="$(arg safety_distance)"
+        with_sc="$(arg with_sc)"/>
+
+  <!-- Attach IMU to mounting point -->
+  <xacro:olv-imu01 
+    namespace="imu" 
+    parent_link="imu_mounting_point" 
+    mounting_side="bottom"
+    mounting_rotation="0"/>
+
+  <!-- Attach cameras to mounting points -->
+  
+  <!-- Front Camera -->
+  <xacro:sensor_d455 parent="front_mounting_point" name="camera_front" 
+                     use_nominal_extrinsics="true">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+
+  <!-- Rear Camera -->
+  <xacro:sensor_d455 parent="rear_mounting_point" name="camera_rear"
+                     use_nominal_extrinsics="true">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+
+  <!-- Left Camera -->
+  <xacro:sensor_d455 parent="left_mounting_point" name="camera_left"
+                     use_nominal_extrinsics="true">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+
+  <!-- Right Camera -->
+  <xacro:sensor_d455 parent="right_mounting_point" name="camera_right"
+                     use_nominal_extrinsics="true">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d455>
+
+  <!-- Attach lidars to mounting points -->
+  
+  <!-- Front Lidar -->
+  <xacro:lidar name="lidar_front" parent="lidar_front_mounting_point">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:lidar>
+
+  <!-- Rear Lidar -->
+  <xacro:lidar name="lidar_rear" parent="lidar_rear_mounting_point">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:lidar>
+
+  <xacro:if value="$(arg gazebo)">
+    <!-- ================= CAMERA SENSORS (Gazebo Sim) ================= -->
+
+    <gazebo reference="camera_front_link">
+      <sensor name="camera_front" type="camera">
+        <update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100.0</far>
+          </clip>
+        </camera>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+
+    <gazebo reference="camera_rear_link">
+      <sensor name="camera_rear" type="camera">
+        <update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+        </camera>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+
+    <gazebo reference="camera_left_link">
+      <sensor name="camera_left" type="camera">
+        <update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+        </camera>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+
+    <gazebo reference="camera_right_link">
+      <sensor name="camera_right" type="camera">
+        <update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+        </camera>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+    
+    <!-- ================= LIDAR SENSORS (Gazebo Sim) ================= -->
+
+    <gazebo reference="lidar_front_link">
+      <sensor name="lidar_front" type="gpu_lidar">
+        <update_rate>20</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+
+    <gazebo reference="lidar_rear_link">
+      <sensor name="lidar_rear" type="gpu_lidar">
+        <update_rate>20</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+    
+
+  </xacro:if>
+</robot>

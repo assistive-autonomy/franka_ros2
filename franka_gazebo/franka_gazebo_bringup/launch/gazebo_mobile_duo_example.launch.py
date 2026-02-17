@@ -30,16 +30,26 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import  LaunchConfiguration
 from launch_ros.actions import Node
 
-def get_robot_description(context: LaunchContext, load_gripper, franka_hand):
+def get_robot_description(context: LaunchContext, load_gripper, franka_hand, with_sensors):
     load_gripper_str = context.perform_substitution(load_gripper)
     franka_hand_str = context.perform_substitution(franka_hand)
+    with_sensors_val = context.perform_substitution(with_sensors).lower()
 
-    franka_xacro_file = os.path.join(
-        get_package_share_directory('franka_description'),
-        'robots',
-        'mobile_fr3_duo_v0_2',
-        'mobile_fr3_duo_v0_2.urdf.xacro'
-    )
+    if with_sensors_val == 'true':
+        selected_package = 'franka_mobile_sensors'
+        franka_xacro_file = os.path.join(
+            get_package_share_directory(selected_package),
+            'robots',
+            'mobile_fr3_duo_v0_2_with_sensors.urdf.xacro'
+        )
+    else:
+        selected_package = 'franka_description'
+        franka_xacro_file = os.path.join(
+            get_package_share_directory(selected_package),
+            'robots',
+            'mobile_fr3_duo_v0_2',
+            'mobile_fr3_duo_v0_2.urdf.xacro'
+        )
 
     robot_description_config = xacro.process_file(
         franka_xacro_file,
@@ -47,6 +57,7 @@ def get_robot_description(context: LaunchContext, load_gripper, franka_hand):
             'robot_types': "['tmrv0_2', 'fr3v2', 'fr3v2']",
             'robot_prefixes': "['', 'left', 'right']",
             'hand': load_gripper_str,
+            'ee_id': franka_hand_str,
             'ros2_control': 'true',
             'gazebo': 'true',
             'gazebo_effort': 'true'
@@ -66,20 +77,32 @@ def get_robot_description(context: LaunchContext, load_gripper, franka_hand):
 
     return [robot_state_publisher]
 
-
+def set_gz_sim_resource_path(context, with_sensors):
+    with_sensors_val = context.perform_substitution(with_sensors).lower()
+    if with_sensors_val == 'true':
+        sensors_share = os.path.dirname(get_package_share_directory('franka_mobile_sensors'))
+        description_share = os.path.dirname(get_package_share_directory('franka_description'))
+        oliv_module_descriptions_share = os.path.dirname(get_package_share_directory('olv_module_descriptions'))
+        os.environ['GZ_SIM_RESOURCE_PATH'] = f"{sensors_share}:{description_share}:{oliv_module_descriptions_share}"
+    else:
+        description_share = os.path.dirname(get_package_share_directory('franka_description'))
+        os.environ['GZ_SIM_RESOURCE_PATH'] = description_share
+    return []
 
 def generate_launch_description():
     load_gripper_name = 'load_gripper'
     franka_hand_name = 'franka_hand'
     namespace_name = 'namespace'
+    with_sensors_name = 'with_sensors'
 
     load_gripper = LaunchConfiguration(load_gripper_name)
     franka_hand = LaunchConfiguration(franka_hand_name)
     namespace = LaunchConfiguration(namespace_name)
+    with_sensors = LaunchConfiguration(with_sensors_name)
 
     load_gripper_launch_argument = DeclareLaunchArgument(
             load_gripper_name,
-            default_value='false',
+            default_value='true',
             description='true/false for activating the gripper')
     franka_hand_launch_argument = DeclareLaunchArgument(
             franka_hand_name,
@@ -89,12 +112,16 @@ def generate_launch_description():
         namespace_name,
         default_value='',
         description='Namespace for the robot. If not set, the robot will be launched in the root namespace.')
+    with_sensors_launch_argument = DeclareLaunchArgument(
+        with_sensors_name,
+        default_value='false',
+        description='If true, use sensor-enhanced description package (franka_mobile_sensors)')
 
     robot_state_publisher = OpaqueFunction(
         function=get_robot_description,
-        args=[load_gripper, franka_hand])
+        args=[load_gripper, franka_hand, with_sensors])
 
-    os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.dirname(get_package_share_directory('franka_description'))
+    set_gz_sim_resource_path_action = OpaqueFunction(function=set_gz_sim_resource_path, args=[with_sensors])
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     gazebo_empty_world = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -142,6 +169,8 @@ def generate_launch_description():
         load_gripper_launch_argument,
         franka_hand_launch_argument,
         namespace_launch_argument,
+        with_sensors_launch_argument,
+        set_gz_sim_resource_path_action,
         gazebo_empty_world,
         robot_state_publisher,
         rviz,
