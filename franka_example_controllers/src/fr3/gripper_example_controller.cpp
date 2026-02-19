@@ -21,7 +21,7 @@
 
 #include "fmt/format.h"
 #include "franka_example_controllers/default_robot_behavior_utils.hpp"
-#include "franka_example_controllers/gripper_example_controller.hpp"
+#include "franka_example_controllers/fr3/gripper_example_controller.hpp"
 
 #define RED "\033[1;31m"
 #define GREEN "\033[1;32m"

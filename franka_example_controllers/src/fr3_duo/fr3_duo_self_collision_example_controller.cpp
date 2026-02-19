@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/fr3_duo_self_collision_example_controller.hpp>
+#include <franka_example_controllers/fr3_duo/fr3_duo_self_collision_example_controller.hpp>
 
 #include <cassert>
 #include <cmath>

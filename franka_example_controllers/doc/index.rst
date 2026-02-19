@@ -84,19 +84,7 @@ The controller integrates both arm and mobile base control in a single unified c
 .. code-block:: shell
 
     ros2 launch franka_bringup mobile_fr3_duo.launch.py \
-        robot_config_file:=mobile_fr3_duo.config.yaml \
         controller_name:=mobile_fr3_duo_joint_impedance_example_controller
-
-**Configuration:**
-
-The mobile base velocity control can be enabled/disabled via the ``enable_mobile_base`` parameter 
-in ``controllers.yaml``:
-
-.. code-block:: yaml
-
-    mobile_fr3_duo_joint_impedance_example_controller:
-      ros__parameters:
-        enable_mobile_base: true  # Set to false to disable mobile base motion
 
 **System Architecture:**
 
@@ -200,6 +188,16 @@ and if a collision is detected they immediately retreat back to the start positi
 .. important::
 
     You must set ``check_selfcollision: true`` in ``fr3_duo.config.yaml`` before running this command.
+
+Mobile Cartesian Velocity Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This controller subscribes to a topic that publishes cartesian velocities and forwards them to the 
+robot after going through a rate limiter.
+
+.. code-block:: shell
+
+    ros2 launch franka_bringup example.launch.py controller_names:=mobile_cartesian_velocity_example_controller
 
 
 Writing Custom Controllers

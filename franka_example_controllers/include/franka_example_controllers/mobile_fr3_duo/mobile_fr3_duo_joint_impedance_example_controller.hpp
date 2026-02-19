@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,30 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
+#include <vector>
 
+#include <Eigen/Eigen>
 #include <controller_interface/controller_interface.hpp>
-#include <geometry_msgs/msg/twist.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <franka_semantic_components/franka_cartesian_velocity_interface.hpp>
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-namespace franka_mobile_example_controllers {
+namespace franka_example_controllers {
 
 /**
- * The cartesian velocity example controller
+ * The mobile FR3 duo joint impedance example controller combines:
+ * - Dual arm joint impedance control (like fr3_duo)
+ * - Mobile base cartesian velocity control
+ * This controller moves joint 4 and 5 of both arms in a compliant periodic movement
+ * while controlling the mobile base velocity.
  */
-class MobileCartesianVelocityExampleController : public controller_interface::ControllerInterface {
+class MobileFr3DuoJointImpedanceExampleController
+    : public controller_interface::ControllerInterface {
  public:
+  using Vector7d = Eigen::Matrix<double, 7, 1>;
+
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()
       const override;
   [[nodiscard]] controller_interface::InterfaceConfiguration state_interface_configuration()
@@ -44,27 +50,30 @@ class MobileCartesianVelocityExampleController : public controller_interface::Co
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::unique_ptr<franka_semantic_components::FrankaCartesianVelocityInterface>
-      franka_cartesian_velocity_;
-  geometry_msgs::msg::TwistStamped::SharedPtr last_cmd_vel_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_sub_;
+  // Dual arm parameters
+  std::vector<std::string> robot_types_;
+  std::vector<std::string> arm_prefixes_;
+  std::string robot_description_;
+  const int num_arm_joints = 7;
+  const int num_base_joints = 4;
 
-  double prev_linear_velocity_x_ = 0.0;
-  double prev_linear_velocity_y_ = 0.0;
-  double prev_angular_velocity_z_ = 0.0;
-  double prev_linear_acceleration_x_ = 0.0;
-  double prev_linear_acceleration_y_ = 0.0;
-  double prev_angular_acceleration_z_ = 0.0;
+  std::vector<Vector7d> q_;
+  std::vector<Vector7d> initial_q_;
+  std::vector<Vector7d> dq_;
+  std::vector<Vector7d> dq_filtered_;
 
-  double max_acceleration_linear_ = 2.5;
-  double max_acceleration_angular_ = 7.5;
-  double max_jerk_linear_ = 3000.0;
-  double max_jerk_angular_ = 5000.0;
+  Vector7d k_gains_;
+  Vector7d d_gains_;
+  double elapsed_time_{0.0};
 
-  double last_cmd_time_;
-  double timeout_sec = 0.2;
-  double dt = 0.001;
-  size_t queue_size_ = 10;
+  // Mobile base velocity parameters
+  const double k_mobile_time_max_{8.0};  // Longer period for mobile base
+  const double k_mobile_v_max_{0.1};     // Max linear velocity (m/s)
+  const double k_mobile_angle_{0.0};     // Move forward/backward
+
+  // Helper methods
+  void updateJointStates();
+  void updateMobileBaseCommand(const rclcpp::Duration& period);
 };
 
-}  // namespace franka_mobile_example_controllers
+}  // namespace franka_example_controllers

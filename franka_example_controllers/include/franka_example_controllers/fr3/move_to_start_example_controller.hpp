@@ -21,7 +21,7 @@
 #include <controller_interface/controller_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include "motion_generator.hpp"
+#include "franka_example_controllers/motion_generator.hpp"
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 

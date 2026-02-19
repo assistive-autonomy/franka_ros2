@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,28 +16,24 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <Eigen/Eigen>
 #include <controller_interface/controller_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
+
+#include "franka_example_controllers/motion_generator.hpp"
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
 namespace franka_example_controllers {
 
-/**
- * The mobile FR3 duo joint impedance example controller combines:
- * - Dual arm joint impedance control (like fr3_duo)
- * - Mobile base cartesian velocity control
- * This controller moves joint 4 and 5 of both arms in a compliant periodic movement
- * while controlling the mobile base velocity.
- */
-class MobileFr3DuoJointImpedanceExampleController
-    : public controller_interface::ControllerInterface {
+enum class ControlPhase { MOVE_TO_START, MOVE_TO_COLLISION, RETREAT, FINISHED };
+
+/// The move to start example controller moves the robot into default pose.
+class SelfCollisionFR3DuoExampleController : public controller_interface::ControllerInterface {
  public:
   using Vector7d = Eigen::Matrix<double, 7, 1>;
-
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()
       const override;
   [[nodiscard]] controller_interface::InterfaceConfiguration state_interface_configuration()
@@ -47,45 +43,33 @@ class MobileFr3DuoJointImpedanceExampleController
   CallbackReturn on_init() override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  // Dual arm parameters
   std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
-  std::string robot_description_;
-  std::vector<int> num_joints_per_robot_;
-  const int num_arm_joints = 7;
-  const int num_base_joints = 4;
+  const int num_joints = 7;
 
   std::vector<Vector7d> q_;
-  std::vector<Vector7d> initial_q_;
   std::vector<Vector7d> dq_;
   std::vector<Vector7d> dq_filtered_;
 
+  std::vector<Vector7d> q_start_;
+  std::vector<Vector7d> q_collision_;
+
   Vector7d k_gains_;
   Vector7d d_gains_;
-  double elapsed_time_{0.0};
 
-  // Mobile base parameters (tmrv0_2 mobile platform with GPIO interfaces)
-  bool enable_mobile_base_{true};
+  rclcpp::Time start_time_;
+  std::vector<std::unique_ptr<MotionGenerator>> motion_generators_;
 
-  // Mobile base velocity parameters
-  const double k_mobile_time_max_{8.0};  // Longer period for mobile base
-  const double k_mobile_v_max_{0.1};     // Max linear velocity (m/s)
-  const double k_mobile_angle_{0.0};     // Move forward/backward
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr collision_sub_;
+  rclcpp::Time last_collision_msg_time_;
+  bool collision_detected_;
+  ControlPhase phase_;
 
-  // Indices for mobile base command interfaces (vx, vy, vz, wx, wy, wz)
-  size_t mobile_vx_index_;
-  size_t mobile_vy_index_;
-  size_t mobile_vz_index_;
-  size_t mobile_wx_index_;
-  size_t mobile_wy_index_;
-  size_t mobile_wz_index_;
+  const double kSpeedMotionGenerators = 0.2;
+  std::string collision_topic_;
 
-  // Helper methods
   void updateJointStates();
-  void updateMobileBaseCommand(const rclcpp::Duration& period);
 };
-
 }  // namespace franka_example_controllers

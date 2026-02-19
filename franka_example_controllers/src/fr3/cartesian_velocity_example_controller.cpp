@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/cartesian_velocity_example_controller.hpp>
 #include <franka_example_controllers/default_robot_behavior_utils.hpp>
+#include <franka_example_controllers/fr3/cartesian_velocity_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
 
 #include <cassert>

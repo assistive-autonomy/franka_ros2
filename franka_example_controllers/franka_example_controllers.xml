@@ -95,4 +95,12 @@
             The self collision FR3 duo example controller moves the robot arms from a start position into a collision configuration and back.
         </description>
     </class>
+    <class name="franka_example_controllers/MobileCartesianVelocityExampleController"
+        type="franka_example_controllers::MobileCartesianVelocityExampleController"
+        base_class_type="controller_interface::ControllerInterface">
+        <description>
+            The mobile cartesian velocity example controller fowards cartesian velocity commands to the mobile robot.
+        </description>
+    </class>
+
 </library>

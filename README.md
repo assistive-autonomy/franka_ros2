@@ -228,16 +228,7 @@ ros2 launch franka_bringup mobile_fr3_duo.launch.py \
   controller_name:=mobile_fr3_duo_joint_impedance_example_controller
 ```
 
-This setup combines:
-- **Dual FR3 arms**: Controlled via joint impedance (torque interface)
-- **Mobile base**: Controlled via cartesian velocity (GPIO interfaces)
-
-**Configuration requirements:**
-- `robot_types`: Must include 3 entries: `['tmrv0_2', 'fr3', 'fr3']` (mobile base + 2 arms)
-- `robot_ips`: Must include 3 IP addresses for mobile base and both arms
-- `arm_prefixes`: Must include 3 prefixes: `['', 'left', 'right']` (empty for mobile base)
-
-**Note:** Like the FR3 Duo setup, the Mobile FR3 Duo supports only **one controller** at a time. The mobile base velocity control is integrated within the controller and can be enabled/disabled via the `enable_mobile_base` parameter in `controllers.yaml`.
+**Note:** Like the FR3 Duo setup, the Mobile FR3 Duo supports only **one controller** at a time. The mobile base velocity control is integrated within the controller.
 
 ### Move the TMRv0.2
 

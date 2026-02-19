@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/joint_position_example_controller.hpp>
+#include <franka_example_controllers/fr3/joint_position_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
 
 #include <cassert>

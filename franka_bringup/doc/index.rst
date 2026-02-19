@@ -184,14 +184,7 @@ To launch the mobile dual-arm setup with the joint impedance controller using a 
 .. code-block:: shell
 
     ros2 launch franka_bringup mobile_fr3_duo.launch.py \
-        robot_config_file:=mobile_fr3_duo.config.yaml \
         controller_name:=mobile_fr3_duo_joint_impedance_example_controller
-
-You can also specify just the config filename, and the launch file will automatically look in the
-``franka_bringup/config/`` directory.
-
-The mobile base velocity control is integrated within the controller and can be enabled/disabled
-via the ``enable_mobile_base`` parameter in ``controllers.yaml``.
 
 .. note::
 

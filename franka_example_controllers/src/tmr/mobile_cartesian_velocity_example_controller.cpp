@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_mobile_example_controllers/mobile_cartesian_velocity_example_controller.hpp>
+#include <franka_example_controllers/tmr/mobile_cartesian_velocity_example_controller.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <exception>
 #include <string>
 
-#include "fmt/format.h"
 #include <Eigen/Eigen>
+#include "fmt/format.h"
 
-namespace franka_mobile_example_controllers {
+namespace franka_example_controllers {
 
 controller_interface::InterfaceConfiguration
 MobileCartesianVelocityExampleController::command_interface_configuration() const {
@@ -70,12 +70,10 @@ controller_interface::return_type MobileCartesianVelocityExampleController::upda
   double target_angular_acceleration_z =
       (target_angular_velocity_z - prev_angular_velocity_z_) / dt;
 
-  prev_linear_acceleration_x_ =
-      limit_acc(target_linear_acceleration_x, prev_linear_acceleration_x_, max_jerk_linear_,
-                max_acceleration_linear_);
-  prev_linear_acceleration_y_ =
-      limit_acc(target_linear_acceleration_y, prev_linear_acceleration_y_, max_jerk_linear_,
-                max_acceleration_linear_);
+  prev_linear_acceleration_x_ = limit_acc(target_linear_acceleration_x, prev_linear_acceleration_x_,
+                                          max_jerk_linear_, max_acceleration_linear_);
+  prev_linear_acceleration_y_ = limit_acc(target_linear_acceleration_y, prev_linear_acceleration_y_,
+                                          max_jerk_linear_, max_acceleration_linear_);
   prev_angular_acceleration_z_ =
       limit_acc(target_angular_acceleration_z, prev_angular_acceleration_z_, max_jerk_angular_,
                 max_acceleration_angular_);
@@ -112,7 +110,7 @@ CallbackReturn MobileCartesianVelocityExampleController::on_configure(
           franka_semantic_components::FrankaCartesianVelocityInterface(false));
 
   cmd_vel_sub_ = get_node()->create_subscription<geometry_msgs::msg::TwistStamped>(
-      fmt::format("{}/mobile_cartesian_velocity_controller/cmd_vel", ns) , queue_size_,
+      fmt::format("{}/mobile_cartesian_velocity_controller/cmd_vel", ns), queue_size_,
       [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
         last_cmd_vel_ = msg;
         last_cmd_time_ = 0.0;
@@ -134,8 +132,8 @@ controller_interface::CallbackReturn MobileCartesianVelocityExampleController::o
   return CallbackReturn::SUCCESS;
 }
 
-}  // namespace franka_mobile_example_controllers
+}  // namespace franka_example_controllers
 #include "pluginlib/class_list_macros.hpp"
 // NOLINTNEXTLINE
-PLUGINLIB_EXPORT_CLASS(franka_mobile_example_controllers::MobileCartesianVelocityExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::MobileCartesianVelocityExampleController,
                        controller_interface::ControllerInterface)
