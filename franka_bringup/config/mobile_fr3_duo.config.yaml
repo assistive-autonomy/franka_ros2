@@ -7,7 +7,7 @@
 mobile_fr3_duo_robot:
   robot_types: "['tmrv0_2', 'fr3v2', 'fr3v2']"
   robot_ips: "['172.16.16.10', '172.16.16.11', '172.16.16.12']"
-  arm_prefixes: "['', 'left', 'right']"
+  robot_prefixes: "['', 'left', 'right']"
   load_gripper: false
   use_fake_hardware: false
   fake_sensor_commands: false

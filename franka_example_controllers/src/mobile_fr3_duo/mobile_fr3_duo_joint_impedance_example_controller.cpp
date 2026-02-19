@@ -35,14 +35,10 @@ MobileFr3DuoJointImpedanceExampleController::command_interface_configuration() c
   config.names = {"vx/cartesian_velocity", "vy/cartesian_velocity", "vz/cartesian_velocity",
                   "wx/cartesian_velocity", "wy/cartesian_velocity", "wz/cartesian_velocity"};
 
-  for (int index = 0; index < arm_prefixes_.size(); ++index) {
-    const auto& prefix = arm_prefixes_[index];
-    if (prefix.empty()) {
-      continue;  // Skip empty prefixes (e.g., for the mobile base)
-    }
+  for (size_t index = 0; index < arm_prefixes_.size(); ++index) {
     for (int i = 1; i <= num_arm_joints; ++i) {
-      config.names.push_back(prefix + "_" + robot_types_[index] + "_joint" + std::to_string(i) +
-                             "/effort");
+      config.names.push_back(arm_prefixes_[index] + "_" + robot_types_[index + 1] + "_joint" +
+                             std::to_string(i) + "/effort");
     }
   }
 
@@ -59,18 +55,13 @@ MobileFr3DuoJointImpedanceExampleController::state_interface_configuration() con
     config.names.push_back(robot_types_[0] + "_joint_" + std::to_string(i) + "/velocity");
   }
 
-  for (int i = 1; i <= num_arm_joints; ++i) {
-    config.names.push_back(arm_prefixes_[1] + "_" + robot_types_[1] + "_joint" + std::to_string(i) +
-                           "/position");
-    config.names.push_back(arm_prefixes_[1] + "_" + robot_types_[1] + "_joint" + std::to_string(i) +
-                           "/velocity");
-  }
-
-  for (int i = 1; i <= num_arm_joints; ++i) {
-    config.names.push_back(arm_prefixes_[2] + "_" + robot_types_[2] + "_joint" + std::to_string(i) +
-                           "/position");
-    config.names.push_back(arm_prefixes_[2] + "_" + robot_types_[2] + "_joint" + std::to_string(i) +
-                           "/velocity");
+  for (int arm = 0; arm < 2; ++arm) {
+    for (int i = 1; i <= num_arm_joints; ++i) {
+      std::string prefix =
+          arm_prefixes_[arm] + "_" + robot_types_[arm + 1] + "_joint" + std::to_string(i);
+      config.names.push_back(prefix + "/position");
+      config.names.push_back(prefix + "/velocity");
+    }
   }
 
   return config;
@@ -114,6 +105,7 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_init() {
     auto_declare<std::vector<double>>("k_gains", {});
     auto_declare<std::vector<double>>("d_gains", {});
     auto_declare<std::vector<std::string>>("arm_prefixes", {});
+    auto_declare<std::vector<std::string>>("robot_prefixes", {});
     auto_declare<std::vector<std::string>>("robot_types", {});
   } catch (...) {
     return CallbackReturn::ERROR;
@@ -125,8 +117,11 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_configure(
     const rclcpp_lifecycle::State&) {
   auto k = get_node()->get_parameter("k_gains").as_double_array();
   auto d = get_node()->get_parameter("d_gains").as_double_array();
-  arm_prefixes_ = get_node()->get_parameter("arm_prefixes").as_string_array();
+  robot_prefixes_ = get_node()->get_parameter("robot_prefixes").as_string_array();
   robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
+
+  auto arm_prefixes_begin = robot_prefixes_.begin() + 1;
+  arm_prefixes_ = std::vector<std::string>(arm_prefixes_begin, arm_prefixes_begin + 2);
 
   if (k.size() != 7 || d.size() != 7) {
     RCLCPP_FATAL(get_node()->get_logger(), "k_gains and d_gains must be size 7");

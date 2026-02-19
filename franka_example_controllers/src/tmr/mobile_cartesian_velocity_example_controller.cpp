@@ -57,11 +57,13 @@ controller_interface::return_type MobileCartesianVelocityExampleController::upda
   auto limit_acc = [&](double target_a, double prev_a, double max_jerk, double max_acc) {
     double delta_a = target_a - prev_a;
     double max_delta = max_jerk * dt;
-    if (std::abs(delta_a) > max_delta)
+    if (std::abs(delta_a) > max_delta) {
       delta_a = std::copysign(max_delta, delta_a);
+    }
     double limited_a = prev_a + delta_a;
-    if (std::abs(limited_a) > max_acc)
+    if (std::abs(limited_a) > max_acc) {
       return std::copysign(max_acc, limited_a);
+    }
     return limited_a;
   };
 

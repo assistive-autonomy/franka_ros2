@@ -53,6 +53,7 @@ class MobileFr3DuoJointImpedanceExampleController
   // Dual arm parameters
   std::vector<std::string> robot_types_;
   std::vector<std::string> arm_prefixes_;
+  std::vector<std::string> robot_prefixes_;
   std::string robot_description_;
   const int num_arm_joints = 7;
   const int num_base_joints = 4;

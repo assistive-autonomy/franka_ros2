@@ -17,17 +17,18 @@
 # robot_config_file: Configuration file name or path. If just a filename is
 #                   provided (e.g., 'mobile_fr3_duo.config.yaml'), it will be
 #                   looked up in franka_bringup/config/ directory.
-#                   If provided, robot_ips, robot_types, and arm_prefixes
+#                   If provided, robot_ips, robot_types, and robot_prefixes
 #                   will be read from this file. (default: '')
 # controller_name: Controller name to spawn (required). Only one controller is
 #                 supported for mobile duo setups.
 # robot_types: Types of robots as a string list (e.g., "['tmrv0_2','fr3','fr3']")
 #             First entry is mobile base, rest are arms.
 #             Required if robot_config_file is not provided.
-# arm_prefixes: Prefixes for robots as a string list (e.g., "['','left','right']")
+# robot_prefixes: Prefixes for robots as a string list (e.g., "['','left','right']")
 #              First entry is mobile base prefix (empty ''), rest are arm prefixes.
 #              Required if robot_config_file is not provided.
-# robot_ips: IP addresses of robots as a string list (e.g., "['172.16.0.1','172.16.0.5','172.16.0.6']")
+# robot_ips: IP addresses of robots as a string list
+#   (e.g., "['172.16.0.1','172.16.0.5','172.16.0.6']")
 #           First entry is mobile base IP, rest are arm IPs.
 #           Required if robot_config_file is not provided.
 # load_gripper: Use Franka Gripper as end-effector (default: 'false')
@@ -53,7 +54,7 @@
 #    ros2 launch franka_bringup mobile_fr3_duo.launch.py \
 #      robot_types:="['tmrv0_2','fr3','fr3']" \
 #      robot_ips:="['172.16.0.1','172.16.0.5','172.16.0.6']" \
-#      arm_prefixes:="['','left','right']"
+#      robot_prefixes:="['','left','right']"
 #
 # NOTE: The franka_robot_state_broadcaster is NOT launched for mobile duo setups as it
 # is not supported for multi-arm configurations.
@@ -61,9 +62,9 @@
 
 import os
 import sys
-import franka_bringup.launch_utils as launch_utils
-from ament_index_python.packages import get_package_share_directory
 
+from ament_index_python.packages import get_package_share_directory
+import franka_bringup.launch_utils as launch_utils
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction, Shutdown
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -77,8 +78,8 @@ CONTROLLER_EXAMPLE = 'controller'
 load_yaml = launch_utils.load_yaml
 parse_string_list = launch_utils.parse_string_list
 validate_duo_arrays_length = launch_utils.validate_duo_arrays_length
-validate_arm_prefixes_unique = launch_utils.validate_arm_prefixes_unique
-is_duo_config = launch_utils.is_duo_config
+validate_robot_prefixes_unique = launch_utils.validate_arm_prefixes_unique
+is_duo_config = launch_utils.is_mobile_duo_config
 package_share = get_package_share_directory('franka_bringup')
 
 
@@ -103,7 +104,7 @@ def generate_robot_nodes(context):
         print(
             f'Error: Configuration file {
                 robot_config_file} does not contain a valid configuration.\n'
-            f'Expected keys: robot_types, robot_ips, arm_prefixes\n'
+            f'Expected keys: robot_types, robot_ips, robot_prefixes\n'
             f'For mobile duo setup: robot_types should have 3 entries [mobile_base, arm1, arm2]\n'
             f'For single robot configurations, use example.launch.py instead.'
         )
@@ -112,7 +113,7 @@ def generate_robot_nodes(context):
     # Extract parameters from config
     robot_ips_str = str(config['robot_ips'])
     robot_types_str = str(config['robot_types'])
-    arm_prefixes_str = str(config['arm_prefixes'])
+    robot_prefixes_str = str(config['robot_prefixes'])
     use_fake_hardware_str = str(config.get('use_fake_hardware', 'false'))
     fake_sensor_commands_str = str(config.get('fake_sensor_commands', 'false'))
     load_gripper_str = str(config.get('load_gripper', 'false'))
@@ -126,14 +127,14 @@ def generate_robot_nodes(context):
     # ros2_control_node
     robot_types_list = parse_string_list(robot_types_str)
     robot_ips_list = parse_string_list(robot_ips_str)
-    arm_prefixes_list = parse_string_list(arm_prefixes_str)
+    robot_prefixes_list = parse_string_list(robot_prefixes_str)
 
     # Validate duo configuration
     validate_duo_arrays_length(
         robot_types_list,
         robot_ips_list,
-        arm_prefixes_list)
-    validate_arm_prefixes_unique(arm_prefixes_list)
+        robot_prefixes_list)
+    validate_robot_prefixes_unique(robot_prefixes_list)
 
     # Build URDF path - using mobile_fr3_duo with tmrv0_2 mobile base
     urdf_path = PathJoinSubstitution(
@@ -181,7 +182,7 @@ def generate_robot_nodes(context):
                 controllers_yaml,
                 {'robot_description': robot_description},
                 {'robot_types': robot_types_list},
-                {'arm_prefixes': arm_prefixes_list},
+                {'robot_prefixes': robot_prefixes_list},
             ],
             remappings=[('joint_states', 'franka/joint_states')],
             output={
@@ -283,7 +284,7 @@ def generate_launch_description():
             'robot_config_file',
             default_value='mobile_fr3_duo.config.yaml',
             description='Config file name (looked up in franka_bringup/config/) or full path. '
-            'If provided, robot_ips, robot_types, and arm_prefixes will be read from this file.',
+            'If provided, robot_ips, robot_types, and robot_prefixes will be read from this file.',
         ),
         DeclareLaunchArgument(
             'controllers_yaml',
