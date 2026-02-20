@@ -59,7 +59,7 @@ ros2 launch franka_gazebo_bringup gazebo_joint_position_controller_example.launc
 
 ## Joint Impedance Control Example with Gazebo
 
-For running torque example. You must compile the `franka_ign_ros2_control` package located under `franka_gazebo`.
+For running torque example. You must compile the `franka_ign_ros2_control` package located under `franka_gazebo_bringup`.
 You can compile `franka_ign_ros2_control` with the following command.
 
 ```bash
@@ -80,10 +80,10 @@ ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.laun
 
 ## Mobile FR3 Duo Example with Gazebo
 
-Before starting, be sure to build `franka_example_controllers`, `franka_gazebo`, `gz_ros2_control` and `franka_description` packages.
+Before starting, be sure to build `franka_example_controllers`, `franka_gazebo_bringup`, `gz_ros2_control` and `franka_description` packages.
 
 ```bash
-colcon build --packages-select franka_example_controllers franka_gazebo franka_description gz_ros2_control
+colcon build --packages-select franka_example_controllers franka_gazebo_bringup franka_description gz_ros2_control
 source install/setup.bash
 ```
 

@@ -11,7 +11,7 @@ franka_ros2
    ../franka_gripper/doc/index
    ../franka_robot_state_broadcaster/doc/index
    ../franka_fr3_moveit_config/doc/index
-   ../franka_gazebo/doc/index
+   ../franka_gazebo_bringup/doc/index
    ../franka_msgs/doc/index
    ../franka_ros2/doc/compatibility_matrix
    ../franka_selfcollision/doc/index
