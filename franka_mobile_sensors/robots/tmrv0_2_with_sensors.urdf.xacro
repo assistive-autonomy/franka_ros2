@@ -2,18 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tmrv0_2_with_sensors">
 
   <!-- Include base tmrv0_2 robot -->
-  <xacro:include filename="$(find franka_description)/robots/tmrv0_2/tmrv0_2.xacro" />
-  
-  <!-- Instantiate the base robot -->
-  <xacro:tmrv0_2 
-    mobile_robot_type="tmrv0_2"
-    ros2_control="true"
-    use_fake_hardware="false"
-    fake_sensor_commands="false"
-    reduced_version="false"
-  />
+  <xacro:include filename="$(find franka_description)/robots/tmrv0_2/tmrv0_2.urdf.xacro" />
 
-  <!-- Include RealSense D455 camera description -->
+   <!-- Include RealSense D455 camera description -->
   <xacro:include filename="$(find realsense2_description)/urdf/_d455.urdf.xacro" />
 
   <!-- Include IMU description -->

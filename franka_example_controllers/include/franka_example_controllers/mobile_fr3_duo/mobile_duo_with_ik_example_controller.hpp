@@ -84,10 +84,6 @@ class MobileFr3DuoJointImpedanceExampleControllerWithIK
   double freq_{0.1};
   double wheel_radius_{0.1};
 
-  double k_period_{10.0};
-  double k_mobile_v_max_{0.2};
-  double k_mobile_angle_{0.0};
-
   void updateJointStates();
   void updateMobileBaseCommand(const rclcpp::Duration& period);
   void computeSwerveIK(double vx, double vy, double wz);

@@ -34,7 +34,7 @@ MobileFr3DuoJointImpedanceExampleControllerWithIK::command_interface_configurati
   config.names = {robot_types_[0] + "_joint_0/position", robot_types_[0] + "_joint_1/velocity",
                   robot_types_[0] + "_joint_2/position", robot_types_[0] + "_joint_3/velocity"};
 
-  for (int index = 0; index < arm_prefixes_.size(); ++index) {
+  for (size_t index = 0; index < arm_prefixes_.size(); ++index) {
     for (int i = 1; i <= num_arm_joints; ++i) {
       config.names.push_back(arm_prefixes_[index] + "_" + robot_types_[index + 1] + "_joint" +
                              std::to_string(i) + "/effort");
@@ -243,7 +243,6 @@ void MobileFr3DuoJointImpedanceExampleControllerWithIK::computeSwerveIK(double v
 
   for (int i = 0; i < kNumberOfWheels; ++i) {
     double prev_angle = steering_angles_(i);
-    double prev_velocity = wheel_velocities_(i);
     double new_angle = angle(i);
     double new_speed = speed(i);
 
