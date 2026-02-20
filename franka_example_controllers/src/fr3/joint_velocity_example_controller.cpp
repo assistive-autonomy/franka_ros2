@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <franka_example_controllers/default_robot_behavior_utils.hpp>
-#include <franka_example_controllers/joint_velocity_example_controller.hpp>
+#include <franka_example_controllers/fr3/joint_velocity_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
 
 #include <cassert>

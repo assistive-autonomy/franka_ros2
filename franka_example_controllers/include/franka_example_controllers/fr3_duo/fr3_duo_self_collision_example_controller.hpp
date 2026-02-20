@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Franka Robotics GmbH
+// Copyright (c) 2026 Franka Robotics GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,26 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
+#include <Eigen/Eigen>
 #include <controller_interface/controller_interface.hpp>
-#include <geometry_msgs/msg/twist.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
 
-#include <franka_semantic_components/franka_cartesian_velocity_interface.hpp>
+#include "franka_example_controllers/motion_generator.hpp"
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-namespace franka_mobile_example_controllers {
+namespace franka_example_controllers {
 
-/**
- * The cartesian velocity example controller
- */
-class MobileCartesianVelocityExampleController : public controller_interface::ControllerInterface {
+enum class ControlPhase { MOVE_TO_START, MOVE_TO_COLLISION, RETREAT, FINISHED };
+
+/// The move to start example controller moves the robot into default pose.
+class SelfCollisionFR3DuoExampleController : public controller_interface::ControllerInterface {
  public:
+  using Vector7d = Eigen::Matrix<double, 7, 1>;
   [[nodiscard]] controller_interface::InterfaceConfiguration command_interface_configuration()
       const override;
   [[nodiscard]] controller_interface::InterfaceConfiguration state_interface_configuration()
@@ -41,30 +43,33 @@ class MobileCartesianVelocityExampleController : public controller_interface::Co
   CallbackReturn on_init() override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
  private:
-  std::unique_ptr<franka_semantic_components::FrankaCartesianVelocityInterface>
-      franka_cartesian_velocity_;
-  geometry_msgs::msg::TwistStamped::SharedPtr last_cmd_vel_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_sub_;
+  std::vector<std::string> robot_types_;
+  std::vector<std::string> arm_prefixes_;
+  const int num_joints = 7;
 
-  double prev_linear_velocity_x_ = 0.0;
-  double prev_linear_velocity_y_ = 0.0;
-  double prev_angular_velocity_z_ = 0.0;
-  double prev_linear_acceleration_x_ = 0.0;
-  double prev_linear_acceleration_y_ = 0.0;
-  double prev_angular_acceleration_z_ = 0.0;
+  std::vector<Vector7d> q_;
+  std::vector<Vector7d> dq_;
+  std::vector<Vector7d> dq_filtered_;
 
-  double max_acceleration_linear_ = 5.0;
-  double max_acceleration_angular_ = 10.0;
-  double max_jerk_linear_ = 3000.0;
-  double max_jerk_angular_ = 5000.0;
+  std::vector<Vector7d> q_start_;
+  std::vector<Vector7d> q_collision_;
 
-  double last_cmd_time_;
-  double timeout_sec = 0.2;
-  double dt = 0.001;
-  size_t queue_size_ = 10;
+  Vector7d k_gains_;
+  Vector7d d_gains_;
+
+  rclcpp::Time start_time_;
+  std::vector<std::unique_ptr<MotionGenerator>> motion_generators_;
+
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr collision_sub_;
+  rclcpp::Time last_collision_msg_time_;
+  bool collision_detected_;
+  ControlPhase phase_;
+
+  const double kSpeedMotionGenerators = 0.2;
+  std::string collision_topic_;
+
+  void updateJointStates();
 };
-
-}  // namespace franka_mobile_example_controllers
+}  // namespace franka_example_controllers

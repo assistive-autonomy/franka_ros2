@@ -219,6 +219,17 @@ ros2 launch franka_bringup fr3_duo.launch.py \
 
 **Note:** The FR3 Duo setup supports only **one controller** at a time and uses the `controller_name` parameter (singular). The dual-arm setup currently only supports the torque (effort) command interface.
 
+### Run Mobile FR3 Duo
+
+For Mobile FR3 Duo setups (TMRv0.2 mobile base with dual FR3 arms), use the `mobile_fr3_duo.launch.py` launch file with the `mobile_fr3_duo.config.yaml` configuration:
+
+```bash
+ros2 launch franka_bringup mobile_fr3_duo.launch.py \
+  controller_name:=mobile_fr3_duo_joint_impedance_example_controller
+```
+
+**Note:** Like the FR3 Duo setup, the Mobile FR3 Duo supports only **one controller** at a time. The mobile base velocity control is integrated within the controller.
+
 ### Move the TMRv0.2
 
 You can move the TMRv0.2 either:

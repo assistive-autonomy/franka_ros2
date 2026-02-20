@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/joint_impedance_example_controller.hpp>
-#include <franka_example_controllers/robot_utils.hpp>
+#include <franka_example_controllers/fr3/move_to_start_example_controller.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <exception>
-#include <string>
 
 #include <Eigen/Eigen>
+#include <controller_interface/controller_interface.hpp>
 
 namespace franka_example_controllers {
 
 controller_interface::InterfaceConfiguration
-JointImpedanceExampleController::command_interface_configuration() const {
+MoveToStartExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
@@ -36,7 +35,7 @@ JointImpedanceExampleController::command_interface_configuration() const {
 }
 
 controller_interface::InterfaceConfiguration
-JointImpedanceExampleController::state_interface_configuration() const {
+MoveToStartExampleController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
   for (int i = 1; i <= num_joints; ++i) {
@@ -46,36 +45,46 @@ JointImpedanceExampleController::state_interface_configuration() const {
   return config;
 }
 
-controller_interface::return_type JointImpedanceExampleController::update(
+controller_interface::return_type MoveToStartExampleController::update(
     const rclcpp::Time& /*time*/,
-    const rclcpp::Duration& period) {
+    const rclcpp::Duration& /*period*/) {
   updateJointStates();
-  Vector7d q_goal = initial_q_;
-  elapsed_time_ = elapsed_time_ + period.seconds();
-
-  double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * elapsed_time_));
-  q_goal(3) += delta_angle;
-  q_goal(4) += delta_angle;
-
-  const double kAlpha = 0.99;
-  dq_filtered_ = (1 - kAlpha) * dq_filtered_ + kAlpha * dq_;
-  Vector7d tau_d_calculated =
-      k_gains_.cwiseProduct(q_goal - q_) + d_gains_.cwiseProduct(-dq_filtered_);
-
-  for (int i = 0; i < num_joints; ++i) {
-    if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
-      RCLCPP_FATAL(get_node()->get_logger(), "Failed to set command interface value");
-      return controller_interface::return_type::ERROR;
+  auto trajectory_time = this->get_node()->now() - start_time_;
+  auto motion_generator_output = motion_generator_->getDesiredJointPositions(trajectory_time);
+  Vector7d q_desired = motion_generator_output.first;
+  bool finished = motion_generator_output.second;
+  if (not finished) {
+    const double kAlpha = 0.99;
+    dq_filtered_ = (1 - kAlpha) * dq_filtered_ + kAlpha * dq_;
+    Vector7d tau_d_calculated =
+        k_gains_.cwiseProduct(q_desired - q_) + d_gains_.cwiseProduct(-dq_filtered_);
+    for (int i = 0; i < 7; ++i) {
+      if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
+        RCLCPP_FATAL(get_node()->get_logger(), "Failed to set command interface value");
+        return controller_interface::return_type::ERROR;
+      }
     }
+  } else {
+    bool ret = true;
+    for (auto& command_interface : command_interfaces_) {
+      ret &= command_interface.set_value(0.0);
+    }
+    if (!ret) {
+      RCLCPP_FATAL(get_node()->get_logger(), "Failure to clear the torque at the end of control. ");
+    }
+    this->get_node()->set_parameter({"process_finished", true});
   }
   return controller_interface::return_type::OK;
 }
 
-CallbackReturn JointImpedanceExampleController::on_init() {
+CallbackReturn MoveToStartExampleController::on_init() {
   try {
-    auto_declare<std::string>("robot_type", "");
+    auto_declare<bool>("process_finished", false);
+    auto_declare<std::string>("robot_type", "fr3");
     auto_declare<std::vector<double>>("k_gains", {});
     auto_declare<std::vector<double>>("d_gains", {});
+    auto_declare<std::vector<double>>("start_joint_configuration",
+                                      {0.0, -M_PI_4, 0.0, -3.0 * M_PI_4, 0.0, M_PI_2, M_PI_4});
   } catch (const std::exception& e) {
     fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
     return CallbackReturn::ERROR;
@@ -83,11 +92,18 @@ CallbackReturn JointImpedanceExampleController::on_init() {
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn JointImpedanceExampleController::on_configure(
+CallbackReturn MoveToStartExampleController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   robot_type_ = get_node()->get_parameter("robot_type").as_string();
   auto k_gains = get_node()->get_parameter("k_gains").as_double_array();
   auto d_gains = get_node()->get_parameter("d_gains").as_double_array();
+
+  auto start_joint_configuration_vector =
+      get_node()->get_parameter("start_joint_configuration").as_double_array();
+
+  Eigen::Map<Eigen::VectorXd>(q_goal_.data(), num_joints) =
+      Eigen::Map<Eigen::VectorXd>(start_joint_configuration_vector.data(), num_joints);
+
   if (k_gains.empty()) {
     RCLCPP_FATAL(get_node()->get_logger(), "k_gains parameter not set");
     return CallbackReturn::FAILURE;
@@ -111,33 +127,18 @@ CallbackReturn JointImpedanceExampleController::on_configure(
     k_gains_(i) = k_gains.at(i);
   }
   dq_filtered_.setZero();
-
-  auto parameters_client =
-      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
-  parameters_client->wait_for_service();
-
-  auto future = parameters_client->get_parameters({"robot_description"});
-  auto result = future.get();
-  if (!result.empty()) {
-    robot_description_ = result[0].value_to_string();
-  } else {
-    RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
-  }
-
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn JointImpedanceExampleController::on_activate(
+CallbackReturn MoveToStartExampleController::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
   updateJointStates();
-  dq_filtered_.setZero();
-  initial_q_ = q_;
-  elapsed_time_ = 0.0;
-
+  motion_generator_ = std::make_unique<MotionGenerator>(0.2, q_, q_goal_);
+  start_time_ = this->get_node()->now();
   return CallbackReturn::SUCCESS;
 }
 
-void JointImpedanceExampleController::updateJointStates() {
+void MoveToStartExampleController::updateJointStates() {
   for (auto i = 0; i < num_joints; ++i) {
     const auto& position_interface = state_interfaces_.at(2 * i);
     const auto& velocity_interface = state_interfaces_.at(2 * i + 1);
@@ -149,9 +150,8 @@ void JointImpedanceExampleController::updateJointStates() {
     dq_(i) = velocity_interface.get_optional().value();
   }
 }
-
 }  // namespace franka_example_controllers
 #include "pluginlib/class_list_macros.hpp"
 // NOLINTNEXTLINE
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::JointImpedanceExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::MoveToStartExampleController,
                        controller_interface::ControllerInterface)

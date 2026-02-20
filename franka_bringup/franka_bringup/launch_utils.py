@@ -54,6 +54,17 @@ def is_duo_config(config):
     return duo_keys.issubset(config.keys())
 
 
+def is_mobile_duo_config(config):
+    """
+    Detect mobile duo setup by checking for plural keys unique to multi-robot configs.
+
+    @param config: Configuration dictionary from YAML file.
+    @return: True if configuration is for a mobile duo setup, False otherwise.
+    """
+    duo_keys = {'robot_types', 'robot_ips', 'robot_prefixes'}
+    return duo_keys.issubset(config.keys())
+
+
 def _assert_same_length(*items: List[Sized]):
     """
     Assert that all provided lists have the same length.

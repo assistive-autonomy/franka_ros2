@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <franka_example_controllers/cartesian_pose_example_controller.hpp>
 #include <franka_example_controllers/default_robot_behavior_utils.hpp>
+#include <franka_example_controllers/fr3/elbow_example_controller.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -23,33 +23,33 @@
 namespace franka_example_controllers {
 
 controller_interface::InterfaceConfiguration
-CartesianPoseExampleController::command_interface_configuration() const {
+ElbowExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  config.names = franka_cartesian_pose_->get_command_interface_names();
+  config.names = franka_cartesian_velocity_->get_command_interface_names();
 
   return config;
 }
 
-controller_interface::InterfaceConfiguration
-CartesianPoseExampleController::state_interface_configuration() const {
+controller_interface::InterfaceConfiguration ElbowExampleController::state_interface_configuration()
+    const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  config.names = franka_cartesian_pose_->get_state_interface_names();
+  config.names = franka_cartesian_velocity_->get_state_interface_names();
+
   // add the robot time interface
   config.names.push_back(robot_type_ + "/robot_time");
+
   return config;
 }
 
-controller_interface::return_type CartesianPoseExampleController::update(
+controller_interface::return_type ElbowExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
   robot_time_ = state_interfaces_.back().get_optional<double>().value();
 
   if (initialization_flag_) {
-    // Get initial orientation and translation
-    std::tie(orientation_, position_) =
-        franka_cartesian_pose_->getCurrentOrientationAndTranslation();
+    initial_elbow_configuration_ = franka_cartesian_velocity_->getCurrentElbowConfiguration();
     initial_robot_time_ = robot_time_;
     elapsed_time_ = 0.0;
     initialization_flag_ = false;
@@ -57,22 +57,16 @@ controller_interface::return_type CartesianPoseExampleController::update(
     elapsed_time_ = robot_time_ - initial_robot_time_;
   }
 
-  double radius = 0.1;
-  double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_));
+  double angle = M_PI / 15.0 * (1.0 - std::cos(M_PI / 5.0 * elapsed_time_));
 
-  double delta_x = radius * std::sin(angle);
-  double delta_z = radius * (std::cos(angle) - 1);
+  Eigen::Vector3d cartesian_linear_velocity(0.0, 0.0, 0.0);
+  Eigen::Vector3d cartesian_angular_velocity(0.0, 0.0, 0.0);
 
-  Eigen::Quaterniond new_orientation;
-  Eigen::Vector3d new_position;
+  std::array<double, 2> elbow_command = {
+      {initial_elbow_configuration_[0] + angle, initial_elbow_configuration_[1]}};
 
-  new_position = position_;
-  new_orientation = orientation_;
-
-  new_position(0) -= delta_x;
-  new_position(2) -= delta_z;
-
-  if (franka_cartesian_pose_->setCommand(new_orientation, new_position)) {
+  if (franka_cartesian_velocity_->setCommand(cartesian_linear_velocity, cartesian_angular_velocity,
+                                             elbow_command)) {
     return controller_interface::return_type::OK;
   } else {
     RCLCPP_FATAL(get_node()->get_logger(),
@@ -81,16 +75,16 @@ controller_interface::return_type CartesianPoseExampleController::update(
   }
 }
 
-CallbackReturn CartesianPoseExampleController::on_init() {
-  franka_cartesian_pose_ =
-      std::make_unique<franka_semantic_components::FrankaCartesianPoseInterface>(
-          franka_semantic_components::FrankaCartesianPoseInterface(k_elbow_activated_));
-
+CallbackReturn ElbowExampleController::on_init() {
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn CartesianPoseExampleController::on_configure(
+CallbackReturn ElbowExampleController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
+  franka_cartesian_velocity_ =
+      std::make_unique<franka_semantic_components::FrankaCartesianVelocityInterface>(
+          franka_semantic_components::FrankaCartesianVelocityInterface(k_elbow_activated_));
+
   auto client = get_node()->create_client<franka_msgs::srv::SetFullCollisionBehavior>(
       "service_server/set_full_collision_behavior");
   auto request = DefaultRobotBehavior::getDefaultCollisionBehaviorRequest();
@@ -124,24 +118,24 @@ CallbackReturn CartesianPoseExampleController::on_configure(
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn CartesianPoseExampleController::on_activate(
+CallbackReturn ElbowExampleController::on_activate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
+  franka_cartesian_velocity_->assign_loaned_command_interfaces(command_interfaces_);
+  franka_cartesian_velocity_->assign_loaned_state_interfaces(state_interfaces_);
+
   initialization_flag_ = true;
   elapsed_time_ = 0.0;
-  franka_cartesian_pose_->assign_loaned_command_interfaces(command_interfaces_);
-  franka_cartesian_pose_->assign_loaned_state_interfaces(state_interfaces_);
-
   return CallbackReturn::SUCCESS;
 }
 
-controller_interface::CallbackReturn CartesianPoseExampleController::on_deactivate(
+controller_interface::CallbackReturn ElbowExampleController::on_deactivate(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  franka_cartesian_pose_->release_interfaces();
+  franka_cartesian_velocity_->release_interfaces();
   return CallbackReturn::SUCCESS;
 }
 
 }  // namespace franka_example_controllers
 #include "pluginlib/class_list_macros.hpp"
 // NOLINTNEXTLINE
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::CartesianPoseExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::ElbowExampleController,
                        controller_interface::ControllerInterface)
