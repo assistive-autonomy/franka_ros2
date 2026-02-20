@@ -12,7 +12,7 @@ constexpr size_t kMaxCounter = 1000;
 
 namespace franka {
 
-constexpr double k_EPS = 1e-5;
+static constexpr double k_EPS = 1e-5;
 
 template <typename T>
 bool compareWithTolerance(const T& lhs, const T& rhs) {
@@ -56,6 +56,7 @@ class PTPMotionTests : public ::testing::Test {
     std::copy(std::cbegin(default_goal_joint_configuration),
               std::cend(default_goal_joint_configuration), std::begin(default_joint_positions.q));
     default_joint_positions.motion_finished = false;
+    stopping_joint_positions.motion_finished = true;
   }
 
   std::shared_ptr<MockRobot> mock_robot;
@@ -70,6 +71,7 @@ class PTPMotionTests : public ::testing::Test {
   franka::RobotState default_robot_state{};
   // This value will be overwritten in the SetUp to the default goal joint configuration
   franka::JointPositions default_joint_positions{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  franka::JointPositions stopping_joint_positions{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
 
   auto startNewMotion() -> std::string {
     std::vector<double> maximum_joint_velocities(7, 1.0);
@@ -213,7 +215,6 @@ TEST_F(PTPMotionTests, givenValidMotion_whenCancelMotion_thenMotionIsCancelled) 
   auto new_motion_id = startNewMotion();
   runUntilExecuting(new_motion_id);
 
-  default_joint_positions.motion_finished = true;
-  EXPECT_CALL(*active_control_raw, writeOnce(default_joint_positions)).Times(1);
+  EXPECT_CALL(*active_control_raw, writeOnce(stopping_joint_positions)).Times(1);
   ptp_motion_handler->cancelMotion();
 }
