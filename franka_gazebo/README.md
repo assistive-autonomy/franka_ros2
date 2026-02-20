@@ -80,10 +80,10 @@ ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.laun
 
 ## Mobile FR3 Duo Example with Gazebo
 
-Before starting, be sure to build `franka_mobile_duo_example_controllers`, `franka_gazebo`, `gz_ros2_control` and `franka_description` packages.
+Before starting, be sure to build `franka_example_controllers`, `franka_gazebo`, `gz_ros2_control` and `franka_description` packages.
 
 ```bash
-colcon build --packages-select franka_mobile_duo_example_controllers franka_gazebo franka_description gz_ros2_control
+colcon build --packages-select franka_example_controllers franka_gazebo franka_description gz_ros2_control
 source install/setup.bash
 ```
 

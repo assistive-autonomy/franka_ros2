@@ -15,7 +15,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     mobile_duo_with_ik_example_controller:
-      type: franka_mobile_duo_example_controllers/MobileFr3DuoJointImpedanceExampleControllerWithIK
+      type: franka_example_controllers/MobileFr3DuoJointImpedanceExampleControllerWithIK
 
 joint_position_example_controller:
   ros__parameters:

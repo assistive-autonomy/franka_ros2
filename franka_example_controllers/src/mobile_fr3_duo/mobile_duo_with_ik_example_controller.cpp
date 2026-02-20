@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <franka_example_controllers/mobile_fr3_duo/mobile_duo_with_ik_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
-#include <franka_mobile_duo_example_controllers/mobile_duo_with_ik_example_controller.hpp>
 
 #include <string>
 
 #include <Eigen/Eigen>
 
-namespace franka_mobile_duo_example_controllers {
+namespace franka_example_controllers {
 
 static constexpr size_t kBaseStateInterfaces = 4;
 static constexpr size_t kArmStateInterfaces = 7 * 2;
@@ -260,9 +260,9 @@ void MobileFr3DuoJointImpedanceExampleControllerWithIK::computeSwerveIK(double v
   }
 }
 
-}  // namespace franka_mobile_duo_example_controllers
+}  // namespace franka_example_controllers
 
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(
-    franka_mobile_duo_example_controllers::MobileFr3DuoJointImpedanceExampleControllerWithIK,
+    franka_example_controllers::MobileFr3DuoJointImpedanceExampleControllerWithIK,
     controller_interface::ControllerInterface)

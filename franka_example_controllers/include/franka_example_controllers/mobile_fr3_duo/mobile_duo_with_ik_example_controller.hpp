@@ -26,7 +26,7 @@
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-namespace franka_mobile_duo_example_controllers {
+namespace franka_example_controllers {
 
 /**
  * The mobile FR3 duo example with IK is meant to be used for Gazebo Sim and combines:
@@ -93,4 +93,4 @@ class MobileFr3DuoJointImpedanceExampleControllerWithIK
   void computeSwerveIK(double vx, double vy, double wz);
 };
 
-}  // namespace franka_mobile_duo_example_controllers
+}  // namespace franka_example_controllers
