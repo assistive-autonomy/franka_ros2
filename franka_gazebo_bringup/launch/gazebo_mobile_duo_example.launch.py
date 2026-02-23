@@ -161,7 +161,7 @@ def generate_launch_description():
 
     mobile_duo_ik_example_controller = ExecuteProcess(
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-                'mobile_duo_with_ik_example_controller'],
+                'mobile_fr3_duo_joint_impedance_example_controller'],
         output='screen'
     )
 
