@@ -314,9 +314,6 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
 
   try {
     prefix_ = info_.hardware_parameters.at("prefix");
-    if (!prefix_.empty()) {
-      prefix_ += "_";  // Add underscore separator if prefix is not empty
-    }
   } catch (const std::out_of_range& ex) {
     RCLCPP_INFO(getLogger(), "Parameter 'prefix' is not set. Using empty prefix.");
     prefix_ = "";

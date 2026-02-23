@@ -25,6 +25,7 @@ Requires libfranka >= 0.20.4 and franka_description >= 2.4.0 requires ROS 2 Jazz
 * refactor: franka example controllers divided into robot types
 * feat: mobile fr3 duo example for gazebo
 * feat: add gazebo sensors xacro in franka_gazebo
+* fix: added arm_prefix functionality to all franka_example_controllers and franka_robot_state_broadcaster
 
 v3.2.0 (2026-01-15)
 -------------------
