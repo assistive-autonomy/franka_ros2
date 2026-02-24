@@ -14,23 +14,22 @@
 
 #include <franka_example_controllers/mobile_fr3_duo/mobile_fr3_duo_joint_impedance_example_controller.hpp>
 #include <franka_example_controllers/robot_utils.hpp>
-#include <franka_example_controllers/swerve_ik.hpp>
+#include <franka_example_controllers/tmr/swerve_ik.hpp>
 
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include <Eigen/Eigen>
 
 namespace franka_example_controllers {
-
-static constexpr size_t kArmCommandInterfaces = 7;
 
 controller_interface::InterfaceConfiguration
 MobileFr3DuoJointImpedanceExampleController::command_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
-  if (simulate_on_gazebo_) {
+  if (simulate_in_gazebo_) {
     config.names = {robot_types_[0] + "_joint_0/position", robot_types_[0] + "_joint_1/velocity",
                     robot_types_[0] + "_joint_2/position", robot_types_[0] + "_joint_3/velocity"};
   } else {
@@ -52,7 +51,7 @@ controller_interface::InterfaceConfiguration
 MobileFr3DuoJointImpedanceExampleController::state_interface_configuration() const {
   controller_interface::InterfaceConfiguration config;
   config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-  if (simulate_on_gazebo_) {
+  if (simulate_in_gazebo_) {
     for (int i = 0; i < num_base_joints; ++i) {
       if (i % 2 == 0) {
         config.names.push_back(robot_types_[0] + "_joint_" + std::to_string(i) + "/position");
@@ -98,7 +97,7 @@ controller_interface::return_type MobileFr3DuoJointImpedanceExampleController::u
     Vector7d tau =
         k_gains_.cwiseProduct(q_goal - q_[arm]) + d_gains_.cwiseProduct(-dq_filtered_[arm]);
 
-    size_t cmd_offset = kBaseCommandInterfaces_ + arm * 7;
+    size_t cmd_offset = kBaseCommandInterfaces_ + arm * kArmCommandInterfaces;
     for (size_t j = 0; j < 7; ++j) {
       if (!command_interfaces_[cmd_offset + j].set_value(tau(j))) {
         RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
@@ -119,7 +118,7 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_init() {
     auto_declare<std::vector<std::string>>("arm_prefixes", {});
     auto_declare<std::vector<std::string>>("robot_prefixes", {});
     auto_declare<std::vector<std::string>>("robot_types", {});
-    auto_declare<bool>("simulate_on_gazebo", false);
+    auto_declare<bool>("simulate_in_gazebo", false);
     auto_declare<double>("wheel_radius", 0.1);
   } catch (...) {
     return CallbackReturn::ERROR;
@@ -138,11 +137,13 @@ CallbackReturn MobileFr3DuoJointImpedanceExampleController::on_configure(
   auto d = get_node()->get_parameter("d_gains").as_double_array();
   robot_prefixes_ = get_node()->get_parameter("robot_prefixes").as_string_array();
   robot_types_ = get_node()->get_parameter("robot_types").as_string_array();
-  simulate_on_gazebo_ = get_node()->get_parameter("simulate_on_gazebo").as_bool();
+  simulate_in_gazebo_ = get_node()->get_parameter("simulate_in_gazebo").as_bool();
   wheel_radius_ = get_node()->get_parameter("wheel_radius").as_double();
 
-  kBaseStateInterfaces_ = simulate_on_gazebo_ ? 4 : 8;
-  kBaseCommandInterfaces_ = simulate_on_gazebo_ ? 4 : 6;
+  kBaseStateInterfaces_ =
+      simulate_in_gazebo_ ? kBaseStateInterfacesSimulation : kBaseStateInterfacesHardware;
+  kBaseCommandInterfaces_ =
+      simulate_in_gazebo_ ? kBaseCommandInterfacesSimulation : kBaseCommandInterfacesHardware;
 
   auto arm_prefixes_begin = robot_prefixes_.begin() + 1;
   arm_prefixes_ = std::vector<std::string>(arm_prefixes_begin, arm_prefixes_begin + 2);
@@ -208,52 +209,30 @@ void MobileFr3DuoJointImpedanceExampleController::updateMobileBaseCommand(const 
 
   double v_x = std::cos(k_mobile_angle_) * v;
   double v_y = std::sin(k_mobile_angle_) * v;
-  double wz = 0.0;
+  const double wz = 0.0;
 
-  if (simulate_on_gazebo_) {
+  if (simulate_in_gazebo_) {
     franka_example_controllers::computeSwerveIK(v_x, v_y, wz, wheel_positions_, wheel_radius_,
                                                 steering_angles_, wheel_velocities_, commands_);
 
-    if (!command_interfaces_[0].set_value(commands_[0].steering_angle)) {
-      RCLCPP_WARN(get_node()->get_logger(), "Failed to set steering angle for wheel 0: %f",
-                  commands_[0].steering_angle);
-    }
-    if (!command_interfaces_[1].set_value(commands_[0].wheel_velocity)) {
-      RCLCPP_WARN(get_node()->get_logger(), "Failed to set wheel velocity for wheel 0: %f",
-                  commands_[0].wheel_velocity);
-    }
-    if (!command_interfaces_[2].set_value(commands_[1].steering_angle)) {
-      RCLCPP_WARN(get_node()->get_logger(), "Failed to set steering angle for wheel 1: %f",
-                  commands_[1].steering_angle);
-    }
-    if (!command_interfaces_[3].set_value(commands_[1].wheel_velocity)) {
-      RCLCPP_WARN(get_node()->get_logger(), "Failed to set wheel velocity for wheel 1: %f",
-                  commands_[1].wheel_velocity);
+    for (size_t i = 0; i < 2; ++i) {
+      if (!command_interfaces_[2 * i].set_value(commands_[i].steering_angle)) {
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to set steering angle for wheel %zu: %f", i,
+                    commands_[i].steering_angle);
+      }
+      if (!command_interfaces_[2 * i + 1].set_value(commands_[i].wheel_velocity)) {
+        RCLCPP_WARN(get_node()->get_logger(), "Failed to set wheel velocity for wheel %zu: %f", i,
+                    commands_[i].wheel_velocity);
+      }
     }
   } else {
-    if (!command_interfaces_[0].set_value(v_x)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set vx velocity");
-    }
-    if (!command_interfaces_[1].set_value(v_y)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set vy velocity");
-    }
-    if (!command_interfaces_[2].set_value(0.0)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set vz velocity");
-    }
-    if (!command_interfaces_[3].set_value(0.0)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set wx velocity");
-    }
-    if (!command_interfaces_[4].set_value(0.0)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set wy velocity");
-    }
-    if (!command_interfaces_[5].set_value(0.0)) {
-      RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
-                           "Failed to set wz velocity");
+    std::array<double, 6> values = {v_x, v_y, 0.0, 0.0, 0.0, wz};
+    std::array<std::string, 6> labels = {"vx", "vy", "vz", "wx", "wy", "wz"};
+    for (int i = 0; i < kBaseCommandInterfacesHardware; ++i) {
+      if (!command_interfaces_[i].set_value(values[i])) {
+        RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 1000,
+                             "Failed to set %s velocity", labels[i].c_str());
+      }
     }
   }
 }

@@ -48,7 +48,7 @@ joint_impedance_example_controller:
 mobile_fr3_duo_joint_impedance_example_controller:
   ros__parameters:
     gazebo: true
-    simulate_on_gazebo: true
+    simulate_in_gazebo: true
     robot_types: ['tmrv0_2', 'fr3v2', 'fr3v2']
     robot_prefixes: ['', 'left', 'right']
     k_gains:

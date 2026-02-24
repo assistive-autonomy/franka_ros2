@@ -52,6 +52,7 @@ add_library(
         src/motion_generator.cpp
         src/fr3/move_to_start_example_controller.cpp
         src/tmr/mobile_cartesian_velocity_example_controller.cpp
+        src/tmr/swerve_ik.cpp
 )
 target_include_directories(
         ${PROJECT_NAME}

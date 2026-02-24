@@ -1,12 +1,18 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_fr3_duo_v0_2_with_sensors">
 
+  <!-- Include mobile fr3 duo description -->
   <xacro:include filename="$(find franka_description)/robots/mobile_fr3_duo_v0_2/mobile_fr3_duo_v0_2.urdf.xacro"/>
+  
+  <!-- Include RealSense D455 camera description -->
   <xacro:include filename="$(find realsense2_description)/urdf/_d455.urdf.xacro" />
+
+  <!-- Include IMU description -->
   <xacro:include filename="$(find olv_module_descriptions)/urdf/olv-imu01.urdf.xacro" />
+
+  <!-- Include custom SICK lidar macro (installed version has fixed "world" parent, needs wrapper for robot integration) -->
   <xacro:include filename="$(find franka_mobile_sensors)/robots/nanoscan3/nanoscan3.xacro" />
   
-
   <!-- Attach IMU to mounting point -->
   <xacro:olv-imu01 
     namespace="imu" 

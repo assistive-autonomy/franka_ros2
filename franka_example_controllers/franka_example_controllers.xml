@@ -102,12 +102,5 @@
             The mobile cartesian velocity example controller fowards cartesian velocity commands to the mobile robot.
         </description>
     </class>
-    <class name="franka_example_controllers/MobileFr3DuoJointImpedanceExampleControllerWithIK"
-        type="franka_example_controllers::MobileFr3DuoJointImpedanceExampleControllerWithIK"
-        base_class_type="controller_interface::ControllerInterface">
-        <description>
-            The mobile FR3 duo example with IK combines dual-arm joint impedance control with mobile base cartesian velocity control and uses inverse kinematics from moveit-OrocosKDL(LMA-ik) to compute the arm joint positions.
-        </description>
-    </class>
 
 </library>

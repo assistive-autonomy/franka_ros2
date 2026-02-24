@@ -12,25 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include <Eigen/Eigen>
+#include <franka_example_controllers/tmr/swerve_ik.hpp>
 
 namespace franka_example_controllers {
 
-struct WheelCommand {
-  double steering_angle;
-  double wheel_velocity;
-};
-
-inline void computeSwerveIK(double vx,
-                            double vy,
-                            double wz,
-                            const Eigen::Vector4d& wheel_positions,
-                            double wheel_radius,
-                            Eigen::Vector4d& steering_angles,
-                            Eigen::Vector4d& wheel_velocities,
-                            std::array<WheelCommand, 2>& commands) {
+void computeSwerveIK(double vx,
+                     double vy,
+                     double wz,
+                     const Eigen::Vector4d& wheel_positions,
+                     double wheel_radius,
+                     Eigen::Vector4d& steering_angles,
+                     Eigen::Vector4d& wheel_velocities,
+                     std::array<WheelCommand, 2>& commands) {
   constexpr int kNumberOfWheels = 2;
   Eigen::Array2d x = wheel_positions.head<2>();
   Eigen::Array2d y = wheel_positions.tail<2>();

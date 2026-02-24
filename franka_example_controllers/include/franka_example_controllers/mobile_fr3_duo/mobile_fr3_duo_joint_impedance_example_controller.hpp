@@ -22,7 +22,7 @@
 #include <controller_interface/controller_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <franka_example_controllers/swerve_ik.hpp>
+#include <franka_example_controllers/tmr/swerve_ik.hpp>
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -59,9 +59,14 @@ class MobileFr3DuoJointImpedanceExampleController
   std::string robot_description_;
   const int num_arm_joints = 7;
   const int num_base_joints = 4;
-  int kBaseStateInterfaces_;
   const int kArmStateInterfaces = 7 * 2;
+  const int kArmCommandInterfaces = 7;
+  const int kBaseCommandInterfacesSimulation = 4;
+  const int kBaseStateInterfacesSimulation = 4;
+  const int kBaseCommandInterfacesHardware = 6;
+  const int kBaseStateInterfacesHardware = 8;
   int kBaseCommandInterfaces_;
+  int kBaseStateInterfaces_;
 
   std::vector<Vector7d> q_;
   std::vector<Vector7d> initial_q_;
@@ -78,13 +83,12 @@ class MobileFr3DuoJointImpedanceExampleController
   const double k_mobile_angle_{0.0};     // Move forward/backward
 
   // IK parameters
-  bool simulate_on_gazebo_{false};
-  double vx_amp_, vy_amp_, wz_amp_, freq_, wheel_radius_;
+  bool simulate_in_gazebo_{false};
+  double wheel_radius_;
   Eigen::Vector4d wheel_positions_;
   Eigen::Vector4d steering_angles_, wheel_velocities_;
 
   std::array<franka_example_controllers::WheelCommand, 2> commands_;
-  const int kNumberOfWheels = 2;
 
   // Helper methods
   void updateJointStates();
