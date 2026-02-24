@@ -256,7 +256,7 @@ Replace ${NS} with the corresponding namespace.
 
 ### Run Gazebo examples with ROS 2
 
-If you want to use Gazebo to run your code, you can find some examples here: [franka_gazebo](./franka_gazebo/README)
+If you want to use Gazebo to run your code, you can find some examples here: [franka_gazebo_bringup](./franka_gazebo_bringup/README)
 
 ## Troubleshooting
 ### `libfranka: UDP receive: Timeout error`

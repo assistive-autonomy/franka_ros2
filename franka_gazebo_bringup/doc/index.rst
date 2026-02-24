@@ -68,7 +68,7 @@ Then you can run with the following command.
 Joint Impedance Control Example with Gazebo
 --------------------------------------------
 
-For running torque example. You must compile the `franka_ign_ros2_control` package located under `franka_gazebo`.
+For running torque example. You must compile the `franka_ign_ros2_control` package located under `franka_gazebo_bringup`.
 You can compile `franka_ign_ros2_control` with the following command.
 
 .. code-block:: shell
@@ -86,6 +86,37 @@ Then you can run the impedance control example.
 .. code-block:: shell
 
     ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
+
+Mobile Duo Control Example with Gazebo
+---------------------------------------
+
+For running the mobile duo example with inverse kinematics. You must compile the `franka_example_controllers` package.
+You can compile `franka_example_controllers` with the following command.
+
+.. code-block:: shell
+
+    colcon build --packages-select franka_example_controllers
+
+If you want to use the sensors, the package `franka_mobile_sensors` must be compiled as well:
+
+.. code-block:: shell
+
+    colcon build --packages-select franka_mobile_sensors
+
+Please follow its README for the installation of the required dependencies and the setup of the sensors. 
+You can find it in `franka_mobile_sensors/README.md`.
+
+Then source your workspace.
+
+.. code-block:: shell
+
+    source install/setup.sh
+
+Then you can run the mobile duo control example.
+
+.. code-block:: shell
+
+    ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py with_sensors:=true
 
 
 Troubleshooting
