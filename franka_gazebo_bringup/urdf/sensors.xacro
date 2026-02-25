@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+    <!-- Franka Gazebo IMU -->
+    <xacro:macro name="franka_gazebo_imu" params="link_target gz_topic rate:=100">
+        <gazebo reference="${link_target}">
+            <sensor name="${link_target}" type="imu">
+                <topic>${gz_topic}</topic>
+                <always_on>true</always_on>
+                <update_rate>${rate}</update_rate>
+                <visualize>false</visualize>
+                <plugin filename="libignition-gazebo-imu-system.so" name="ignition::gazebo::systems::Imu"/>
+            </sensor>
+      </gazebo>
+    </xacro:macro>
+
+    <!-- Franka Gazebo Arm IMUs -->
+    <!-- Every joint has an IMU on both sides of the pcb -->
+    <xacro:macro name="franka_gazebo_arm_imus" params="arm_prefix robot_type imu_side">
+        <xacro:property name="prefix" value="${arm_prefix + '_' if arm_prefix else '' + robot_type}"/>
+        <xacro:franka_gazebo_imu link_target="${prefix}_link0_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link0/${imu_side}"/> 
+        <xacro:franka_gazebo_imu link_target="${prefix}_link1_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link1/${imu_side}"/>
+        <xacro:franka_gazebo_imu link_target="${prefix}_link2_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link2/${imu_side}"/>
+        <xacro:franka_gazebo_imu link_target="${prefix}_link3_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link3/${imu_side}"/>
+        <xacro:franka_gazebo_imu link_target="${prefix}_link4_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link4/${imu_side}"/>
+        <xacro:franka_gazebo_imu link_target="${prefix}_link5_accelerometer_${imu_side}" gz_topic="/${prefix}/imu/link5/${imu_side}"/>
+    </xacro:macro>
+
+</robot>
