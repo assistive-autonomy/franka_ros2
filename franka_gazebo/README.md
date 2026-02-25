@@ -89,10 +89,10 @@ source install/setup.sh
 Then you can run the multi-robot velocity control example.
 
 ```bash
-ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py franka_hand:='franka_hand'
+ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py 
 ```
 
-This will launch Gazebo with the configured robots, each in their own namespace, with joint velocity controllers loaded.
+This will launch Gazebo with the configured robots, each in their own namespace, with controllers loaded. Use `with_sensors:=true` to enable sensor-enhanced descriptions for `tmrv0_2` robots.
 
 
 ## Throubleshooting

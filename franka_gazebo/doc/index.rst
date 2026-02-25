@@ -100,7 +100,7 @@ Then you can run the multi-robot control example.
 
     ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py 
 
-This will launch Gazebo with the configured robots, each in their own namespace.
+This will launch Gazebo with the configured robots, each in their own namespace. Use ``with_sensors:=true`` to enable sensor-enhanced descriptions for ``tmrv0_2`` robots.
 
 
 Troubleshooting

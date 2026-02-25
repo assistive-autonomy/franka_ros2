@@ -24,6 +24,7 @@ from launch.actions import (
     OpaqueFunction,
     ExecuteProcess,
     TimerAction,
+    SetEnvironmentVariable,
 )
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -36,16 +37,37 @@ import franka_bringup.launch_utils as launch_utils
 package_share = get_package_share_directory('franka_bringup')
 load_yaml = launch_utils.load_yaml
 
-def get_robot_nodes(context: LaunchContext, robot_cfg, multi_robot_configs):
+def set_global_gz_sim_resource_path(context, with_sensors):
+    with_sensors_val = context.perform_substitution(with_sensors).lower()
+    description_share = os.path.dirname(get_package_share_directory('franka_description'))
+    if with_sensors_val == 'true':
+        sensors_share = os.path.dirname(get_package_share_directory('franka_mobile_sensors'))
+        oliv_module_descriptions_share = os.path.dirname(get_package_share_directory('olv_module_descriptions'))
+        gz_sim_resource_path = f"{sensors_share}:{description_share}:{oliv_module_descriptions_share}"
+    else:
+        gz_sim_resource_path = description_share
+    return [SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', gz_sim_resource_path)]
+
+def get_robot_nodes(context: LaunchContext, robot_cfg, multi_robot_configs, with_sensors):
     namespace = robot_cfg['namespace']
     robot_type = robot_cfg['robot_type']
     load_gripper = str(robot_cfg['load_gripper']).lower()
     arm_prefix = robot_cfg['arm_prefix']
+    with_sensors_val = context.perform_substitution(with_sensors).lower()
 
-    franka_xacro_file = os.path.join(
-        get_package_share_directory('franka_description'),
-        'robots', robot_type, f'{robot_type}.urdf.xacro'
-    )
+    if with_sensors_val == 'true' and robot_type == 'tmrv0_2':
+        selected_package = 'franka_mobile_sensors'
+        franka_xacro_file = os.path.join(
+            get_package_share_directory(selected_package),
+            'robots',
+            'tmrv0_2_with_sensors.urdf.xacro'
+        )
+    else:
+        franka_xacro_file = os.path.join(
+            get_package_share_directory('franka_description'),
+            'robots', robot_type, f'{robot_type}.urdf.xacro'
+        )
+
     config = multi_robot_configs.get(arm_prefix, multi_robot_configs.get('', {}))
     pos = config.get('position', {})
     controller = config.get('controller', '')
@@ -140,6 +162,8 @@ def get_robot_nodes(context: LaunchContext, robot_cfg, multi_robot_configs):
     ]
 
 def generate_launch_description():
+    with_sensors_name = 'with_sensors'
+    with_sensors = LaunchConfiguration(with_sensors_name)
 
     robot_config_file_arg = DeclareLaunchArgument(
         'robot_config_file',
@@ -157,6 +181,13 @@ def generate_launch_description():
         description='Gazebo multi-robot config file'
     )
 
+    with_sensors_launch_argument = DeclareLaunchArgument(
+        with_sensors_name,
+        default_value='false',
+        description='If true, use sensor-enhanced description package (franka_mobile_sensors)'
+    )
+ 
+
     robots_yaml = load_yaml(
         os.path.join(package_share, 'config', 'franka.config.yaml')
     )
@@ -172,10 +203,6 @@ def generate_launch_description():
         if key.startswith('ROBOT') and cfg.get('robot_type')
     ]
 
-    os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.dirname(
-        get_package_share_directory('franka_description')
-    )
-
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -189,6 +216,8 @@ def generate_launch_description():
     actions = [
         robot_config_file_arg,
         gazebo_config_file_arg,
+        with_sensors_launch_argument,
+        OpaqueFunction(function=set_global_gz_sim_resource_path, args=[with_sensors]),
         gazebo,
     ]
 
@@ -196,7 +225,7 @@ def generate_launch_description():
         actions.append(
             OpaqueFunction(
                 function=get_robot_nodes,
-                args=[robot_cfg, arm_configs]
+                args=[robot_cfg, arm_configs, with_sensors]
             )
         )
 
