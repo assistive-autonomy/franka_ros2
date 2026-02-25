@@ -9,33 +9,33 @@
 # Ensure each robot has a unique namespace to prevent topic conflicts.
 
 ROBOT1: # Arbitrary identifier for the first robot (a Mnemonic) 
-  robot_type: "fr3v2" # Reserved for future use, unique arm (i.e. robot model) identifier
-  arm_prefix: "left" # Reserved for future use (e.g., robot unique prefix)
+  robot_type: "fr3" # Reserved for future use, unique arm (i.e. robot model) identifier
+  arm_prefix: "" # Reserved for future use (e.g., robot unique prefix)
   fake_sensor_commands: "false" # Enable fake sensor commands for simulation
   joint_state_rate: 30 # Publishing rate for joint states (Hz)
-  load_gripper: "true" # Enable Franka Gripper ("true" or "false")
+  load_gripper: "false" # Enable Franka Gripper ("true" or "false")
   namespace: "NS_1" # Namespace for robot, any string (empty string allowed - meaningful names recommended)
   robot_ip: "172.16.0.2" # Robot’s IP address or hostname
   use_fake_hardware: "false" # Use simulated hardware ("true" or "false")
-  use_rviz: "true" # Launch RViz if "true" (single instance for all namespaces)
+  use_rviz: "false" # Launch RViz if "true" (single instance for all namespaces)
 # Uncomment the following lines to add more robots in Namespaces
-ROBOT2:
-  robot_type: "fr3v2"
-  arm_prefix: "right"
-  fake_sensor_commands: "false"
-  joint_state_rate: 30 
-  load_gripper: "true"
-  namespace: "NS_2"
-  robot_ip: "172.16.0.4"
-  use_fake_hardware: "false"
-  use_rviz: "false" 
-ROBOT3:
-  robot_type: "tmrv0_2"
-  arm_prefix: ""
-  fake_sensor_commands: "false"
-  joint_state_rate: 30
-  load_gripper: "false"
-  namespace: "NS_3"
-  robot_ip: "172.16.0.5"
-  use_fake_hardware: "false"
-  use_rviz: "false"
+# ROBOT2:
+#   robot_type: ""
+#   arm_prefix: ""
+#   fake_sensor_commands: "false"
+#   joint_state_rate: 30 
+#   load_gripper: "false"
+#   namespace: "NS_2"
+#   robot_ip: "172.16.0.4"
+#   use_fake_hardware: "false"
+#   use_rviz: "false" 
+# ROBOT3:
+#   robot_type: ""
+#   arm_prefix: ""
+#   fake_sensor_commands: "false"
+#   joint_state_rate: 30
+#   load_gripper: "false"
+#   namespace: "NS_3"
+#   robot_ip: "172.16.0.5"
+#   use_fake_hardware: "false"
+#   use_rviz: "false" 
