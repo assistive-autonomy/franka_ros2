@@ -36,7 +36,7 @@ import franka_bringup.launch_utils as launch_utils
 package_share = get_package_share_directory('franka_bringup')
 load_yaml = launch_utils.load_yaml
 
-def get_robot_nodes(context: LaunchContext, robot_cfg):
+def get_robot_nodes(context: LaunchContext, robot_cfg, multi_robot_configs):
     namespace = robot_cfg['namespace']
     robot_type = robot_cfg['robot_type']
     load_gripper = str(robot_cfg['load_gripper']).lower()
@@ -46,6 +46,9 @@ def get_robot_nodes(context: LaunchContext, robot_cfg):
         get_package_share_directory('franka_description'),
         'robots', robot_type, f'{robot_type}.urdf.xacro'
     )
+    config = multi_robot_configs.get(arm_prefix, multi_robot_configs.get('', {}))
+    pos = config.get('position', {})
+    controller = config.get('controller', '')
 
     robot_description_config = xacro.process_file(
         franka_xacro_file,
@@ -56,28 +59,13 @@ def get_robot_nodes(context: LaunchContext, robot_cfg):
             'gazebo': 'true',
             'ee_id': 'franka_hand',
             'robot_namespace': namespace,
-            'gazebo_effort': 'true'
+            'gazebo_effort': 'true',
         }
     )
 
     robot_description = {
         'robot_description': robot_description_config.toxml()
     }
-
-    # Define positions for left and right robots
-    positions = [
-        {'x': 0.0369, 'y': 0.05018, 'z': 1.0, 'roll': -0.89334809, 'pitch': -0.17456074, 'yaw': -0.46334506},  # left
-        {'x': 0.0369, 'y': -0.05018, 'z': 1.0, 'roll': 0.89334809, 'pitch': -0.17456074, 'yaw': 0.46334506},  # right
-        {'x': 0.0, 'y': 0.0, 'z': 0.0, 'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0}  # default
-    ]
-    controllers =[
-        'joint_impedance_example_controller',
-        'joint_impedance_example_controller',
-        'mobile_cartesian_velocity_with_ik_example_controller'
-    ]
-    index = {'left': 0, 'right': 1, '': 2}
-    pos = positions[index[arm_prefix]]
-    controller = controllers[index[arm_prefix]]
 
     rsp_node = Node(
         package='robot_state_publisher',
@@ -161,9 +149,23 @@ def generate_launch_description():
         description='Multi-robot config file'
     )
 
+    gazebo_config_file_arg = DeclareLaunchArgument(
+        'gazebo_config_file',
+        default_value=os.path.join(
+            get_package_share_directory('franka_gazebo_bringup'), 'config', 'gazebo_multi_robot_configs.yaml'
+        ),
+        description='Gazebo multi-robot config file'
+    )
+
     robots_yaml = load_yaml(
         os.path.join(package_share, 'config', 'franka.config.yaml')
     )
+
+    gazebo_config_yaml = load_yaml(
+        os.path.join(get_package_share_directory('franka_gazebo_bringup'), 'config', 'gazebo_multi_robot_configs.yaml')
+    )
+
+    arm_configs = gazebo_config_yaml
 
     robots = [
         cfg for key, cfg in robots_yaml.items()
@@ -186,6 +188,7 @@ def generate_launch_description():
 
     actions = [
         robot_config_file_arg,
+        gazebo_config_file_arg,
         gazebo,
     ]
 
@@ -193,7 +196,7 @@ def generate_launch_description():
         actions.append(
             OpaqueFunction(
                 function=get_robot_nodes,
-                args=[robot_cfg]
+                args=[robot_cfg, arm_configs]
             )
         )
 

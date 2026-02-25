@@ -72,6 +72,8 @@ For running multiple robots simultaneously in Gazebo, each in their own namespac
 
 First, configure the robots in `/ros2_ws/src/franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` for the desired number of robots (e.g., ROBOT1, ROBOT2, ROBOT3).
 
+Multi-robot configurations (positions and controllers) are defined in `franka_gazebo_bringup/config/gazebo_multi_robot_configs.yaml`.
+
 Ensure `franka_example_controllers` and `franka_description` are built.
 
 ```bash

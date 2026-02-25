@@ -81,6 +81,7 @@ Multi-Robot Control Example with Gazebo
 For running multiple robots simultaneously in Gazebo, each in their own namespace with dedicated URDFs. The example is designed to be run with two `fr3v2` and one `tmrv0_2`.
 
 First, configure the robots in `franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` and `arm_prefix` for each robot you want to spawn. 
+Multi-robot configurations (positions and controllers) are defined in `franka_gazebo_bringup/config/gazebo_multi_robot_configs.yaml`.
 Ensure `franka_example_controllers` and `franka_description` are built.
 
 .. code-block:: shell
