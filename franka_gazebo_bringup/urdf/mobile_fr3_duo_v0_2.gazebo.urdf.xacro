@@ -19,6 +19,7 @@
   <!-- Macro includes                                                    -->
   <!-- ================================================================ -->
   <xacro:include filename="$(find franka_description)/robots/mobile_fr3_duo_v0_2/mobile_fr3_duo_v0_2.xacro"/>
+  <xacro:include filename="$(find franka_gazebo_bringup)/urdf/gravity_overrides.xacro"/>
 
   <!-- ================================================================ -->
   <!-- Arguments                                                        -->
@@ -76,40 +77,8 @@
   <!-- ================================================================ -->
   <!-- Gravity overrides                                                -->
   <!-- ================================================================ -->
-
-  <!-- Disable gravity on arm links: the example controllers do not
-       implement gravity compensation, so the arms would collapse. -->
-  <xacro:macro name="disable_arm_gravity" params="prefix robot_type">
-    <gazebo reference="${prefix}${robot_type}_link0"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link1"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link2"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link3"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link4"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link5"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link6"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link7"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_link8"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_flange"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_hand"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_leftfinger"><gravity>false</gravity></gazebo>
-    <gazebo reference="${prefix}${robot_type}_rightfinger"><gravity>false</gravity></gazebo>
-  </xacro:macro>
   <xacro:disable_arm_gravity prefix="left_" robot_type="${robot_types_list[1]}"/>
   <xacro:disable_arm_gravity prefix="right_" robot_type="${robot_types_list[2]}"/>
-
-  <!-- Disable gravity on spine links so the lift does not sag. -->
-  <gazebo reference="franka_spine"><gravity>false</gravity></gazebo>
-  <gazebo reference="franka_spine_support"><gravity>false</gravity></gazebo>
-  <gazebo reference="mount_link"><gravity>false</gravity></gazebo>
-  <gazebo reference="head_link"><gravity>false</gravity></gazebo>
-
-  <!-- Hold the spine lift joint against reaction forces.
-       The stiffness resists displacement, the damping prevents oscillation.
-       A commanded position change can still overcome these values. -->
-  <gazebo reference="franka_spine_vertical_joint">
-    <implicitSpringDamper>true</implicitSpringDamper>
-    <springStiffness>5000</springStiffness>
-    <springDamping>500</springDamping>
-  </gazebo>
+  <xacro:disable_mobile_base_gravity/>
 
 </robot>
