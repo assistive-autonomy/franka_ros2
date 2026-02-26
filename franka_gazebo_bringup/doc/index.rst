@@ -87,36 +87,41 @@ Then you can run the impedance control example.
 
     ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
 
-Mobile Duo Control Example with Gazebo
----------------------------------------
+Mobile FR3 Duo Example with Gazebo
+-----------------------------------
 
-For running the mobile duo example with inverse kinematics. You must compile the `franka_example_controllers` package.
-You can compile `franka_example_controllers` with the following command.
+Before starting, be sure to build ``franka_example_controllers``, ``franka_gazebo_bringup``,
+``gz_ros2_control`` and ``franka_description`` packages.
 
 .. code-block:: shell
 
-    colcon build --packages-select franka_example_controllers
+    colcon build --packages-select franka_example_controllers franka_gazebo_bringup franka_description gz_ros2_control
+    source install/setup.bash
 
-If you want to use the sensors, the package `franka_mobile_sensors` must be compiled as well:
+Now you can launch the mobile FR3 duo example with Gazebo:
+
+.. code-block:: shell
+
+    ros2 launch franka_gazebo_bringup gazebo_mobile_fr3_duo_example.launch.py
+
+To launch with the full sensor suite (4x cameras, 2x LiDARs, 1x IMU), also build ``franka_mobile_sensors``:
 
 .. code-block:: shell
 
     colcon build --packages-select franka_mobile_sensors
+    source install/setup.bash
+    ros2 launch franka_gazebo_bringup gazebo_mobile_fr3_duo_example.launch.py with_sensors:=true
 
-Please follow its README for the installation of the required dependencies and the setup of the sensors. 
-You can find it in `franka_mobile_sensors/README.md`.
+**Arguments:**
 
-Then source your workspace.
+- ``with_sensors``: If set to ``true``, uses the sensor-enhanced description (``franka_mobile_sensors``)
+  with Gazebo sensor plugins. Defaults to ``false``.
+- ``world``: SDF world filename inside ``franka_gazebo_bringup/worlds/`` to load.
+  Overrides the default world selection.
 
-.. code-block:: shell
-
-    source install/setup.sh
-
-Then you can run the mobile duo control example.
-
-.. code-block:: shell
-
-    ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py with_sensors:=true
+This will spawn the mobile base and two FR3 arms, and start the joint impedance controller
+for both arms and cartesian velocity control for the mobile base. RViz will also launch
+for visualization. Select ``base_link`` to see the robot there.
 
 
 Troubleshooting

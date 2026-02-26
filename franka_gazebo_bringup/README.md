@@ -87,15 +87,23 @@ colcon build --packages-select franka_example_controllers franka_gazebo_bringup 
 source install/setup.bash
 ```
 
-Now you can launch the mobile FR3 duo example with Gazebo, and optionally select whether to use sensor-enhanced model:
+Now you can launch the mobile FR3 duo example with Gazebo:
 
 ```bash
-ros2 launch franka_gazebo_bringup gazebo_mobile_duo_example.launch.py \
-	with_sensors:=false \
+ros2 launch franka_gazebo_bringup gazebo_mobile_fr3_duo_example.launch.py
 ```
 
-**Argument:**
-- `with_sensors`: If set to `true`, uses the sensor-enhanced description package (`franka_mobile_sensors`). Defaults to `false`.
+To launch with the full sensor suite (4x cameras, 2x LiDARs, 1x IMU), also build `franka_mobile_sensors`:
+
+```bash
+colcon build --packages-select franka_mobile_sensors
+source install/setup.bash
+ros2 launch franka_gazebo_bringup gazebo_mobile_fr3_duo_example.launch.py with_sensors:=true
+```
+
+**Arguments:**
+- `with_sensors`: If set to `true`, uses the sensor-enhanced description (`franka_mobile_sensors`) with Gazebo sensor plugins. Defaults to `false`.
+- `world`: SDF world filename inside `franka_gazebo_bringup/worlds/` to load. Overrides the default world selection.
 
 This will spawn the mobile base and two FR3 arms, and start the joint impedance controller for both arms and cartesian velocity control for the mobile base. RViz will also launch for visualization. Select `base_link` to see the robot there.
 
