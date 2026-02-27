@@ -2,26 +2,6 @@
 
 ROS 2 package for managing RealSense cameras and SICK safety scanners on Franka Tactile Mobile Robot.
 
-## ⚠️ Note for Franka Tactile Mobile Robot Users
-
-This package is **ignored by colcon by default** (via `COLCON_IGNORE` file). It is only relevant for users of a Franka Tactile Mobile Robot (TMR) or a Franka Mobile FR3 Duo. If you want to enable this package, remove the `COLCON_IGNORE` file:
-
-```bash
-# Remove COLCON_IGNORE
-rm src/franka_mobile_sensors/COLCON_IGNORE
-
-# Import optional dependencies
-vcs import src < src/franka_mobile_sensors/mobile_sensors.repos
-
-# Install package dependencies
-sudo apt-get update
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-
-# Build
-colcon build --packages-up-to franka_mobile_sensors --symlink-install
-```
-
 ## Launch
 
 ```bash
@@ -30,12 +10,12 @@ ros2 launch franka_mobile_sensors franka_mobile_sensors.launch.py \
   [start_lidars:=true|false] \
   [start_rviz:=true|false] \
   [robot_type:=<robot_type>] \
-  [config_file:=<config_name>] 
+  [config_file:=<config_name>]
 ```
 
 **Parameters:**
 - `start_cameras` (default: `true`) - Start RealSense camera drivers
-- `start_lidars` (default: `true`) - Start SICK safety scanner drivers  
+- `start_lidars` (default: `true`) - Start SICK safety scanner drivers
 - `start_rviz` (default: `true`) - Start RViz visualization
 - `robot_type` (default: `tmrv0_2`) - ID of the robot type for visualization
 - `config_file` (default: `default_sensor_suite`) - Sensor suite configuration (without .yaml extension)
