@@ -4,7 +4,7 @@ project(franka_mobile_sensors)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY launch config rviz robots
+  DIRECTORY launch config rviz robots doc
   DESTINATION share/${PROJECT_NAME}
 )
 
