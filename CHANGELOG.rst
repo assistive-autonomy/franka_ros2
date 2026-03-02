@@ -1,7 +1,7 @@
 Changelog for package franka_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-UNRELEASED
+v3.2.1 (2026-03-02)
 ----------
 Requires libfranka >= 0.20.4 and franka_description >= 2.4.0 requires ROS 2 Jazzy
 
@@ -26,6 +26,7 @@ Requires libfranka >= 0.20.4 and franka_description >= 2.4.0 requires ROS 2 Jazz
 * feat: mobile fr3 duo example for gazebo
 * feat: add gazebo sensors xacro in franka_gazebo
 * fix: added arm_prefix functionality to all franka_example_controllers and franka_robot_state_broadcaster
+* chore: vendored controller_manager 4.39.2 to avoid version mismatch with gz_ros_sim
 
 v3.2.0 (2026-01-15)
 -------------------
