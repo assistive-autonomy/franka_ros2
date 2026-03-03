@@ -16,6 +16,11 @@ Compatibility Matrix for Jazzy:
      - Franka Description Version
      - Ubuntu Version
 
+   * - v3.2.2
+     - >= 0.20.4
+     - >= 2.6.0
+     - 24.04
+
    * - v3.2.0
      - >= 0.19.0
      - >= 2.3.0
