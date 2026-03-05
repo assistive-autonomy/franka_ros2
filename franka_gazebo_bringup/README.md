@@ -66,36 +66,22 @@ ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.laun
 ```
 
 
-## Multi-Robot Joint Velocity Control Example with Gazebo
+## Mobile Robot Example with Gazebo
 
-For running multiple robots simultaneously in Gazebo, each in their own namespace with dedicated URDFs.
-
-First, configure the robots in `/ros2_ws/src/franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` for the desired number of robots (e.g., ROBOT1, ROBOT2, ROBOT3).
-
-Multi-robot configurations (positions and controllers) are defined in `franka_gazebo_bringup/config/gazebo_multi_robot_configs.yaml`.
-
-Ensure `franka_example_controllers` and `franka_description` are built.
+Launch the TMR mobile base in Gazebo:
 
 ```bash
-colcon build --packages-select franka_example_controllers
+ros2 launch franka_gazebo_bringup gazebo_mobile_robot.launch.py
 ```
 
-Then source your workspace.
+With sensors enabled:
 
 ```bash
-source install/setup.sh
+ros2 launch franka_gazebo_bringup gazebo_mobile_robot.launch.py with_sensors:=true
 ```
 
-Then you can run the multi-robot velocity control example.
 
-```bash
-ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py 
-```
-
-This will launch Gazebo with the configured robots, each in their own namespace, with controllers loaded. Use `with_sensors:=true` to enable sensor-enhanced descriptions for `tmrv0_2` robots.
-
-
-## Throubleshooting
+## Troubleshooting
 
 If you experience that Gazebo can't find your model files, try to include the workspace. E.g.
 

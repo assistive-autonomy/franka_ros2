@@ -75,32 +75,20 @@ For running torque example:
     ros2 launch franka_gazebo_bringup gazebo_joint_impedance_controller_example.launch.py load_gripper:=true franka_hand:='franka_hand'
 
 
-Multi-Robot Control Example with Gazebo
--------------------------------------------------------
+Mobile Robot Example with Gazebo
+---------------------------------
 
-For running multiple robots simultaneously in Gazebo, each in their own namespace with dedicated URDFs. The example is designed to be run with two `fr3v2` and one `tmrv0_2`.
-
-First, configure the robots in `franka_bringup/config/franka.config.yaml`. Uncomment and set `robot_type` and `arm_prefix` for each robot you want to spawn. 
-Multi-robot configurations (positions and controllers) are defined in `franka_gazebo_bringup/config/gazebo_multi_robot_configs.yaml`.
-Ensure `franka_example_controllers` and `franka_description` are built.
+Launch the TMR mobile base in Gazebo:
 
 .. code-block:: shell
 
-    colcon build --packages-up-to franka_example_controllers
+    ros2 launch franka_gazebo_bringup gazebo_mobile_robot.launch.py
 
-Then source your workspace.
-
-.. code-block:: shell
-
-    source install/setup.sh
-
-Then you can run the multi-robot control example.
+With sensors enabled:
 
 .. code-block:: shell
 
-    ros2 launch franka_gazebo_bringup multi_robot_gazebo_example.launch.py 
-
-This will launch Gazebo with the configured robots, each in their own namespace. Use ``with_sensors:=true`` to enable sensor-enhanced descriptions for ``tmrv0_2`` robots.
+    ros2 launch franka_gazebo_bringup gazebo_mobile_robot.launch.py with_sensors:=true
 
 
 Troubleshooting
