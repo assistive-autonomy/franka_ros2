@@ -183,7 +183,9 @@ pipeline {
       }
     }
     stage("Hardware Test"){
-      when { expression { params.executeHardwareTestsOnRobot } }
+      // re-enable this when https://franka.atlassian.net/browse/BFFTRAC-2632 is fixed
+      // when { expression { params.executeHardwareTestsOnRobot } }
+      when { expression { false } }
       options { skipDefaultCheckout true }
       agent { 
         dockerfile {
